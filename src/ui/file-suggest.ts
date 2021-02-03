@@ -1,0 +1,54 @@
+import { TAbstractFile, TFile, TFolder } from "obsidian";
+
+import { TextInputSuggest } from "./suggest";
+
+export class FileSuggest extends TextInputSuggest<TFile> {
+  getSuggestions(inputStr: string): TFile[] {
+    const abstractFiles = this.app.vault.getAllLoadedFiles();
+    const files: TFile[] = [];
+    abstractFiles.forEach((file: TAbstractFile) => {
+      if (file instanceof TFile && file.path.toLowerCase().contains(inputStr)) {
+        files.push(file);
+      }
+    });
+
+    return files;
+  }
+
+  renderSuggestion(file: TFile, el: HTMLElement): void {
+    el.setText(file.path);
+  }
+
+  selectSuggestion(file: TFile): void {
+    this.inputEl.value = file.path;
+    this.inputEl.trigger("input");
+    this.close();
+  }
+}
+
+export class FolderSuggest extends TextInputSuggest<TFolder> {
+  getSuggestions(inputStr: string): TFolder[] {
+    const abstractFiles = this.app.vault.getAllLoadedFiles();
+    const folders: TFolder[] = [];
+    abstractFiles.forEach((folder: TAbstractFile) => {
+      if (
+        folder instanceof TFolder &&
+        folder.path.toLowerCase().contains(inputStr)
+      ) {
+        folders.push(folder);
+      }
+    });
+
+    return folders;
+  }
+
+  renderSuggestion(file: TFolder, el: HTMLElement): void {
+    el.setText(file.path);
+  }
+
+  selectSuggestion(file: TFolder): void {
+    this.inputEl.value = file.path;
+    this.inputEl.trigger("input");
+    this.close();
+  }
+}

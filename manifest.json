@@ -1,0 +1,10 @@
+{
+  "id": "periodic-notes",
+  "name": "Periodic Notes",
+  "description": "",
+  "version": "0.0.1",
+  "author": "Liam Cain",
+  "authorUrl": "https://github.com/liamcain/",
+  "isDesktopOnly": false,
+  "minAppVersion": "0.9.11"
+}
