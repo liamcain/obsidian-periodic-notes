@@ -1,3 +1,4 @@
+import type { Plugin } from "obsidian";
 import {
   appHasDailyNotesPluginLoaded,
   IPeriodicNoteSettings,
@@ -16,9 +17,29 @@ export function orderedValues<T>(unordered: Record<string, T>): T[] {
     }, []);
 }
 
-export function appHasCalendarPluginLoaded(): boolean {
+interface IWeeklyNoteOptions {
+  weeklyNoteFormat: string;
+  weeklyNoteFolder: string;
+  weeklyNoteTemplate: string;
+}
+
+interface ICalendarPlugin extends Plugin {
+  options: IWeeklyNoteOptions;
+}
+
+interface IDailyNotesPlugin extends Plugin {
+  options: IPeriodicNoteSettings;
+}
+
+function getCalendarPlugin(): ICalendarPlugin {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return !!(<any>window).app.plugins.getPlugin("calendar");
+  return (<any>window).app.plugins.getPlugin("calendar");
+}
+
+function getDailyNotesPlugin(): IDailyNotesPlugin {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { internalPlugins } = <any>window.app;
+  return internalPlugins.getPluginById("daily-notes")?.instance;
 }
 
 export function capitalize(text: string): string {
@@ -29,36 +50,27 @@ export function hasLegacyDailyNoteSettings() {
   if (!appHasDailyNotesPluginLoaded()) {
     return false;
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { internalPlugins } = <any>window.app;
-  const options = internalPlugins.getPluginById("daily-notes")?.instance
-    ?.options;
-
+  const options = getDailyNotesPlugin()?.options;
   return !!(options.format || options.folder || options.template);
 }
 
 export function getLegacyDailyNoteSettings(): IPeriodicNoteSettings {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { plugins } = <any>window.app;
-
-  const calendarSettings = plugins.getPlugin("calendar")?.options || {};
-
+  const options =
+    getDailyNotesPlugin().options || ({} as IPeriodicNoteSettings);
   return {
-    format: calendarSettings.weeklyNoteFormat,
-    folder: calendarSettings.weeklyNoteFolder?.trim(),
-    template: calendarSettings.weeklyNoteTemplate?.trim(),
+    format: options.format,
+    folder: options.folder?.trim(),
+    template: options.template?.trim(),
   };
 }
 
 export function hasLegacyWeeklyNoteSettings() {
-  if (!appHasCalendarPluginLoaded()) {
+  const calendarPlugin = getCalendarPlugin();
+  if (!calendarPlugin) {
     return false;
   }
 
-  const options =
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (<any>window.app).plugins.getPlugin("calendar")?.options || {};
+  const options = calendarPlugin.options || ({} as IWeeklyNoteOptions);
   return !!(
     options.weeklyNoteFormat ||
     options.weeklyNoteFolder ||
@@ -67,14 +79,10 @@ export function hasLegacyWeeklyNoteSettings() {
 }
 
 export function getLegacyWeeklyNoteSettings(): IPeriodicNoteSettings {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { plugins } = <any>window.app;
-
-  const calendarSettings = plugins.getPlugin("calendar")?.options || {};
-
+  const options = getCalendarPlugin().options || ({} as IWeeklyNoteOptions);
   return {
-    format: calendarSettings.weeklyNoteFormat,
-    folder: calendarSettings.weeklyNoteFolder?.trim(),
-    template: calendarSettings.weeklyNoteTemplate?.trim(),
+    format: options.weeklyNoteFormat,
+    folder: options.weeklyNoteFolder?.trim(),
+    template: options.weeklyNoteTemplate?.trim(),
   };
 }

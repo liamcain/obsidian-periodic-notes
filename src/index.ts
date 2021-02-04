@@ -76,22 +76,14 @@ export default class PeriodicNotesPlugin extends Plugin {
   }
 
   private onSettingsUpdate(): void {
+    // TODO: There's currently no way to unload the commands when any of these
+    // are toggled off
     ["daily", "weekly", "monthly"]
       .filter((periodicity: IPeriodicity) => this.settings[periodicity].enabled)
       .forEach((periodicity: IPeriodicity) => {
         getCommands(periodicity).forEach(this.addCommand.bind(this));
       });
   }
-
-  //   async updateSettings(
-  //     key: IPeriodicity,
-  //     settings: Partial<IPeriodicNoteSettings>
-  //   ): Promise<void> {
-  //     this.settings[key] = Object.assign({}, this.settings[key], settings);
-  //     await this.saveData(this.settings);
-  //     this.onSettingsUpdate();
-  //   }
-  // }
 
   async updateSettings(val: ISettings): Promise<void> {
     this.settings = val;

@@ -21,7 +21,6 @@
   }
 
   function clearError() {
-    console.log("clear error");
     error = "";
   }
 
