@@ -1,4 +1,4 @@
-# Periodic Notes �
+# Periodic Notes
 
 The Periodic Notes plugin expands on the idea of daily notes and introduces weekly and monthly notes.
 
@@ -36,7 +36,7 @@ If you currently use weekly notes with the Calendar plugin, your settings will a
 
 You can create a Daily Note either by clicking on the calendar icon in the left panel, or with the Command palette. You can also set a hotkey in Keyboard shortcuts.
 
-### Settings
+### Weekly Settings
 
 | Setting  | Description                                                                                                                                                                                          |
 | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -44,7 +44,7 @@ You can create a Daily Note either by clicking on the calendar icon in the left 
 | Template | Configure a template for weekly notes. Weekly notes have slightly different template tags than daily notes. See here for the list of supported [weekly note template tags](#template-tags).          |
 | Format   | The date format for the weekly note filename. Defaults to `gggg-[W]ww`. If you use `DD` in the week format, this will refer to first day of the week (Sunday or Monday, depending on your settings). |
 
-### Template Tags
+### Weekly Template Tags
 
 | Tag                                                                                    | Description                                                                                                                                                                                                  |
 | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -76,7 +76,7 @@ Navigates to the previous monthly note chronologically. Skips over weeks with no
 
 Coming soon! I just have to figure out a good place to show it in the UI.
 
-### Settings
+### Monthly Settings
 
 | Setting  | Description                                                                                                                                                                                        |
 | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -84,7 +84,7 @@ Coming soon! I just have to figure out a good place to show it in the UI.
 | Template | Configure a template for monthly notes. Monthly notes have slightly different template tags than daily notes. See here for the list of supported [monthly note template tags](#template-tags).     |
 | Format   | The date format for the monthly note filename. Defaults to `YYYY-MM`. If you use `DD` in the week format, this will refer to first day of the week (Sunday or Monday, depending on your settings). |
 
-### Template Tags
+### Monthly Template Tags
 
 | Tag            | Description                                                                                                                                                                            |
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
