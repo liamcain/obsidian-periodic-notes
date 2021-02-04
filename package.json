@@ -1,7 +1,7 @@
 {
-  "name": "obsidian-monthly-notes",
+  "name": "obsidian-periodic-notes",
   "version": "0.0.1",
-  "description": "Create and manage monthly notes notes within Obsidian",
+  "description": "Create/manage daily, weekly, and monthly notes",
   "author": "liamcain",
   "main": "main.js",
   "license": "MIT",
