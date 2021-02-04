@@ -145,7 +145,7 @@ export function getCommands(periodicity: IPeriodicity): Command[] {
 
     {
       id: `prev-${periodicity}-note`,
-      name: `Open ${periodicity} note`,
+      name: `Open previous ${periodicity} note`,
       checkCallback: (checking: boolean) => {
         if (checking) {
           const activeFile = getActiveFile();
