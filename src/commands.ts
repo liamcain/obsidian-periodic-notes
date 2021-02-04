@@ -12,7 +12,8 @@ import {
   getMonthlyNote,
   getWeeklyNote,
 } from "obsidian-daily-notes-interface";
-import { IPeriodicity } from "src/settings";
+
+import type { IPeriodicity } from "src/settings";
 import { orderedValues } from "src/utils";
 
 interface IPeriodConfig {
@@ -64,7 +65,7 @@ async function openPeriodicNote(
   if (!periodicNote) {
     periodicNote = await config.createNote(startOfPeriod);
   }
-  await this.openFile(periodicNote, inNewSplit);
+  await openFile(periodicNote, inNewSplit);
 }
 
 function getActiveFile(): TFile | null {
@@ -84,7 +85,7 @@ async function openFile(file: TFile, inNewSplit: boolean): Promise<void> {
 
 async function openNextNote(periodicity: IPeriodicity): Promise<void> {
   const config = periodConfigs[periodicity];
-  const activeFile = this.getActiveFile();
+  const activeFile = getActiveFile();
 
   try {
     const allNotes = orderedValues(config.getAllNotes());
@@ -95,14 +96,14 @@ async function openNextNote(periodicity: IPeriodicity): Promise<void> {
       await openFile(nextNote, false);
     }
   } catch (err) {
-    console.error("failed to find your ${periodicity} notes folder", err);
-    new Notice("Failed to find your ${periodicity} notes folder");
+    console.error(`failed to find your ${periodicity} notes folder`, err);
+    new Notice(`Failed to find your ${periodicity} notes folder`);
   }
 }
 
 async function openPrevNote(periodicity: IPeriodicity): Promise<void> {
   const config = periodConfigs[periodicity];
-  const activeFile = this.getActiveFile();
+  const activeFile = getActiveFile();
 
   try {
     const allNotes = orderedValues(config.getAllNotes());
@@ -113,8 +114,8 @@ async function openPrevNote(periodicity: IPeriodicity): Promise<void> {
       await openFile(prevNote, false);
     }
   } catch (err) {
-    console.error("failed to find your ${periodicity} notes folder", err);
-    new Notice("Failed to find your ${periodicity} notes folder");
+    console.error(`failed to find your ${periodicity} notes folder`, err);
+    new Notice(`Failed to find your ${periodicity} notes folder`);
   }
 }
 
@@ -123,14 +124,14 @@ export function getCommands(periodicity: IPeriodicity): Command[] {
 
   return [
     {
-      id: "open-${periodicity}-note",
-      name: "Open ${periodicity} note",
-      callback: () => openPeriodicNote("weekly", window.moment(), false),
+      id: `open-${periodicity}-note`,
+      name: `Open ${periodicity} note`,
+      callback: () => openPeriodicNote(periodicity, window.moment(), false),
     },
 
     {
-      id: "next-${periodicity}-note",
-      name: "Open next ${periodicity} note",
+      id: `next-${periodicity}-note`,
+      name: `Open next ${periodicity} note`,
       checkCallback: (checking: boolean) => {
         if (checking) {
           const activeFile = getActiveFile();
@@ -138,13 +139,13 @@ export function getCommands(periodicity: IPeriodicity): Command[] {
             activeFile && getDateFromFile(activeFile, config.unitOfTime)
           );
         }
-        openNextNote("weekly");
+        openNextNote(periodicity);
       },
     },
 
     {
-      id: "prev-${periodicity}-note",
-      name: "Open ${periodicity} weekly note",
+      id: `prev-${periodicity}-note`,
+      name: `Open ${periodicity} note`,
       checkCallback: (checking: boolean) => {
         if (checking) {
           const activeFile = getActiveFile();
@@ -152,7 +153,7 @@ export function getCommands(periodicity: IPeriodicity): Command[] {
             activeFile && getDateFromFile(activeFile, config.unitOfTime)
           );
         }
-        openPrevNote("weekly");
+        openPrevNote(periodicity);
       },
     },
   ];

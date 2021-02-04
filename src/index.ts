@@ -1,6 +1,5 @@
 import type moment from "moment";
 import { App, Plugin } from "obsidian";
-import { IPeriodicNoteSettings } from "obsidian-daily-notes-interface";
 
 import { getCommands } from "./commands";
 import {
@@ -10,9 +9,8 @@ import {
   PeriodicNotesSettingsTab,
 } from "./settings";
 import {
-  getLegacyDailyNoteSettings,
   getLegacyWeeklyNoteSettings,
-  hasWeeklyNoteSettingsFromCalendar,
+  hasLegacyWeeklyNoteSettings,
 } from "./utils";
 
 declare global {
@@ -27,6 +25,8 @@ export default class PeriodicNotesPlugin extends Plugin {
   public isInitialLoad: boolean;
 
   async onload(): Promise<void> {
+    this.updateSettings = this.updateSettings.bind(this);
+
     await this.loadSettings();
     this.addSettingTab(new PeriodicNotesSettingsTab(this.app, this));
 
@@ -40,40 +40,35 @@ export default class PeriodicNotesPlugin extends Plugin {
   private onLayoutReady() {
     // If the user has Calendar Weekly Notes settings, migrate them automatically,
     // since the functionality will be deprecated.
-    if (this.isInitialLoad && hasWeeklyNoteSettingsFromCalendar()) {
+    if (this.isInitialLoad && hasLegacyWeeklyNoteSettings()) {
       this.migrateWeeklySettings();
       this.settings.weekly.enabled = true;
     }
   }
 
-  // public tryToMigrateDailyNoteSettings(): void {
-  //   // If the user has Daily Notes settings, migrate them automatically,
-  //   // since the functionality will be deprecated.
-  //   if (!this.settings.daily.enabled && appHasDailyNotesPluginLoaded()) {
-  //     this.migrateDailySettings();
-
-  //     this.settings.daily.enabled = true;
-  //   }
-  // }
-
-  public migrateDailySettings(): void {
-    const dailyNotesSettings = getLegacyDailyNoteSettings();
-    this.updateSettings("daily", dailyNotesSettings);
-  }
-
   private migrateWeeklySettings(): void {
     const calendarSettings = getLegacyWeeklyNoteSettings();
-    this.updateSettings("weekly", calendarSettings);
+    this.updateSettings({
+      ...this.settings,
+      ...{
+        weekly: { ...calendarSettings, enabled: true },
+        hasMigratedWeeklyNoteSettings: true,
+      },
+    });
   }
 
   async loadSettings(): Promise<void> {
-    const options = await this.loadData();
+    const settings = await this.loadData();
 
-    if (!options) {
+    if (!settings) {
       this.isInitialLoad = true;
     }
 
-    this.settings = options || {
+    this.settings = settings || {
+      showGettingStartedBanner: true,
+      hasMigratedDailyNoteSettings: false,
+      hasMigratedWeeklyNoteSettings: false,
+
       daily: { ...DEFAULT_SETTINGS },
       weekly: { ...DEFAULT_SETTINGS },
       monthly: { ...DEFAULT_SETTINGS },
@@ -88,12 +83,20 @@ export default class PeriodicNotesPlugin extends Plugin {
       });
   }
 
-  async updateSettings(
-    key: IPeriodicity,
-    settings: Partial<IPeriodicNoteSettings>
-  ): Promise<void> {
-    this.settings[key] = Object.assign({}, this.settings[key], settings);
+  //   async updateSettings(
+  //     key: IPeriodicity,
+  //     settings: Partial<IPeriodicNoteSettings>
+  //   ): Promise<void> {
+  //     this.settings[key] = Object.assign({}, this.settings[key], settings);
+  //     await this.saveData(this.settings);
+  //     this.onSettingsUpdate();
+  //   }
+  // }
+
+  async updateSettings(val: ISettings): Promise<void> {
+    this.settings = val;
     await this.saveData(this.settings);
+
     this.onSettingsUpdate();
   }
 }

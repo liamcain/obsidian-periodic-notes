@@ -13,3 +13,12 @@
 .settings-banner h4 {
   margin-bottom: 0.25em;
 }
+
+.has-error {
+  color: var(--text-error);
+}
+
+input.has-error {
+  color: var(--text-error);
+  border-color: var(--text-error);
+}

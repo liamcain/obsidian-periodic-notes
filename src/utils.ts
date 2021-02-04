@@ -1,4 +1,7 @@
-import { IPeriodicNoteSettings } from "obsidian-daily-notes-interface";
+import {
+  appHasDailyNotesPluginLoaded,
+  IPeriodicNoteSettings,
+} from "obsidian-daily-notes-interface";
 
 export const wrapAround = (value: number, size: number): number => {
   return ((value % size) + size) % size;
@@ -18,13 +21,24 @@ export function appHasCalendarPluginLoaded(): boolean {
   return !!(<any>window).app.plugins.getPlugin("calendar");
 }
 
-export function getLegacyDailyNoteSettings(): IPeriodicNoteSettings {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { internalPlugins } = <any>window.app;
-  return internalPlugins.getPluginById("daily-notes")?.instance?.options;
+export function capitalize(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-export function getLegacyWeeklyNoteSettings(): IPeriodicNoteSettings {
+export function hasLegacyDailyNoteSettings() {
+  if (!appHasDailyNotesPluginLoaded()) {
+    return false;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { internalPlugins } = <any>window.app;
+  const options = internalPlugins.getPluginById("daily-notes")?.instance
+    ?.options;
+
+  return !!(options.format || options.folder || options.template);
+}
+
+export function getLegacyDailyNoteSettings(): IPeriodicNoteSettings {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { plugins } = <any>window.app;
 
@@ -37,7 +51,7 @@ export function getLegacyWeeklyNoteSettings(): IPeriodicNoteSettings {
   };
 }
 
-export function hasWeeklyNoteSettingsFromCalendar(): boolean {
+export function hasLegacyWeeklyNoteSettings() {
   if (!appHasCalendarPluginLoaded()) {
     return false;
   }
@@ -52,6 +66,15 @@ export function hasWeeklyNoteSettingsFromCalendar(): boolean {
   );
 }
 
-export function capitalize(text: string): string {
-  return text.charAt(0).toUpperCase() + text.slice(1);
+export function getLegacyWeeklyNoteSettings(): IPeriodicNoteSettings {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { plugins } = <any>window.app;
+
+  const calendarSettings = plugins.getPlugin("calendar")?.options || {};
+
+  return {
+    format: calendarSettings.weeklyNoteFormat,
+    folder: calendarSettings.weeklyNoteFolder?.trim(),
+    template: calendarSettings.weeklyNoteTemplate?.trim(),
+  };
 }
