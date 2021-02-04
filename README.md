@@ -1,4 +1,4 @@
-# Periodic Notes �
+# Periodic Notes ⌚
 
 The Periodic Notes plugin expands on the idea of daily notes and introduces weekly and monthly notes.
 
