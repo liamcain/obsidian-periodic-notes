@@ -46,7 +46,7 @@ export function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-export function hasLegacyDailyNoteSettings() {
+export function hasLegacyDailyNoteSettings(): boolean {
   if (!appHasDailyNotesPluginLoaded()) {
     return false;
   }
@@ -64,7 +64,7 @@ export function getLegacyDailyNoteSettings(): IPeriodicNoteSettings {
   };
 }
 
-export function hasLegacyWeeklyNoteSettings() {
+export function hasLegacyWeeklyNoteSettings(): boolean {
   const calendarPlugin = getCalendarPlugin();
   if (!calendarPlugin) {
     return false;

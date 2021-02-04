@@ -32,7 +32,9 @@
         {#if $settings.hasMigratedDailyNoteSettings}
           <p class="setting-item-description">
             You have successfully migrated your daily notes settings. You can
-            now disable the Daily Notes core plugin to avoid any confusion.
+            now disable the Daily Notes core plugin to avoid any confusion.<br
+            />If you have an custom hotkeys for daily notes, make sure to update
+            them to use the new "Periodic Notes" commands.
           </p>
         {:else}
           <p class="setting-item-description">

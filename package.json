@@ -14,7 +14,7 @@
   "dependencies": {
     "@popperjs/core": "2.6.0",
     "obsidian": "obsidianmd/obsidian-api#master",
-    "obsidian-daily-notes-interface": "../obsidian-daily-notes-interface",
+    "obsidian-daily-notes-interface": "0.7.0",
     "svelte": "3.32.1",
     "tslib": "2.0.3"
   },
