@@ -8,6 +8,10 @@ function isValidFilename(filename: string) {
 }
 
 export function validateFormat(format: string): string {
+  if (!format) {
+    return "";
+  }
+
   if (!isValidFilename(format)) {
     return "Format contains illegal characters";
   }
