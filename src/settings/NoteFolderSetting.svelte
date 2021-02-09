@@ -15,8 +15,8 @@
 
   $: value = $settings[periodicity].folder;
 
-  function onChange(localValue: string) {
-    error = validateFolder(localValue);
+  function onChange() {
+    error = validateFolder(inputEl.value);
   }
 
   onMount(() => {
@@ -42,7 +42,7 @@
       type="text"
       spellcheck={false}
       placeholder="Example: folder 1/folder 2"
-      on:change={() => onChange(value)}
+      on:change={onChange}
     />
   </div>
 </div>

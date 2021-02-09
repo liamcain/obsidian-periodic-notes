@@ -2,6 +2,7 @@ import type moment from "moment";
 import { App, Plugin } from "obsidian";
 
 import { getCommands } from "./commands";
+import { SETTINGS_UPDATED } from "./events";
 import {
   DEFAULT_SETTINGS,
   IPeriodicity,
@@ -64,15 +65,19 @@ export default class PeriodicNotesPlugin extends Plugin {
       this.isInitialLoad = true;
     }
 
-    this.settings = settings || {
-      showGettingStartedBanner: true,
-      hasMigratedDailyNoteSettings: false,
-      hasMigratedWeeklyNoteSettings: false,
+    this.settings = Object.assign(
+      {},
+      {
+        showGettingStartedBanner: true,
+        hasMigratedDailyNoteSettings: false,
+        hasMigratedWeeklyNoteSettings: false,
 
-      daily: { ...DEFAULT_SETTINGS },
-      weekly: { ...DEFAULT_SETTINGS },
-      monthly: { ...DEFAULT_SETTINGS },
-    };
+        daily: { ...DEFAULT_SETTINGS },
+        weekly: { ...DEFAULT_SETTINGS },
+        monthly: { ...DEFAULT_SETTINGS },
+      },
+      settings || {}
+    );
   }
 
   private onSettingsUpdate(): void {
@@ -83,6 +88,9 @@ export default class PeriodicNotesPlugin extends Plugin {
       .forEach((periodicity: IPeriodicity) => {
         getCommands(periodicity).forEach(this.addCommand.bind(this));
       });
+
+    // Integrations (i.e. Calendar Plugin) can listen for changes to settings
+    this.app.workspace.trigger(SETTINGS_UPDATED);
   }
 
   async updateSettings(val: ISettings): Promise<void> {

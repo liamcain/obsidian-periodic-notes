@@ -1,10 +1,12 @@
-import { normalizePath } from "obsidian";
-
 function isValidFilename(filename: string) {
-  const rg1 = /^[a-z0-9_.@()-/]+$/i;
-  const rg2 = /^\./; // cannot start with dot (.)
-  const rg3 = /^(nul|prn|con|lpt[0-9]|com[0-9])(\.|$)/i; // forbidden file names
-  return rg1.test(filename) && !rg2.test(filename) && !rg3.test(filename);
+  const allowedChars = /^[a-z0-9_.@()-/\s[\]]+$/i;
+  const startsWithDot = /^\./; // cannot start with dot (.)
+  const forbiddenWindowsFilenames = /^(nul|prn|con|lpt[0-9]|com[0-9])(\.|$)/i; // forbidden file names
+  return (
+    allowedChars.test(filename) &&
+    !startsWithDot.test(filename) &&
+    !forbiddenWindowsFilenames.test(filename)
+  );
 }
 
 export function validateFormat(format: string): string {
@@ -23,7 +25,7 @@ export function validateTemplate(template: string): string {
   }
 
   const { metadataCache } = window.app;
-  const file = metadataCache.getFirstLinkpathDest(normalizePath(template), "");
+  const file = metadataCache.getFirstLinkpathDest(template, "");
   if (!file) {
     return "Template file not found";
   }
@@ -32,12 +34,12 @@ export function validateTemplate(template: string): string {
 }
 
 export function validateFolder(folder: string): string {
-  if (!folder) {
+  if (!folder || folder === "/") {
     return "";
   }
 
   const { metadataCache } = window.app;
-  const file = metadataCache.getFirstLinkpathDest(normalizePath(folder), "");
+  const file = metadataCache.getFirstLinkpathDest(folder, "");
   if (!file) {
     return "Folder not found in vault";
   }

@@ -16,8 +16,8 @@
 
   $: value = $settings[periodicity].template;
 
-  function validateOnBlur(localValue: string) {
-    error = validateTemplate(localValue);
+  function validateOnBlur() {
+    error = validateTemplate(inputEl.value);
   }
 
   function clearError() {
@@ -47,7 +47,7 @@
       type="text"
       spellcheck={false}
       placeholder="Example: folder/note"
-      on:blur={() => validateOnBlur(value)}
+      on:change={validateOnBlur}
       on:input={clearError}
     />
   </div>

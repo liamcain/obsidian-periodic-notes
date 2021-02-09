@@ -20,6 +20,7 @@
   };
   const defaultFormat = DEFAULT_FORMATS[periodicity];
 
+  let inputEl: HTMLInputElement;
   let value: string;
   let error: string;
 
@@ -32,8 +33,8 @@
     basename = isTemplateNested ? value.split("/").pop() : value;
   }
 
-  function onChange(localValue: string) {
-    error = validateFormat(localValue);
+  function onChange() {
+    error = validateFormat(inputEl.value);
   }
 </script>
 
@@ -63,11 +64,12 @@
   <div class="setting-item-control">
     <input
       bind:value={$settings[periodicity].format}
+      bind:this={inputEl}
       class:has-error={!!error}
       type="text"
       spellcheck={false}
       placeholder={defaultFormat}
-      on:change={() => onChange(value)}
+      on:change={onChange}
     />
   </div>
 </div>
