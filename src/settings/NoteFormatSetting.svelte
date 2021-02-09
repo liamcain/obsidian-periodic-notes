@@ -28,7 +28,7 @@
   let basename: string;
 
   $: {
-    value = $settings[periodicity].format;
+    value = $settings[periodicity].format || "";
     isTemplateNested = value.indexOf("/") !== -1;
     basename = isTemplateNested ? value.split("/").pop() : value;
   }

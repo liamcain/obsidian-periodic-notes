@@ -81,8 +81,8 @@ export function hasLegacyWeeklyNoteSettings(): boolean {
 export function getLegacyWeeklyNoteSettings(): IPeriodicNoteSettings {
   const options = getCalendarPlugin().options || ({} as IWeeklyNoteOptions);
   return {
-    format: options.weeklyNoteFormat,
-    folder: options.weeklyNoteFolder?.trim(),
-    template: options.weeklyNoteTemplate?.trim(),
+    format: options.weeklyNoteFormat || "",
+    folder: options.weeklyNoteFolder?.trim() || "",
+    template: options.weeklyNoteTemplate?.trim() || "",
   };
 }

@@ -14,7 +14,7 @@
   let error: string;
   let inputEl: HTMLInputElement;
 
-  $: value = $settings[periodicity].template;
+  $: value = $settings[periodicity].template || "";
 
   function validateOnBlur() {
     error = validateTemplate(inputEl.value);

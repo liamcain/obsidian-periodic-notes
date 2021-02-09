@@ -13,7 +13,7 @@
   let value: string;
   let error: string;
 
-  $: value = $settings[periodicity].folder;
+  $: value = $settings[periodicity].folder || "";
 
   function onChange() {
     error = validateFolder(inputEl.value);
