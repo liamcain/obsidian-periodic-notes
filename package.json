@@ -8,7 +8,7 @@
   "scripts": {
     "lint": "eslint . --ext .ts",
     "build": "npm run lint && rollup -c",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:watch": "yarn test -- --watch"
   },
   "dependencies": {
