@@ -45,6 +45,7 @@ export default class PeriodicNotesPlugin extends Plugin {
       this.migrateWeeklySettings();
       this.settings.weekly.enabled = true;
     }
+    this.configureCommands();
   }
 
   private migrateWeeklySettings(): void {
@@ -56,6 +57,16 @@ export default class PeriodicNotesPlugin extends Plugin {
         hasMigratedWeeklyNoteSettings: true,
       },
     });
+  }
+
+  private configureCommands() {
+    // TODO: There's currently no way to unload the commands when any of these
+    // are toggled off
+    ["daily", "weekly", "monthly"]
+      .filter((periodicity: IPeriodicity) => this.settings[periodicity].enabled)
+      .forEach((periodicity: IPeriodicity) => {
+        getCommands(periodicity).forEach(this.addCommand.bind(this));
+      });
   }
 
   async loadSettings(): Promise<void> {
@@ -81,13 +92,7 @@ export default class PeriodicNotesPlugin extends Plugin {
   }
 
   private onSettingsUpdate(): void {
-    // TODO: There's currently no way to unload the commands when any of these
-    // are toggled off
-    ["daily", "weekly", "monthly"]
-      .filter((periodicity: IPeriodicity) => this.settings[periodicity].enabled)
-      .forEach((periodicity: IPeriodicity) => {
-        getCommands(periodicity).forEach(this.addCommand.bind(this));
-      });
+    this.configureCommands();
 
     // Integrations (i.e. Calendar Plugin) can listen for changes to settings
     this.app.workspace.trigger(SETTINGS_UPDATED);

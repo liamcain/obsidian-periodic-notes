@@ -6,8 +6,13 @@ export class FileSuggest extends TextInputSuggest<TFile> {
   getSuggestions(inputStr: string): TFile[] {
     const abstractFiles = this.app.vault.getAllLoadedFiles();
     const files: TFile[] = [];
+    const lowerCaseInputStr = inputStr.toLowerCase();
+
     abstractFiles.forEach((file: TAbstractFile) => {
-      if (file instanceof TFile && file.path.toLowerCase().contains(inputStr)) {
+      if (
+        file instanceof TFile &&
+        file.path.toLowerCase().contains(lowerCaseInputStr)
+      ) {
         files.push(file);
       }
     });
@@ -30,10 +35,12 @@ export class FolderSuggest extends TextInputSuggest<TFolder> {
   getSuggestions(inputStr: string): TFolder[] {
     const abstractFiles = this.app.vault.getAllLoadedFiles();
     const folders: TFolder[] = [];
+    const lowerCaseInputStr = inputStr.toLowerCase();
+
     abstractFiles.forEach((folder: TAbstractFile) => {
       if (
         folder instanceof TFolder &&
-        folder.path.toLowerCase().contains(inputStr)
+        folder.path.toLowerCase().contains(lowerCaseInputStr)
       ) {
         folders.push(folder);
       }
