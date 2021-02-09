@@ -4,14 +4,15 @@
     DEFAULT_MONTHLY_NOTE_FORMAT,
     DEFAULT_WEEKLY_NOTE_FORMAT,
   } from "obsidian-daily-notes-interface";
+  import { onMount } from "svelte";
   import type { Writable } from "svelte/store";
 
-  import type { ISettings } from "./index";
+  import type { IPeriodicity, ISettings } from "./index";
 
-  import { validateFormat } from "./validation";
+  import { getBasename, validateFormat } from "./validation";
 
   export let settings: Writable<ISettings>;
-  export let periodicity: string;
+  export let periodicity: IPeriodicity;
 
   const DEFAULT_FORMATS = {
     daily: DEFAULT_DAILY_NOTE_FORMAT,
@@ -29,12 +30,21 @@
 
   $: {
     value = $settings[periodicity].format || "";
+
     isTemplateNested = value.indexOf("/") !== -1;
-    basename = isTemplateNested ? value.split("/").pop() : value;
+    basename = getBasename(value);
+  }
+
+  onMount(() => {
+    error = validateFormat(inputEl.value, periodicity);
+  });
+
+  function clearError() {
+    error = "";
   }
 
   function onChange() {
-    error = validateFormat(inputEl.value);
+    error = validateFormat(inputEl.value, periodicity);
   }
 </script>
 
@@ -70,6 +80,7 @@
       spellcheck={false}
       placeholder={defaultFormat}
       on:change={onChange}
+      on:input={clearError}
     />
   </div>
 </div>

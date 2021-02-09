@@ -19,7 +19,12 @@
     error = validateFolder(inputEl.value);
   }
 
+  function clearError() {
+    error = "";
+  }
+
   onMount(() => {
+    error = validateFolder(inputEl.value);
     new FolderSuggest(window.app, inputEl);
   });
 </script>
@@ -43,6 +48,7 @@
       spellcheck={false}
       placeholder="Example: folder 1/folder 2"
       on:change={onChange}
+      on:input={clearError}
     />
   </div>
 </div>

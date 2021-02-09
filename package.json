@@ -1,6 +1,6 @@
 {
   "name": "obsidian-periodic-notes",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Create/manage daily, weekly, and monthly notes",
   "author": "liamcain",
   "main": "main.js",
@@ -8,7 +8,7 @@
   "scripts": {
     "lint": "eslint . --ext .ts",
     "build": "npm run lint && rollup -c",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:watch": "yarn test -- --watch"
   },
   "dependencies": {

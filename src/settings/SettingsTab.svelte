@@ -3,7 +3,7 @@
   import { writable } from "svelte/store";
   import { slide } from "svelte/transition";
 
-  import type { ISettings } from "./index";
+  import type { IPeriodicity, ISettings } from "./index";
 
   import GettingStartedBanner from "./GettingStartedBanner.svelte";
   import NoteFormatSetting from "./NoteFormatSetting.svelte";
@@ -29,7 +29,7 @@
     }));
   }
 
-  const periodicities = ["daily", "weekly", "monthly"];
+  const periodicities: IPeriodicity[] = ["daily", "weekly", "monthly"];
 
   onDestroy(() => {
     unsubscribeFromSettings();

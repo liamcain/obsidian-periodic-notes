@@ -25,6 +25,7 @@
   }
 
   onMount(() => {
+    error = validateTemplate(inputEl.value);
     new FileSuggest(window.app, inputEl);
   });
 </script>
