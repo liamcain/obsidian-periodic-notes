@@ -1,6 +1,6 @@
 {
   "name": "obsidian-periodic-notes",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Create/manage daily, weekly, and monthly notes",
   "author": "liamcain",
   "main": "main.js",
