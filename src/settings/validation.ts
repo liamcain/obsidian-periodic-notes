@@ -7,13 +7,16 @@ export function getBasename(format: string): string {
 }
 
 function isValidFilename(filename: string): boolean {
-  const allowedChars = /^[a-z0-9_.@()-/\s[\]]+$/i;
-  const startsWithDot = /^\./; // cannot start with dot (.)
-  const forbiddenWindowsFilenames = /^(nul|prn|con|lpt[0-9]|com[0-9])(\.|$)/i; // forbidden file names
+  const illegalRe = /[?<>\\:*|"]/g;
+  const controlRe = /[\x00-\x1f\x80-\x9f]/g;
+  const reservedRe = /^\.+$/;
+  const windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i;
+
   return (
-    allowedChars.test(filename) &&
-    !startsWithDot.test(filename) &&
-    !forbiddenWindowsFilenames.test(filename)
+    !illegalRe.test(filename) &&
+    !controlRe.test(filename) &&
+    !reservedRe.test(filename) &&
+    !windowsReservedRe.test(filename)
   );
 }
 
