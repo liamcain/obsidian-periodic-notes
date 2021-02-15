@@ -8,5 +8,6 @@ module.exports = {
       2,
       { args: "all", argsIgnorePattern: "^_" },
     ],
+    "no-control-regex": 0
   },
 };
