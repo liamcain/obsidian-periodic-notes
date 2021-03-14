@@ -1,6 +1,7 @@
 .settings-banner {
-  background-color: var(--background-secondary-alt);
-  border-radius: 4px;
+  background-color: var(--background-primary-alt);
+  border-radius: 8px;
+  border: 1px solid var(--background-modifier-border);
   margin-bottom: 2em;
   padding: 1.5em;
   text-align: left;
