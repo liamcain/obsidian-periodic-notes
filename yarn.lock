@@ -3272,15 +3272,15 @@ object.pick@^1.3.0:
   dependencies:
     isobject "^3.0.1"
 
-obsidian-daily-notes-interface@0.7.5:
-  version "0.7.5"
-  resolved "https://registry.yarnpkg.com/obsidian-daily-notes-interface/-/obsidian-daily-notes-interface-0.7.5.tgz#c92ec25b4128571ffbe352101875472a4ff147c9"
-  integrity sha512-EGLr56O5HfDMAZT5TJLp4NlG6IEf09ViqrHIJhznvV7pG4mDmFIhyVQUMzYR3y823I5pJpZxk80yv+gXy0s0WA==
+obsidian-daily-notes-interface@0.7.6:
+  version "0.7.6"
+  resolved "https://registry.yarnpkg.com/obsidian-daily-notes-interface/-/obsidian-daily-notes-interface-0.7.6.tgz#2161cff49ddcdcf14aafce5fc660c4efe1d73b4a"
+  integrity sha512-b9MITVljqYZlbvTbhFZ3td/Nmmg9sFaGCn7QGNRj0XPrPhOUUt6iPKJqjfPPstNtqRgc1ufUZdRXxlsJu0grWQ==
   dependencies:
     obsidian obsidianmd/obsidian-api#master
     tslib "2.1.0"
 
-obsidian@obsidianmd/obsidian-api#master:
+"obsidian@github:obsidianmd/obsidian-api#master", obsidian@obsidianmd/obsidian-api#master:
   version "0.11.0"
   resolved "https://codeload.github.com/obsidianmd/obsidian-api/tar.gz/81ab85ade4552c9116c1e10d009127e62019c923"
   dependencies:
