@@ -44,7 +44,7 @@ const periodConfigs: Record<IPeriodicity, IPeriodConfig> = {
   },
 };
 
-async function openPeriodicNote(
+export async function openPeriodicNote(
   periodicity: IPeriodicity,
   date: Moment,
   inNewSplit: boolean
@@ -52,12 +52,12 @@ async function openPeriodicNote(
   const config = periodConfigs[periodicity];
   const startOfPeriod = date.clone().startOf(config.unitOfTime);
 
-  let allNotes;
+  let allNotes: Record<string, TFile>;
   try {
     allNotes = config.getAllNotes();
   } catch (err) {
-    console.error("failed to find your ${periodicity} notes folder", err);
-    new Notice("Failed to find your ${periodicity} notes folder");
+    console.error(`failed to find your ${periodicity} notes folder`, err);
+    new Notice(`Failed to find your ${periodicity} notes folder`);
     return;
   }
 

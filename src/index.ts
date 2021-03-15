@@ -1,7 +1,7 @@
 import type moment from "moment";
 import { App, Plugin } from "obsidian";
 
-import { getCommands } from "./commands";
+import { getCommands, openPeriodicNote } from "./commands";
 import { SETTINGS_UPDATED } from "./events";
 import {
   DEFAULT_SETTINGS,
@@ -11,6 +11,7 @@ import {
 } from "./settings";
 import {
   getLegacyWeeklyNoteSettings,
+  hasCoreDailyNotesPluginEnabled,
   hasLegacyWeeklyNoteSettings,
 } from "./utils";
 
@@ -25,26 +26,28 @@ export default class PeriodicNotesPlugin extends Plugin {
   public settings: ISettings;
   public isInitialLoad: boolean;
 
+  private ribbonEls: HTMLElement[];
+
   async onload(): Promise<void> {
+    this.ribbonEls = [];
+
     this.updateSettings = this.updateSettings.bind(this);
 
     await this.loadSettings();
     this.addSettingTab(new PeriodicNotesSettingsTab(this.app, this));
 
-    if (this.app.workspace.layoutReady) {
-      this.onLayoutReady();
-    } else {
-      this.app.workspace.on("layout-ready", this.onLayoutReady.bind(this));
-    }
+    this.app.workspace.onLayoutReady(this.onLayoutReady.bind(this));
   }
 
-  private onLayoutReady() {
+  onLayoutReady(): void {
     // If the user has Calendar Weekly Notes settings, migrate them automatically,
     // since the functionality will be deprecated.
     if (this.isInitialLoad && hasLegacyWeeklyNoteSettings()) {
       this.migrateWeeklySettings();
       this.settings.weekly.enabled = true;
     }
+
+    this.configureRibbonIcons();
     this.configureCommands();
   }
 
@@ -59,11 +62,37 @@ export default class PeriodicNotesPlugin extends Plugin {
     });
   }
 
+  private configureRibbonIcons() {
+    for (const ribbonEl of this.ribbonEls) {
+      ribbonEl.detach();
+    }
+
+    // Only show ribbon icon if daily notes plugin is disabled to avoid confusion
+    if (this.settings.daily.enabled && !hasCoreDailyNotesPluginEnabled()) {
+      this.ribbonEls.push(
+        this.addRibbonIcon("calendar-with-checkmark", "Open today's note", () =>
+          openPeriodicNote("daily", window.moment(), false)
+        )
+      );
+    }
+  }
+
   private configureCommands() {
-    // TODO: There's currently no way to unload the commands when any of these
-    // are toggled off
+    // Remove disabled commands
     ["daily", "weekly", "monthly"]
-      .filter((periodicity: IPeriodicity) => this.settings[periodicity].enabled)
+      .filter((periodicity) => !this.settings[periodicity].enabled)
+      .forEach((periodicity: IPeriodicity) => {
+        getCommands(periodicity).forEach((command) =>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (this.app as any).commands.removeCommand(
+            `periodic-notes:${command.id}`
+          )
+        );
+      });
+
+    // register enabled commands
+    ["daily", "weekly", "monthly"]
+      .filter((periodicity) => this.settings[periodicity].enabled)
       .forEach((periodicity: IPeriodicity) => {
         getCommands(periodicity).forEach(this.addCommand.bind(this));
       });
@@ -93,6 +122,7 @@ export default class PeriodicNotesPlugin extends Plugin {
 
   private onSettingsUpdate(): void {
     this.configureCommands();
+    this.configureRibbonIcons();
 
     // Integrations (i.e. Calendar Plugin) can listen for changes to settings
     this.app.workspace.trigger(SETTINGS_UPDATED);

@@ -42,6 +42,12 @@ function getDailyNotesPlugin(): IDailyNotesPlugin {
   return internalPlugins.getPluginById("daily-notes")?.instance;
 }
 
+export function hasCoreDailyNotesPluginEnabled(): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { internalPlugins } = <any>window.app;
+  return internalPlugins.getPluginById("daily-notes")?._loaded;
+}
+
 export function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
