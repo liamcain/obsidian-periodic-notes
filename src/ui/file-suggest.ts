@@ -11,6 +11,7 @@ export class FileSuggest extends TextInputSuggest<TFile> {
     abstractFiles.forEach((file: TAbstractFile) => {
       if (
         file instanceof TFile &&
+        file.extension === "md" &&
         file.path.toLowerCase().contains(lowerCaseInputStr)
       ) {
         files.push(file);
