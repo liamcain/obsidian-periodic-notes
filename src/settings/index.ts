@@ -38,7 +38,7 @@ export class PeriodicNotesSettingsTab extends PluginSettingTab {
   }
 
   unload(): void {
-    super.unload();
+    // super.unload();
     this.view?.$destroy();
   }
 
