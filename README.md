@@ -1,4 +1,4 @@
-# Periodic Notes ⌚
+\*\*\*\*# Periodic Notes ⌚
 
 The Periodic Notes plugin expands on the idea of daily notes and introduces weekly and monthly notes.
 
@@ -92,6 +92,13 @@ Coming soon! I just have to figure out a good place to show it in the UI.
 | `date`, `time` | Works the same as the daily note `{{date}}` and `{{time}}`. It will insert the date and time of the first day of the week. Useful for creating a heading (e.g. `# {{date:MMM YYYY}}`). |
 
 ---
+
+## FAQ
+
+### How do I use a variable in the folder path?
+
+If you want new daily notes to show up in the folder `Journal/2021/` for example, you can include the folder in the "Format" field. For example:
+<img width="945" alt="image" src="https://user-images.githubusercontent.com/693981/111852801-c1cd8e00-88ee-11eb-9542-b7d840239037.png">
 
 ## Say Thanks 🙏
 

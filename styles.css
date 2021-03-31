@@ -1,3 +1,7 @@
+.periodic-modal {
+  min-width: 40vw;
+}
+
 .settings-banner {
   background-color: var(--background-primary-alt);
   border-radius: 8px;
