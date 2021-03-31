@@ -1,8 +1,9 @@
 import type moment from "moment";
 import { App, Plugin } from "obsidian";
 
-import { getCommands, openPeriodicNote } from "./commands";
+import { getCommands, openPeriodicNote, periodConfigs } from "./commands";
 import { SETTINGS_UPDATED } from "./events";
+import { PeriodicNoteCreateModal } from "./modal";
 import {
   DEFAULT_SETTINGS,
   IPeriodicity,
@@ -11,7 +12,6 @@ import {
 } from "./settings";
 import {
   getLegacyWeeklyNoteSettings,
-  hasCoreDailyNotesPluginEnabled,
   hasLegacyWeeklyNoteSettings,
 } from "./utils";
 
@@ -67,11 +67,27 @@ export default class PeriodicNotesPlugin extends Plugin {
       ribbonEl.detach();
     }
 
-    // Only show ribbon icon if daily notes plugin is disabled to avoid confusion
-    if (this.settings.daily.enabled && !hasCoreDailyNotesPluginEnabled()) {
+    const configuredPeriodicities = ["daily", "weekly", "monthly"].filter(
+      (periodicity) => this.settings[periodicity].enabled
+    );
+
+    if (configuredPeriodicities.length > 1) {
       this.ribbonEls.push(
-        this.addRibbonIcon("calendar-with-checkmark", "Open today's note", () =>
-          openPeriodicNote("daily", window.moment(), false)
+        this.addRibbonIcon(
+          "calendar-with-checkmark",
+          "Open periodic note",
+          () => new PeriodicNoteCreateModal(this.app, this.settings).open()
+        )
+      );
+    } else if (configuredPeriodicities.length === 1) {
+      const periodicity = configuredPeriodicities[0] as IPeriodicity;
+      const config = periodConfigs[periodicity];
+
+      this.ribbonEls.push(
+        this.addRibbonIcon(
+          "calendar-with-checkmark",
+          `Open ${config.relativeUnit}'s note`,
+          () => openPeriodicNote(periodicity, window.moment(), false)
         )
       );
     }

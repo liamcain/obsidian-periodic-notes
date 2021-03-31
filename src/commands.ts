@@ -18,26 +18,30 @@ import { orderedValues } from "src/utils";
 
 interface IPeriodConfig {
   unitOfTime: "day" | "week" | "month";
+  relativeUnit: string;
   createNote: (date: Moment) => Promise<TFile>;
   getNote: (date: Moment, allFiles: Record<string, TFile>) => TFile;
   getAllNotes: () => Record<string, TFile>;
 }
 
-const periodConfigs: Record<IPeriodicity, IPeriodConfig> = {
+export const periodConfigs: Record<IPeriodicity, IPeriodConfig> = {
   daily: {
     unitOfTime: "day",
+    relativeUnit: "today",
     createNote: createDailyNote,
     getNote: getDailyNote,
     getAllNotes: getAllDailyNotes,
   },
   weekly: {
     unitOfTime: "week",
+    relativeUnit: "this week",
     createNote: createWeeklyNote,
     getNote: getWeeklyNote,
     getAllNotes: getAllWeeklyNotes,
   },
   monthly: {
     unitOfTime: "month",
+    relativeUnit: "this month",
     createNote: createMonthlyNote,
     getNote: getMonthlyNote,
     getAllNotes: getAllMonthlyNotes,
