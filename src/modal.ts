@@ -1,8 +1,31 @@
-import { App, Modal } from "obsidian";
+import { App, Menu, Modal, Point } from "obsidian";
 
 import { openPeriodicNote, periodConfigs } from "./commands";
 import type { IPeriodicity, ISettings } from "./settings";
 
+export function showFileMenu(
+  app: App,
+  settings: ISettings,
+  position: Point
+): void {
+  const contextMenu = new Menu(app);
+
+  ["daily", "weekly", "monthly"]
+    .filter((periodicity) => settings[periodicity].enabled)
+    .forEach((periodicity: IPeriodicity) => {
+      const config = periodConfigs[periodicity];
+      contextMenu.addItem((item) =>
+        item
+          .setTitle(`Open ${config.relativeUnit}`)
+          .setIcon(`calendar-${config.unitOfTime}`)
+          .onClick(() => {
+            openPeriodicNote(periodicity, window.moment(), false);
+          })
+      );
+    });
+
+  contextMenu.showAtPosition(position);
+}
 export class PeriodicNoteCreateModal extends Modal {
   constructor(app: App, settings: ISettings) {
     super(app);
