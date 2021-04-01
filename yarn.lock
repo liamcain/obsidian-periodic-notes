@@ -3272,10 +3272,10 @@ object.pick@^1.3.0:
   dependencies:
     isobject "^3.0.1"
 
-obsidian-daily-notes-interface@0.8.4:
-  version "0.8.4"
-  resolved "https://registry.yarnpkg.com/obsidian-daily-notes-interface/-/obsidian-daily-notes-interface-0.8.4.tgz#530cec611878c2d2ae94ba868490df5bf17c8ccf"
-  integrity sha512-REKQtAuIOKDbvNH/th1C1gWmJWCP5tRn9T/mfZGZt4Zncgko7McXK0aSKFtEInipvgbZJ2nScivvyLdiWluSMw==
+obsidian-daily-notes-interface@0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/obsidian-daily-notes-interface/-/obsidian-daily-notes-interface-0.9.0.tgz#6a8996917899097c99ed62264a28e231a297d3c6"
+  integrity sha512-vzqOLgjTJi+jeT654eRgyEA2PfqeNI23Fe955VwqnRpAjkarr6qcllpC9cs1XBgpjmRm/XRIqXFdLsO+1z1RGg==
   dependencies:
     obsidian obsidianmd/obsidian-api#master
     tslib "2.1.0"

@@ -1,9 +1,10 @@
 import type moment from "moment";
-import { App, Plugin } from "obsidian";
+import { addIcon, App, Plugin } from "obsidian";
 
 import { getCommands, openPeriodicNote, periodConfigs } from "./commands";
 import { SETTINGS_UPDATED } from "./events";
-import { PeriodicNoteCreateModal } from "./modal";
+import { calendarDayIcon, calendarMonthIcon, calendarWeekIcon } from "./icons";
+import { showFileMenu } from "./modal";
 import {
   DEFAULT_SETTINGS,
   IPeriodicity,
@@ -26,10 +27,10 @@ export default class PeriodicNotesPlugin extends Plugin {
   public settings: ISettings;
   public isInitialLoad: boolean;
 
-  private ribbonEls: HTMLElement[];
+  private ribbonEl: HTMLElement;
 
   async onload(): Promise<void> {
-    this.ribbonEls = [];
+    this.ribbonEl = null;
 
     this.updateSettings = this.updateSettings.bind(this);
 
@@ -37,6 +38,10 @@ export default class PeriodicNotesPlugin extends Plugin {
     this.addSettingTab(new PeriodicNotesSettingsTab(this.app, this));
 
     this.app.workspace.onLayoutReady(this.onLayoutReady.bind(this));
+
+    addIcon("calendar-day", calendarDayIcon);
+    addIcon("calendar-week", calendarWeekIcon);
+    addIcon("calendar-month", calendarMonthIcon);
   }
 
   onLayoutReady(): void {
@@ -63,33 +68,27 @@ export default class PeriodicNotesPlugin extends Plugin {
   }
 
   private configureRibbonIcons() {
-    for (const ribbonEl of this.ribbonEls) {
-      ribbonEl.detach();
-    }
+    this.ribbonEl?.detach();
 
     const configuredPeriodicities = ["daily", "weekly", "monthly"].filter(
       (periodicity) => this.settings[periodicity].enabled
     );
 
-    if (configuredPeriodicities.length > 1) {
-      this.ribbonEls.push(
-        this.addRibbonIcon(
-          "calendar-with-checkmark",
-          "Open periodic note",
-          () => new PeriodicNoteCreateModal(this.app, this.settings).open()
-        )
-      );
-    } else if (configuredPeriodicities.length === 1) {
+    if (configuredPeriodicities.length) {
       const periodicity = configuredPeriodicities[0] as IPeriodicity;
       const config = periodConfigs[periodicity];
 
-      this.ribbonEls.push(
-        this.addRibbonIcon(
-          "calendar-with-checkmark",
-          `Open ${config.relativeUnit}'s note`,
-          () => openPeriodicNote(periodicity, window.moment(), false)
-        )
+      this.ribbonEl = this.addRibbonIcon(
+        `calendar-${config.unitOfTime}`,
+        `Open ${config.relativeUnit}`,
+        () => openPeriodicNote(periodicity, window.moment(), false)
       );
+      this.ribbonEl.addEventListener("contextmenu", (ev: MouseEvent) => {
+        showFileMenu(this.app, this.settings, {
+          x: ev.pageX,
+          y: ev.pageY,
+        });
+      });
     }
   }
 
