@@ -28,7 +28,7 @@ If you have "Week numbers" enabled from the Calendar plugin, the calendar will a
 
 #### Weekly Notes are moving
 
-If you currently use the Calendar plugin, you might be thinking "doesn't the Calendar plugin already do this?" To which the answer is: **yes**. This plugin provides the same functionality as the Calendar plugin's weekly notes. However, [weekly notes are moving](https://github.com/liamcain/obsidian-calendar-plugin#weekly-notes-have-a-new-home).
+If you currently use the Calendar plugin, you might be thinking "doesn't the Calendar plugin already do this?" To which the answer is: **yes**. This plugin provides the same functionality as the Calendar plugin's weekly notes. However, [weekly notes are moving away from the Calendar plugin to this one](https://github.com/liamcain/obsidian-calendar-plugin#weekly-notes-have-a-new-home).
 
 #### Migrating
 
