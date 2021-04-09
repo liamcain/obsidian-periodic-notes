@@ -100,6 +100,10 @@ Coming soon! I just have to figure out a good place to show it in the UI.
 If you want new daily notes to show up in the folder `Journal/2021/` for example, you can include the folder in the "Format" field. For example:
 <img width="500" alt="image" src="https://user-images.githubusercontent.com/693981/111852801-c1cd8e00-88ee-11eb-9542-b7d840239037.png">
 
+### Why the weekly note title is wrong with the week number?
+
+Depending on your locale and operating system you are using, you may have been adopting either ISO week (first week of the year is started on the first Thursday) or Week of Year (first week of the year is started on the first day). Obsidian Periodic Notes uses Week of Year by default (ww), but you can change to ISO week by using (WW) instead. For more details, please refer to MomentJS documentation
+
 ## Say Thanks 🙏
 
 If you like this plugin and would like to buy me a coffee, you can!
