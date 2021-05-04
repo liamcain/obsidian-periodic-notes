@@ -85,6 +85,7 @@ async function openFile(file: TFile, inNewSplit: boolean): Promise<void> {
     : workspace.getUnpinnedLeaf();
 
   await leaf.openFile(file);
+  workspace.setActiveLeaf(leaf, true, true);
 }
 
 async function openNextNote(periodicity: IPeriodicity): Promise<void> {
