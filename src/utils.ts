@@ -86,3 +86,11 @@ export function getLegacyWeeklyNoteSettings(): IPeriodicNoteSettings {
     template: options.weeklyNoteTemplate?.trim() || "",
   };
 }
+
+function isMacOS() {
+  return navigator.appVersion.indexOf("Mac") !== -1;
+}
+
+export function isMetaPressed(e: MouseEvent): boolean {
+  return isMacOS() ? e.metaKey : e.ctrlKey;
+}

@@ -14,6 +14,7 @@ import {
 import {
   getLegacyWeeklyNoteSettings,
   hasLegacyWeeklyNoteSettings,
+  isMetaPressed,
 } from "./utils";
 
 declare global {
@@ -81,7 +82,8 @@ export default class PeriodicNotesPlugin extends Plugin {
       this.ribbonEl = this.addRibbonIcon(
         `calendar-${config.unitOfTime}`,
         `Open ${config.relativeUnit}`,
-        () => openPeriodicNote(periodicity, window.moment(), false)
+        (event: MouseEvent) =>
+          openPeriodicNote(periodicity, window.moment(), isMetaPressed(event))
       );
       this.ribbonEl.addEventListener("contextmenu", (ev: MouseEvent) => {
         showFileMenu(this.app, this.settings, {
