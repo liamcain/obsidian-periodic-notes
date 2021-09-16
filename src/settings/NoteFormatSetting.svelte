@@ -3,6 +3,8 @@
     DEFAULT_DAILY_NOTE_FORMAT,
     DEFAULT_MONTHLY_NOTE_FORMAT,
     DEFAULT_WEEKLY_NOTE_FORMAT,
+    DEFAULT_QUARTERLY_NOTE_FORMAT,
+    DEFAULT_YEARLY_NOTE_FORMAT,
   } from "obsidian-daily-notes-interface";
   import { onMount } from "svelte";
   import type { Writable } from "svelte/store";
@@ -18,6 +20,8 @@
     daily: DEFAULT_DAILY_NOTE_FORMAT,
     weekly: DEFAULT_WEEKLY_NOTE_FORMAT,
     monthly: DEFAULT_MONTHLY_NOTE_FORMAT,
+    quarterly: DEFAULT_QUARTERLY_NOTE_FORMAT,
+    yearly: DEFAULT_YEARLY_NOTE_FORMAT,
   };
   const defaultFormat = DEFAULT_FORMATS[periodicity];
 
