@@ -5,7 +5,12 @@ import type { SvelteComponent } from "svelte";
 import type WeeklyNotesPlugin from "../index";
 import SettingsTab from "./SettingsTab.svelte";
 
-export type IPeriodicity = "daily" | "weekly" | "monthly";
+export type IPeriodicity =
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "quarterly"
+  | "yearly";
 
 interface IPerioditySettings extends IPeriodicNoteSettings {
   enabled: boolean;
@@ -19,6 +24,8 @@ export interface ISettings {
   daily: IPerioditySettings;
   weekly: IPerioditySettings;
   monthly: IPerioditySettings;
+  quarterly: IPerioditySettings;
+  yearly: IPerioditySettings;
 }
 
 export const DEFAULT_SETTINGS = Object.freeze({

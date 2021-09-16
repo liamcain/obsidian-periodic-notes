@@ -1,6 +1,6 @@
 {
   "name": "obsidian-periodic-notes",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "Create/manage daily, weekly, and monthly notes",
   "author": "liamcain",
   "main": "main.js",
@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@popperjs/core": "2.9.1",
-    "obsidian": "obsidianmd/obsidian-api#master",
-    "obsidian-daily-notes-interface": "0.9.1",
+    "obsidian": "0.12.16",
+    "obsidian-daily-notes-interface": "0.9.4",
     "svelte": "3.35.0",
     "tslib": "2.1.0"
   },
@@ -38,6 +38,9 @@
     "svelte-preprocess": "4.6.9",
     "ts-jest": "26.5.3",
     "typescript": "4.2.3"
+  },
+  "resolutions": {
+    "obsidian": "0.12.16"
   },
   "jest": {
     "moduleNameMapper": {

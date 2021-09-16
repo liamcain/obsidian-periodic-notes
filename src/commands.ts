@@ -3,21 +3,27 @@ import { Command, MarkdownView, Notice, TFile } from "obsidian";
 import {
   createDailyNote,
   createMonthlyNote,
+  createQuarterlyNote,
   createWeeklyNote,
+  createYearlyNote,
   getAllDailyNotes,
   getAllMonthlyNotes,
+  getAllQuarterlyNotes,
   getAllWeeklyNotes,
+  getAllYearlyNotes,
   getDailyNote,
   getDateFromFile,
   getMonthlyNote,
+  getQuarterlyNote,
   getWeeklyNote,
+  getYearlyNote,
 } from "obsidian-daily-notes-interface";
 
 import type { IPeriodicity } from "src/settings";
 import { orderedValues } from "src/utils";
 
 interface IPeriodConfig {
-  unitOfTime: "day" | "week" | "month";
+  unitOfTime: "day" | "week" | "month" | "quarter" | "year";
   relativeUnit: string;
   createNote: (date: Moment) => Promise<TFile>;
   getNote: (date: Moment, allFiles: Record<string, TFile>) => TFile;
@@ -45,6 +51,20 @@ export const periodConfigs: Record<IPeriodicity, IPeriodConfig> = {
     createNote: createMonthlyNote,
     getNote: getMonthlyNote,
     getAllNotes: getAllMonthlyNotes,
+  },
+  quarterly: {
+    unitOfTime: "quarter",
+    relativeUnit: "this quarter",
+    createNote: createQuarterlyNote,
+    getNote: getQuarterlyNote,
+    getAllNotes: getAllQuarterlyNotes,
+  },
+  yearly: {
+    unitOfTime: "year",
+    relativeUnit: "this year",
+    createNote: createYearlyNote,
+    getNote: getYearlyNote,
+    getAllNotes: getAllYearlyNotes,
   },
 };
 

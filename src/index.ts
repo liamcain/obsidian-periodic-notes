@@ -3,7 +3,13 @@ import { addIcon, App, Plugin } from "obsidian";
 
 import { getCommands, openPeriodicNote, periodConfigs } from "./commands";
 import { SETTINGS_UPDATED } from "./events";
-import { calendarDayIcon, calendarMonthIcon, calendarWeekIcon } from "./icons";
+import {
+  calendarDayIcon,
+  calendarMonthIcon,
+  calendarWeekIcon,
+  calendarQuarterIcon,
+  calendarYearIcon,
+} from "./icons";
 import { showFileMenu } from "./modal";
 import {
   DEFAULT_SETTINGS,
@@ -43,6 +49,8 @@ export default class PeriodicNotesPlugin extends Plugin {
     addIcon("calendar-day", calendarDayIcon);
     addIcon("calendar-week", calendarWeekIcon);
     addIcon("calendar-month", calendarMonthIcon);
+    addIcon("calendar-quarter", calendarQuarterIcon);
+    addIcon("calendar-year", calendarYearIcon);
   }
 
   onLayoutReady(): void {
@@ -71,9 +79,13 @@ export default class PeriodicNotesPlugin extends Plugin {
   private configureRibbonIcons() {
     this.ribbonEl?.detach();
 
-    const configuredPeriodicities = ["daily", "weekly", "monthly"].filter(
-      (periodicity) => this.settings[periodicity].enabled
-    );
+    const configuredPeriodicities = [
+      "daily",
+      "weekly",
+      "monthly",
+      "quarterly",
+      "yearly",
+    ].filter((periodicity) => this.settings[periodicity].enabled);
 
     if (configuredPeriodicities.length) {
       const periodicity = configuredPeriodicities[0] as IPeriodicity;
@@ -96,7 +108,7 @@ export default class PeriodicNotesPlugin extends Plugin {
 
   private configureCommands() {
     // Remove disabled commands
-    ["daily", "weekly", "monthly"]
+    ["daily", "weekly", "monthly", "quarterly", "yearly"]
       .filter((periodicity) => !this.settings[periodicity].enabled)
       .forEach((periodicity: IPeriodicity) => {
         getCommands(periodicity).forEach((command) =>
@@ -108,7 +120,7 @@ export default class PeriodicNotesPlugin extends Plugin {
       });
 
     // register enabled commands
-    ["daily", "weekly", "monthly"]
+    ["daily", "weekly", "monthly", "quarterly", "yearly"]
       .filter((periodicity) => this.settings[periodicity].enabled)
       .forEach((periodicity: IPeriodicity) => {
         getCommands(periodicity).forEach(this.addCommand.bind(this));
@@ -132,6 +144,8 @@ export default class PeriodicNotesPlugin extends Plugin {
         daily: { ...DEFAULT_SETTINGS },
         weekly: { ...DEFAULT_SETTINGS },
         monthly: { ...DEFAULT_SETTINGS },
+        quarterly: { ...DEFAULT_SETTINGS },
+        yearly: { ...DEFAULT_SETTINGS },
       },
       settings || {}
     );

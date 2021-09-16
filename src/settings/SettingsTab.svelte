@@ -29,7 +29,13 @@
     }));
   }
 
-  const periodicities: IPeriodicity[] = ["daily", "weekly", "monthly"];
+  const periodicities: IPeriodicity[] = [
+    "daily",
+    "weekly",
+    "monthly",
+    "quarterly",
+    "yearly",
+  ];
 
   onDestroy(() => {
     unsubscribeFromSettings();
@@ -59,8 +65,8 @@
         class="checkbox-container"
         class:is-enabled={$settingsStore[periodicity].enabled}
         on:click={() => {
-          $settingsStore[periodicity].enabled = !$settingsStore[periodicity]
-            .enabled;
+          $settingsStore[periodicity].enabled =
+            !$settingsStore[periodicity].enabled;
         }}
       />
     </div>
