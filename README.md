@@ -41,7 +41,7 @@ You can create a Daily Note either by clicking on the calendar icon in the left 
 | Setting  | Description                                                                                                                                                                                          |
 | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Folder   | The folder that your weekly notes go into. It can be the same or different from your daily notes. By default they are placed in your vault root.                                                     |
-| Template | Configure a template for weekly notes. Weekly notes have slightly different template tags than daily notes. See here for the list of supported [weekly note template tags](#template-tags).          |
+| Template | Configure a template for weekly notes. Weekly notes have slightly different template tags than daily notes. See here for the list of supported [weekly note template tags](#weekly-template-tags).          |
 | Format   | The date format for the weekly note filename. Defaults to `gggg-[W]ww`. If you use `DD` in the week format, this will refer to first day of the week (Sunday or Monday, depending on your settings). |
 
 ### Weekly Template Tags
@@ -81,7 +81,7 @@ Coming soon! I just have to figure out a good place to show it in the UI.
 | Setting  | Description                                                                                                                                                                                        |
 | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Folder   | The folder that your monthly notes go into. It can be the same or different from your daily notes. By default they are placed in your vault root.                                                  |
-| Template | Configure a template for monthly notes. Monthly notes have slightly different template tags than daily notes. See here for the list of supported [monthly note template tags](#template-tags).     |
+| Template | Configure a template for monthly notes. Monthly notes have slightly different template tags than daily notes. See here for the list of supported [monthly note template tags](#monthly-template-tags).     |
 | Format   | The date format for the monthly note filename. Defaults to `YYYY-MM`. If you use `DD` in the week format, this will refer to first day of the week (Sunday or Monday, depending on your settings). |
 
 ### Monthly Template Tags
