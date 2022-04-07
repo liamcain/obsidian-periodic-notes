@@ -19,6 +19,7 @@
   let nameEl: HTMLDivElement;
   let optionsEl: HTMLDivElement;
   let calendarsetName = selectedCalendarSet;
+  let isActive = selectedCalendarSet === manager.getActiveSet();
   let errorMsg = "";
 
   function tryToRename(e: FocusEvent) {
@@ -42,16 +43,21 @@
 
   function toggleOptionsMenu(evt: MouseEvent) {
     const menu = new Menu(app);
+
+    if (!isActive) {
+      menu
+        .addItem((item) =>
+          item
+            .setTitle("Set as active")
+            .setIcon("check-circle-2")
+            .onClick(() => {
+              manager.setActiveSet(selectedCalendarSet);
+              isActive = true;
+            })
+        )
+        .addSeparator();
+    }
     menu
-      .addItem((item) =>
-        item
-          .setTitle("Set as active")
-          .setIcon("check-circle-2")
-          .onClick(() => {
-            manager.setActiveSet(selectedCalendarSet);
-          })
-      )
-      .addSeparator()
       .addItem((item) =>
         item
           .setTitle("Duplicate calendar set")
@@ -74,6 +80,7 @@
         item
           .setTitle("Delete calendar set")
           .setIcon("x")
+          .setDisabled(manager.getCalendarSets().length === 1)
           .onClick(() => {
             manager.deleteCalendarSet(selectedCalendarSet);
             router.navigate(["Periodic Notes"]);
@@ -111,7 +118,16 @@
     on:blur={tryToRename}
     on:keypress={submitOnEnter}
   />
-  <div class="view-action" bind:this={optionsEl} on:click={toggleOptionsMenu} />
+  <div class="calendarset-toolbar">
+    {#if isActive}
+      <div class="active-calendarset-badge">Active</div>
+    {/if}
+    <div
+      class="view-action"
+      bind:this={optionsEl}
+      on:click={toggleOptionsMenu}
+    />
+  </div>
 </div>
 {#if errorMsg}
   <div class="calendarset-error">{errorMsg}</div>
@@ -128,8 +144,9 @@
   {/each}
 </div>
 
-<style>
+<style lang="scss">
   .calendarset-titlebar {
+    align-items: center;
     display: flex;
     justify-content: space-between;
     margin-top: 12px;
@@ -145,5 +162,27 @@
 
   .calendarset-groups {
     margin-top: 2em;
+  }
+
+  .calendarset-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .view-action {
+      padding: 2px;
+    }
+  }
+
+  .active-calendarset-badge {
+    background-color: var(--background-primary);
+    border-radius: 6px;
+    border: 1px solid var(--background-modifier-border);
+    color: var(--text-accent);
+    font-size: 0.6em;
+    font-weight: 600;
+    letter-spacing: 0.25px;
+    padding: 0.1em 0.7em;
+    text-transform: uppercase;
   }
 </style>

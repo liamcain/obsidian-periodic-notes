@@ -11,7 +11,7 @@
   export let calendarSet: CalendarSet;
   export let manager: CalendarSetManager;
 
-  let active = manager.activeSet === calendarSet.id;
+  let active = manager.getActiveSet() === calendarSet.id;
   let showEmptyState =
     granularities.filter((g) => calendarSet[g]?.enabled).length === 0;
 </script>
@@ -47,7 +47,13 @@
     transition: 0.2s border-color ease-in;
 
     &.active {
-      box-shadow: inset 0 0 0 2px var(--text-accent);
+      background: var(--text-selection);
+      box-shadow: inset 0 0 0 1px var(--text-accent);
+
+      &:hover {
+        border-color: var(--interactive-accent);
+        box-shadow: inset 0 0 0 1px var(--text-accent-hover);
+      }
     }
 
     &:hover {

@@ -52,9 +52,8 @@
     granularity: Granularity,
     date: Moment
   ) {
-    // TODO: fix this if the periodic note is being created. this will be null
     let file = cache.getPeriodicNote(
-      plugin.calendarSetManager.activeSet,
+      plugin.calendarSetManager.getActiveSet(),
       granularity,
       date
     );

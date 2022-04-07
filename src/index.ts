@@ -167,7 +167,7 @@ export default class PeriodicNotesPlugin extends Plugin {
 
   public getPeriodicNote(granularity: Granularity, date: Moment): TFile | null {
     return this.cache.getPeriodicNote(
-      this.calendarSetManager.activeSet,
+      this.calendarSetManager.getActiveSet(),
       granularity,
       date
     );
@@ -184,7 +184,7 @@ export default class PeriodicNotesPlugin extends Plugin {
   ): Promise<void> {
     const { workspace } = this.app;
     let file = this.cache.getPeriodicNote(
-      this.calendarSetManager.activeSet,
+      this.calendarSetManager.getActiveSet(),
       granularity,
       date
     );
