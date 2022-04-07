@@ -4,7 +4,11 @@
   import type CalendarSetManager from "src/calendarSetManager";
   import type { ISettings } from "src/settings";
   import { router } from "src/settings/stores";
-  import { createNewCalendarSet, deleteCalendarSet } from "src/settings/utils";
+  import {
+    createNewCalendarSet,
+    deleteCalendarSet,
+    setActiveSet,
+  } from "src/settings/utils";
 
   import { granularities } from "src/types";
   import { onMount } from "svelte";
@@ -51,7 +55,7 @@
             .setTitle("Set as active")
             .setIcon("check-circle-2")
             .onClick(() => {
-              manager.setActiveSet(selectedCalendarSet);
+              settings.update(setActiveSet(selectedCalendarSet));
               isActive = true;
             })
         )

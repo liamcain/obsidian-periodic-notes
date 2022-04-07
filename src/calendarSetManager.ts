@@ -166,11 +166,4 @@ export default class CalendarSetManager {
       return settings;
     });
   }
-
-  setActiveSet(calendarSetId: string): void {
-    this.plugin.settings.update((settings) => {
-      settings.activeCalendarSet = calendarSetId;
-      return settings;
-    });
-  }
 }

@@ -11,7 +11,11 @@
   import CalendarSetManager from "src/calendarSetManager";
   import { router } from "src/settings/stores";
   import type { ISettings } from "src/settings";
-  import { createNewCalendarSet, deleteCalendarSet } from "src/settings/utils";
+  import {
+    createNewCalendarSet,
+    deleteCalendarSet,
+    setActiveSet,
+  } from "src/settings/utils";
 
   export let app: App;
   export let viewDetails: () => void;
@@ -38,7 +42,7 @@
             .setTitle("Set as active")
             .setIcon("check-circle-2")
             .onClick(() => {
-              manager.setActiveSet(calendarSet.id);
+              settings.update(setActiveSet(calendarSet.id));
             })
         )
         .addSeparator();

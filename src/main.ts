@@ -83,8 +83,6 @@ export default class PeriodicNotesPlugin extends Plugin {
       //   this.migrateWeeklySettings();
       //   this.settings.weekly.enabled = true;
       // }
-      this.cache.initialize();
-
       this.configureRibbonIcons();
       this.configureCommands();
     });
@@ -177,6 +175,18 @@ export default class PeriodicNotesPlugin extends Plugin {
 
   public getPeriodicNote(granularity: Granularity, date: Moment): TFile | null {
     return this.cache.getPeriodicNote(
+      this.calendarSetManager.getActiveSet(),
+      granularity,
+      date
+    );
+  }
+
+  // What API do I want for this?
+  public getPeriodicNotes(
+    granularity: Granularity,
+    date: Moment
+  ): PeriodicNoteCachedMetadata[] {
+    return this.cache.getPeriodicNotes(
       this.calendarSetManager.getActiveSet(),
       granularity,
       date

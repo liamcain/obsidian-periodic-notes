@@ -49,3 +49,17 @@ input.has-error {
   display: inline-block;
   font-size: 70%;
 }
+
+.suggestion-badge {
+  background: var(--text-selection);
+  border-radius: 6px;
+  color: var(--interactive-accent);
+  display: inline-block;
+  font-size: 65%;
+  font-weight: 500;
+  line-height: 1.5;
+  padding: 0.2em 0.6em;
+  position: absolute;
+  right: 10px;
+  top: 6px;
+}

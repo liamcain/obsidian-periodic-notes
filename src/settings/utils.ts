@@ -49,3 +49,14 @@ export const createNewCalendarSet: CreateFunc = (
     return settings;
   };
 };
+
+type UpdateActiveFunc = (
+  calendarSetId: string,
+  refSettings?: Partial<CalendarSet>
+) => Updater<ISettings>;
+export const setActiveSet: UpdateActiveFunc = (id: string) => {
+  return (settings: ISettings) => {
+    settings.activeCalendarSet = id;
+    return settings;
+  };
+};

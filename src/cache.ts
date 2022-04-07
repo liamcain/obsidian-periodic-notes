@@ -4,12 +4,12 @@ import { App, Component, TAbstractFile, TFile, TFolder } from "obsidian";
 
 import { DEFAULT_FORMAT } from "./constants";
 import type PeriodicNotesPlugin from "./main";
+import { getLooselyMatchedDate } from "./parser";
 import { granularities, type Granularity, type PeriodicConfig } from "./types";
 
+export type MatchType = "filename" | "frontmatter" | "date-prefixed";
 
-type MatchType = "filename" | "frontmatter";
-
-interface PeriodicNoteMatchMatchData {
+export interface PeriodicNoteMatchMatchData {
   /* where was the date found */
   matchType: MatchType;
   /* XXX: keep ZK matches in the cache, should this be separate from formats with HH:mm in them? */
@@ -53,15 +53,27 @@ export class PeriodicNotesCache extends Component {
   constructor(readonly app: App, readonly plugin: PeriodicNotesPlugin) {
     super();
     this.cachedFiles = new Map();
+
+    this.app.workspace.onLayoutReady(() => {
+      console.info("[Periodic Notes] initializing cache");
+      this.initialize();
+      this.registerEvent(this.app.vault.on("create", this.resolve, this));
+      this.registerEvent(this.app.vault.on("rename", this.resolveRename, this));
+      this.registerEvent(
+        this.app.workspace.on("periodic-notes:settings-updated", this.reset, this)
+      );
+    });
+  }
+
+  public reset(): void {
+    this.cachedFiles.clear();
+    this.initialize();
   }
 
   public initialize(): void {
-    console.info("[Periodic Notes] initializing cache");
-    this.registerEvent(this.app.metadataCache.on("resolve", this.resolve, this));
-
     for (const calendarSet of this.plugin.calendarSetManager.getCalendarSets()) {
-      for (const granularity of granularities) {
-        if (!calendarSet[granularity]?.enabled) continue;
+      const activeGranularities = granularities.filter((g) => calendarSet[g]?.enabled);
+      for (const granularity of activeGranularities) {
         const config = calendarSet[granularity] as PeriodicConfig;
         const rootFolder = this.app.vault.getAbstractFileByPath(
           config.folder || "/"
@@ -75,17 +87,24 @@ export class PeriodicNotesCache extends Component {
     }
   }
 
+  private resolveRename(file: TAbstractFile, oldPath: string): void {
+    if (file instanceof TFile) {
+      this.cachedFiles.delete(oldPath);
+      this.resolve(file);
+    }
+  }
+
   private resolve(file: TFile): void {
-    // TODO: should I listen for create+rename instead? Rename would allow me to remove items from the cache
     const manager = this.plugin.calendarSetManager;
 
     // Check if file matches any calendar set
-    for (const calendarSet of manager.getCalendarSets()) {
-      for (const granularity of granularities) {
-        if (!calendarSet[granularity]?.enabled) continue;
+    calendarsets: for (const calendarSet of manager.getCalendarSets()) {
+      const activeGranularities = granularities.filter((g) => calendarSet[g]?.enabled);
+      if (activeGranularities.length === 0) continue calendarsets;
 
+      granularities: for (const granularity of activeGranularities) {
         const folder = calendarSet[granularity]?.folder ?? "/";
-        if (!file.path.startsWith(folder)) continue;
+        if (!file.path.startsWith(folder)) continue granularities;
 
         const format = calendarSet[granularity]?.format || DEFAULT_FORMAT[granularity];
         const date = window.moment(file.basename, format, true);
@@ -102,9 +121,41 @@ export class PeriodicNotesCache extends Component {
             },
           });
 
+          console.log(
+            "found periodic note",
+            date.format(),
+            granularity,
+            file.path,
+            calendarSet.id
+          );
           this.app.workspace.trigger("periodic-notes:resolve", granularity, file);
-          return;
+          continue calendarsets;
         }
+      }
+
+      const nonStrictDate = getLooselyMatchedDate(file.basename);
+      if (nonStrictDate) {
+        this.cachedFiles.set(file.path, {
+          calendarSet: calendarSet.id,
+          filePath: file.path,
+          date: nonStrictDate.date,
+          granularity: nonStrictDate.granularity,
+          canonicalDateStr: getCanonicalDateString(
+            nonStrictDate.granularity,
+            nonStrictDate.date
+          ),
+          matchData: {
+            exact: false,
+            matchType: "filename",
+          },
+        });
+
+        this.app.workspace.trigger(
+          "periodic-notes:resolve",
+          nonStrictDate.granularity,
+          file
+        );
+        continue;
       }
     }
   }
@@ -123,18 +174,45 @@ export class PeriodicNotesCache extends Component {
     date: Moment
   ): TFile | null {
     for (const [filePath, cacheData] of this.cachedFiles) {
-      if (cacheData.calendarSet !== calendarSet) continue;
-      if (cacheData.granularity !== granularity) continue;
-      if (!cacheData.date.isSame(date, granularity)) continue;
-
-      /**
-       * TODO handle the non-unique case.
-       */
-
-      return this.app.vault.getAbstractFileByPath(filePath) as TFile;
+      if (
+        cacheData.calendarSet === calendarSet &&
+        cacheData.granularity === granularity &&
+        cacheData.matchData.exact === true &&
+        cacheData.date.isSame(date, granularity)
+      ) {
+        return this.app.vault.getAbstractFileByPath(filePath) as TFile;
+      }
     }
 
     return null;
+  }
+
+  /**
+   *
+   * Get all periodic notes from the cache
+   *
+   * @param calendarSet
+   * @param granularity
+   * @param date
+   */
+  public getPeriodicNotes(
+    calendarSet: string,
+    granularity: Granularity,
+    date: Moment
+  ): PeriodicNoteCachedMetadata[] {
+    const matches: PeriodicNoteCachedMetadata[] = [];
+    for (const [, cacheData] of this.cachedFiles) {
+      if (
+        cacheData.calendarSet === calendarSet &&
+        cacheData.granularity === granularity &&
+        cacheData.matchData.exact === true &&
+        cacheData.date.isSame(date, granularity)
+      ) {
+        matches.push(cacheData);
+      }
+    }
+
+    return matches;
   }
 
   // XXX: is this good to expose?

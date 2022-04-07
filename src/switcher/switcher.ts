@@ -1,20 +1,20 @@
 import capitalize from "lodash/capitalize";
-import type { Moment } from "moment";
 import { type NLDatesPlugin, type NLDResult, setIcon, App, SuggestModal } from "obsidian";
+import type { MatchType } from "src/cache";
 import { DEFAULT_FORMAT } from "src/constants";
 import type PeriodicNotesPlugin from "src/main";
 import { getRelativeDate, isIsoFormat, join } from "src/utils";
 
 import type { Granularity } from "../types";
-import { FileOptionsSwitcher } from "./fileOptionsSwitcher";
+import { RelatedFilesSwitcher } from "./relatedFilesSwitcher";
 
-interface DateNavigationItem {
+export interface DateNavigationItem {
   granularity: Granularity;
   nldResult: NLDResult;
   label: string;
   matchData?: {
-    exact: false;
-    matchType: "date-prefixed";
+    exact: boolean;
+    matchType: MatchType;
   };
 }
 
@@ -30,91 +30,36 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
 
   constructor(readonly app: App, readonly plugin: PeriodicNotesPlugin) {
     super(app);
-    //     this.inputEl.parentElement.prepend(
-    //       createDiv("periodic-notes-switcher-input-container", (inputContainer) => {
-    //         inputContainer.appendChild(this.inputEl);
-    //         this.granularityLabel = inputContainer.createDiv({
-    //           cls: "mode-indicator",
-    //           text: this.mode,
-    //         });
-    //       })
-    //     );
+    // this.inputEl.parentElement.prepend(
+    //   createDiv("periodic-notes-switcher-input-container", (inputContainer) => {
+    //     inputContainer.appendChild(this.inputEl);
+    //     this.granularityLabel = inputContainer.createDiv({
+    //       cls: "mode-indicator",
+    //       text: this.mode,
+    //     });
+    //   })
+    // );
 
     this.setInstructions(DEFAULT_INSTRUCTIONS);
     this.setPlaceholder("Type date to find related notes");
 
     this.nlDatesPlugin = app.plugins.getPlugin("nldates-obsidian") as NLDatesPlugin;
 
-    // this.scope.register(["Mod"], "Enter", (evt: KeyboardEvent) => {
-    //   this.chooser.useSelectedItem(evt);
-    //   return false;
-    // });
-
-    //     this.scope.register([], "Tab", (evt: KeyboardEvent) => {
-    //       evt.preventDefault();
-    //       this.cycleGranularity();
-    //     });
-
     this.scope.register([], "Tab", (evt: KeyboardEvent) => {
       evt.preventDefault();
       this.close();
-      new FileOptionsSwitcher(this.app).open();
+      new RelatedFilesSwitcher(
+        this.app,
+        this.plugin,
+        this.getSelectedItem(),
+        this.inputEl.value
+      ).open();
     });
   }
 
-  /**
-   * Return a list of suggested dates based on the parsed result
-   * @param query string
-   * @param parsedResult NLDResult
-   * @returns Moment[]
-   */
-  getDaySuggestions(query: string, parsedResult: NLDResult) {
-    const start = window.moment(parsedResult.moment);
-    const dateArray: Moment[] = [];
-    let end: Moment;
-
-    if (query.includes("week")) {
-      end = window.moment(start).endOf("week");
-    } else if (query.includes("month")) {
-      end = window.moment(start).endOf("month");
-    } else {
-      end = window.moment(start);
-    }
-
-    do {
-      dateArray.push(window.moment(start.format("YYYY-MM-DD")));
-      start.add(1, "day");
-    } while (!start.isAfter(end, "day"));
-
-    return dateArray;
-  }
-
-  //   cycleGranularity() {
-  //     const granularities: IGranularity[] = ["day", "week", "month", "year"];
-  //     const idx = granularities.indexOf(this.mode);
-  //     this.setGranularity(granularities[(idx + 1) % granularities.length]);
-  //   }
-
-  // setGranularity(granularity: Granularity) {
-  //   this.mode = granularity;
-  //   this.granularityLabel.setText(this.mode);
-  //   this.chooser.setSuggestions(this.getSuggestions(this.inputEl.value));
-  // }
-
-  private getDatePrefixedNotes(nldResult: NLDResult): DateNavigationItem[] {
-    const zettelPrefix = nldResult.moment.format("YYYYMMDD");
-    return this.app.vault
-      .getMarkdownFiles()
-      .filter((file) => file.basename.startsWith(zettelPrefix))
-      .map((file) => ({
-        label: file.basename,
-        nldResult,
-        granularity: "day",
-        matchData: {
-          exact: false,
-          matchType: "date-prefixed",
-        },
-      }));
+  private getSelectedItem(): DateNavigationItem {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    return (this as any).chooser.values[(this as any).chooser.selectedItem];
   }
 
   /** XXX: this is pretty messy currently. Not sure if I like the format yet */
@@ -165,10 +110,7 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
   getSuggestions(query: string): DateNavigationItem[] {
     const dateInQuery = this.nlDatesPlugin.parseDate(query);
     if (dateInQuery.moment.isValid()) {
-      return [
-        ...this.getPeriodicNotesFromQuery(query, dateInQuery),
-        ...this.getDatePrefixedNotes(dateInQuery),
-      ];
+      return this.getPeriodicNotesFromQuery(query, dateInQuery);
     }
 
     return this.getDateSuggestions(query);
@@ -238,18 +180,19 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
   }
 
   renderSuggestion(value: DateNavigationItem, el: HTMLElement) {
-    if (value.matchData?.matchType === "date-prefixed") {
-      el.setText(value.label);
-      el.createEl("div", {
-        cls: "suggestion-note",
-        text: "Related note",
-      });
-      return;
-    }
+    const numRelatedNotes = this.plugin
+      .getPeriodicNotes(value.granularity, value.nldResult.moment)
+      .filter((e) => e.matchData.exact === false).length;
 
     const periodicNote = this.plugin.getPeriodicNote(
       value.granularity,
       value.nldResult.moment
+    );
+    console.log(
+      "periodic note for value",
+      value.label,
+      periodicNote,
+      this.plugin.calendarSetManager.getActiveSet()
     );
 
     if (!periodicNote) {
@@ -260,6 +203,9 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
       el.createEl("span", { cls: "suggestion-flair", prepend: true }, (el) => {
         setIcon(el, "add-note-glyph", 16);
       });
+      if (numRelatedNotes > 0) {
+        el.createEl("span", { cls: "suggestion-badge", text: `+${numRelatedNotes}` });
+      }
       el.createEl("div", {
         cls: "suggestion-note",
         text: join(folder, value.nldResult.moment.format(format)),
@@ -275,6 +221,9 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
     el.createEl("span", { cls: "suggestion-flair", prepend: true }, (el) => {
       setIcon(el, `calendar-${value.granularity}`, 16);
     });
+    if (numRelatedNotes > 0) {
+      el.createEl("span", { cls: "suggestion-badge", text: `+${numRelatedNotes}` });
+    }
   }
 
   async onChooseSuggestion(item: DateNavigationItem, _evt: MouseEvent | KeyboardEvent) {

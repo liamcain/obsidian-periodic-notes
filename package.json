@@ -9,7 +9,7 @@
     "lint": "svelte-check && eslint . --ext .ts && tsc --noEmit",
     "lint:fix": "svelte-check && eslint . --ext .ts --fix",
     "dev": "node --experimental-json-modules esbuild.config.mjs",
-    "build": "yarn run lint && node esbuild.config.mjs production",
+    "build": "yarn run lint && node --experimental-json-modules esbuild.config.mjs production",
     "release": "standard-version",
     "test": "jest --passWithNoTests",
     "test:watch": "yarn test -- --watch"
