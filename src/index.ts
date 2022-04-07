@@ -4,7 +4,6 @@ import { addIcon, Plugin, TFile } from "obsidian";
 import { PeriodicNotesCache, type PeriodicNoteCachedMetadata } from "./cache";
 import CalendarSetManager from "./calendarSetManager";
 import { displayConfigs, getCommands } from "./commands";
-import { SETTINGS_UPDATED } from "./events";
 import {
   calendarDayIcon,
   calendarMonthIcon,
@@ -13,7 +12,7 @@ import {
   calendarYearIcon,
 } from "./icons";
 import { showFileMenu } from "./modal";
-import { type ISettings, PeriodicNotesSettingsTab } from "./settings";
+import { type ISettings, PeriodicNotesSettingsTab, DEFAULT_SETTINGS } from "./settings";
 import { NLDNavigator } from "./switcher/switcher";
 import TimelineManager from "./timeline/manager";
 import type { Granularity } from "./types";
@@ -87,14 +86,18 @@ export default class PeriodicNotesPlugin extends Plugin {
       const config = displayConfigs[granularity];
       this.ribbonEl = this.addRibbonIcon(
         `calendar-${granularity}`,
-        `Open ${config.labelOpenPresent}`,
-        (event: MouseEvent) =>
-          this.openPeriodicNote(granularity, window.moment(), isMetaPressed(event))
+        config.labelOpenPresent,
+        (e: MouseEvent) => {
+          if (e.type !== "auxclick") {
+            this.openPeriodicNote(granularity, window.moment(), isMetaPressed(e));
+          }
+        }
       );
-      this.ribbonEl.addEventListener("contextmenu", (ev: MouseEvent) => {
+      this.ribbonEl.addEventListener("contextmenu", (e: MouseEvent) => {
+        e.preventDefault();
         showFileMenu(this.app, this, {
-          x: ev.pageX,
-          y: ev.pageY,
+          x: e.pageX,
+          y: e.pageY,
         });
       });
     }
@@ -121,25 +124,17 @@ export default class PeriodicNotesPlugin extends Plugin {
   async loadSettings(): Promise<void> {
     const settings = await this.loadData();
 
-    this.settings = Object.assign(
-      {},
-      {
-        showGettingStartedBanner: true,
-        hasMigratedDailyNoteSettings: false,
-        hasMigratedWeeklyNoteSettings: false,
-        calendarSets: [],
-      },
-      settings || {}
-    );
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, settings || {});
   }
 
   public async onUpdateSettings(newSettings: ISettings): Promise<void> {
+    this.settings = newSettings;
     await this.saveData(newSettings);
     this.configureCommands();
     this.configureRibbonIcons();
 
     // Integrations (i.e. Calendar Plugin) can listen for changes to settings
-    this.app.workspace.trigger(SETTINGS_UPDATED);
+    this.app.workspace.trigger("periodic-notes:settings-updated");
   }
 
   public updateSettings(tx: (old: ISettings) => Partial<ISettings>): void {

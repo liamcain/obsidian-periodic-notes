@@ -11,6 +11,15 @@ declare module "obsidian" {
     options: IWeeklyNoteOptions;
   }
 
+  export interface Workspace extends Events {
+    on(
+      name: "periodic-notes:settings-updated",
+      callback: () => void,
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+      ctx?: any
+    ): EventRef;
+  }
+
   interface CommandManager {
     removeCommand(commandName: string): void;
   }

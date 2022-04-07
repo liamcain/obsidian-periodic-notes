@@ -43,11 +43,17 @@
     await view.leaf.openFile(file, { active: true });
   }
 
-  function toggleCalendarVisibility() {
-    showMiniCalendar = !showMiniCalendar;
+  function updateComplicationVisibility() {
+    showComplication = plugin.settings.enableTimelineComplication;
   }
 
-  let showMiniCalendar: boolean;
+  function toggleCalendarVisibility() {
+    showTimeline = !showTimeline;
+  }
+
+  let showComplication: boolean;
+  let showTimeline: boolean;
+
   let weekDays: Moment[];
   let today = window.moment();
   let periodicData: PeriodicNoteCachedMetadata | null;
@@ -79,15 +85,21 @@
 
   onMount(() => {
     plugin.registerEvent(plugin.app.workspace.on("file-open", updateView));
+    plugin.registerEvent(
+      plugin.app.workspace.on(
+        "periodic-notes:settings-updated",
+        updateComplicationVisibility
+      )
+    );
   });
 </script>
 
-{#if periodicData}
+{#if showComplication && periodicData}
   <div class="timeline-container">
     <div class="leaf-periodic-button" on:click={toggleCalendarVisibility}>
       {relativeDataStr}
     </div>
-    {#if showMiniCalendar}
+    {#if showTimeline}
       <div class="timeline-view" in:fly={{ x: 8 }} out:fly={{ x: 8 }}>
         {#each weekDays as weekDay}
           <div
@@ -119,9 +131,13 @@
     gap: 12px;
     height: 56px;
     position: absolute;
-    right: 16px;
+    right: 26px;
     top: 56px;
     z-index: 1;
+
+    :global(.native-scrollbars) & {
+      right: 16px;
+    }
   }
 
   .leaf-periodic-button {

@@ -1,4 +1,6 @@
 <script type="ts">
+  import capitalize from "lodash/capitalize";
+
   import Checkmark from "src/settings/components/Checkmark.svelte";
   import type { CalendarSet } from "src/types";
   import { granularities } from "src/types";
@@ -16,7 +18,7 @@
         <div>
           <Checkmark />
           <span class="periodicity-text">
-            {displayConfigs[granularity].periodicity} notes
+            {capitalize(displayConfigs[granularity].periodicity)} notes
           </span>
         </div>
       {/if}
@@ -29,12 +31,11 @@
     background: var(--background-primary);
     border-radius: 16px;
     border: 1px solid var(--background-modifier-border);
-    cursor: point;
+    cursor: pointer;
     display: flex;
     flex-direction: column;
     padding: 24px;
     transition: 0.2s border ease-in;
-    width: calc(50% - 24px);
   }
 
   .calendarset-container:hover {

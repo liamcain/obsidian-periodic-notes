@@ -10,8 +10,19 @@ export interface ISettings {
   hasMigratedDailyNoteSettings: boolean;
   hasMigratedWeeklyNoteSettings: boolean;
 
+  activeCalendarSet: string;
   calendarSets: CalendarSet[];
+
+  enableTimelineComplication: boolean;
 }
+
+export const DEFAULT_SETTINGS = {
+  showGettingStartedBanner: true,
+  hasMigratedDailyNoteSettings: false,
+  hasMigratedWeeklyNoteSettings: false,
+  calendarSets: [],
+  enableTimelineComplication: true,
+};
 
 export const DEFAULT_PERIODIC_CONFIG: PeriodicConfig = Object.freeze({
   enabled: false,

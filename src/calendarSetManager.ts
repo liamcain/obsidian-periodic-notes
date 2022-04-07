@@ -79,7 +79,7 @@ function createWritableConfig(config: PeriodicConfig | undefined) {
 }
 
 export default class CalendarSetManager {
-  activeSet: string;
+  public activeSet: string;
 
   constructor(readonly plugin: PeriodicNotesPlugin) {
     this.activeSet = DEFAULT_CALENDARSET_ID;
@@ -169,5 +169,57 @@ export default class CalendarSetManager {
       throw new Error("No active calendar set found");
     }
     return granularities.filter((granularity) => activeSet[granularity]?.enabled);
+  }
+
+  public renameCalendarset(calendarSetId: string, proposedName: string): void {
+    if (calendarSetId === proposedName.trim()) {
+      return;
+    }
+
+    if (proposedName.trim() === "") {
+      throw new Error("Name required");
+    }
+
+    const existingSetWithName = this.plugin.settings.calendarSets.find(
+      (c) => c.id === proposedName
+    );
+
+    if (existingSetWithName) {
+      throw new Error(`A calendar set with the name '${proposedName}' already exists`);
+    }
+
+    const calendarSet = this.plugin.settings.calendarSets.find(
+      (c) => c.id === calendarSetId
+    );
+
+    if (!calendarSet) {
+      return;
+    }
+
+    calendarSet.id = proposedName;
+    if (this.activeSet === calendarSetId) {
+      this.activeSet = proposedName;
+      this.plugin.settings.activeCalendarSet = proposedName;
+    }
+
+    this.plugin.onUpdateSettings(this.plugin.settings);
+  }
+
+  deleteCalendarSet(calendarSetId: string): void {
+    const calendarSet = this.plugin.settings.calendarSets.find(
+      (c) => c.id === calendarSetId
+    );
+
+    if (!calendarSet) {
+      return;
+    }
+
+    this.plugin.settings.calendarSets.remove(calendarSet);
+    this.plugin.onUpdateSettings(this.plugin.settings);
+  }
+
+  setActiveSet(calendarSetId: string): void {
+    this.plugin.settings.activeCalendarSet = calendarSetId;
+    this.plugin.onUpdateSettings(this.plugin.settings);
   }
 }

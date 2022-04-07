@@ -28,12 +28,16 @@
     align-items: center;
     color: var(--text-muted);
     display: flex;
-    margin-bottom: 48px;
+    margin-bottom: 24px;
   }
 
   .crumb {
     cursor: pointer;
     margin: 0 0.4em;
+
+    &:first-of-type {
+      margin-left: 0;
+    }
 
     &:last-of-type {
       color: var(--text-normal);

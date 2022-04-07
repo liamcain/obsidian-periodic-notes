@@ -1,43 +1,57 @@
 <script lang="ts">
-  import type { App } from "obsidian";
-  import { onDestroy } from "svelte";
-  import { writable } from "svelte/store";
+  import { setIcon } from "obsidian";
+  import { onMount } from "svelte";
+  import type { Writable } from "svelte/store";
 
   import CalendarSetManager from "src/calendarSetManager";
   import { router } from "src/settings/stores";
   import type { ISettings } from "src/settings/index";
-  import { getLegacyDailyNoteSettings } from "src/utils";
+  // import { getLegacyDailyNoteSettings } from "src/utils";
 
-  import GettingStartedBanner from "./GettingStartedBanner.svelte";
+  // import GettingStartedBanner from "./GettingStartedBanner.svelte";
   import CalendarSetMenuItem from "./CalendarSets/MenuItem.svelte";
-  import Footer from "../../components/Footer.svelte";
+  import Footer from "src/settings/components/Footer.svelte";
+  import SettingItem from "src/settings/components/SettingItem.svelte";
+  import Toggle from "src/settings/components/Toggle.svelte";
 
-  export let app: App;
+  // export let app: App;
   export let manager: CalendarSetManager;
-  export let settings: ISettings;
-  export let onUpdateSettings: (newSettings: ISettings) => void;
+  export let settings: Writable<ISettings>;
+  // export let onUpdateSettings: (newSettings: ISettings) => void;
 
-  let settingsStore = writable(settings);
+  let addEl: HTMLElement;
+  // let settingsStore = writable(settings);
 
-  const unsubscribeFromSettings = settingsStore.subscribe(onUpdateSettings);
+  // const unsubscribeFromSettings = settingsStore.subscribe(onUpdateSettings);
 
-  function migrateDailyNoteSettings(): void {
-    const dailyNoteSettings = getLegacyDailyNoteSettings(app);
-    settingsStore.update((old) => ({
-      ...old,
-      ...{
-        daily: { ...dailyNoteSettings, enabled: true },
-        hasMigratedDailyNoteSettings: true,
-      },
-    }));
+  // function migrateDailyNoteSettings(): void {
+  //   const dailyNoteSettings = getLegacyDailyNoteSettings(app);
+  //   settingsStore.update((old) => ({
+  //     ...old,
+  //     ...{
+  //       daily: { ...dailyNoteSettings, enabled: true },
+  //       hasMigratedDailyNoteSettings: true,
+  //     },
+  //   }));
+  // }
+
+  function addCalendarset(): void {
+    let iter = 1;
+    const calSets = manager.getCalendarSets();
+    while (calSets.find((set) => set.id === `Calendar set ${iter}`)) {
+      iter++;
+    }
+    const id = `Calendar set ${iter}`;
+    manager.createNewCalendarSet(id);
+    router.navigate(["Periodic Notes", id]);
   }
 
-  onDestroy(() => {
-    unsubscribeFromSettings();
+  onMount(() => {
+    setIcon(addEl, "plus", 16);
   });
 </script>
 
-{#if $settingsStore.showGettingStartedBanner}
+<!-- {#if $settingsStore.showGettingStartedBanner}
   <GettingStartedBanner
     {app}
     {migrateDailyNoteSettings}
@@ -46,9 +60,12 @@
       $settingsStore.showGettingStartedBanner = false;
     }}
   />
-{/if}
+{/if} -->
 
-<h3 class="section-title">Calendar Sets</h3>
+<div class="section-nav">
+  <h3 class="section-title">Calendar Sets</h3>
+  <div class="clickable-icon" bind:this={addEl} on:click={addCalendarset} />
+</div>
 <div class="calendarset-container">
   {#each manager.getCalendarSets() as calendarSet}
     <CalendarSetMenuItem
@@ -57,15 +74,40 @@
     />
   {/each}
 </div>
+
+<SettingItem
+  name="Show “Timeline” complication on periodic notes"
+  description="Adds a collapsible timeline to the top-right of all periodic notes"
+  type="toggle"
+  isHeading={false}
+>
+  <Toggle
+    slot="control"
+    isEnabled={$settings.enableTimelineComplication}
+    onChange={(val) => {
+      $settings.enableTimelineComplication = val;
+    }}
+  />
+</SettingItem>
+
 <Footer />
 
 <style>
   .calendarset-container {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    padding-bottom: 1.4em;
   }
 
   .section-title {
+    margin: 0;
+  }
+
+  .section-nav {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
     margin: 2em 0 0.8em;
   }
 </style>

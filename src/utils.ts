@@ -27,10 +27,6 @@ function getDailyNotesPlugin(app: App): DailyNotesPlugin | null {
   return null;
 }
 
-export function capitalize(text: string): string {
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
-
 export function hasLegacyDailyNoteSettings(app: App): boolean {
   const dailyNotesPlugin = app.internalPlugins.plugins["daily-notes"];
   if (dailyNotesPlugin && dailyNotesPlugin.enabled) {
