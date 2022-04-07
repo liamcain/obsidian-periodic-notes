@@ -1,4 +1,4 @@
-import { App, type NLDatesPlugin, Scope, SuggestModal, TFile } from "obsidian";
+import { App, type NLDatesPlugin, Scope, SuggestModal2, TFile } from "obsidian";
 
 interface FileCommandItem {
   label: string;
@@ -11,7 +11,11 @@ const DEFAULT_INSTRUCTIONS = [
   { command: "esc", purpose: "to dismiss" },
 ];
 
-export class FileOptionsSwitcher extends SuggestModal<DateNavigationItem> {
+interface FileOptionsItem {
+  label: string;
+}
+
+export class FileOptionsSwitcher extends SuggestModal2<FileOptionsItem> {
   nlDatesPlugin: NLDatesPlugin;
 
   granularityLabel: HTMLElement;

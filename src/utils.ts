@@ -9,23 +9,10 @@ import {
 } from "obsidian";
 
 import type { PeriodicConfig } from "./types";
-// import {
-//   appHasDailyNotesPluginLoaded,
-//   IPeriodicNoteSettings,
-// } from "obsidian-daily-notes-interface";
 
 export const wrapAround = (value: number, size: number): number => {
   return ((value % size) + size) % size;
 };
-
-// export function orderedValues<T>(unordered: Record<string, T>): T[] {
-//   return Object.keys(unordered)
-//     .sort()
-//     .reduce((acc, key) => {
-//       acc.push(unordered[key]);
-//       return acc;
-//     }, []);
-// }
 
 // function getCalendarPlugin(app: App): CalendarPlugin {
 //   return app.plugins.getPlugin("calendar") as CalendarPlugin;
@@ -50,7 +37,7 @@ export function hasLegacyDailyNoteSettings(app: App): boolean {
   }
 
   const options = getDailyNotesPlugin(app)?.options;
-  return !!(options.format || options.folder || options.template);
+  return !!(options?.format || options?.folder || options?.template);
 }
 
 export function getLegacyDailyNoteSettings(app: App): DailyNotesSettings {

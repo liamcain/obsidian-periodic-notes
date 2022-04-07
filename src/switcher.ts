@@ -1,5 +1,11 @@
 import type { Moment } from "moment";
-import { type NLDatesPlugin, type NLDResult, setIcon, SuggestModal, App } from "obsidian";
+import {
+  type NLDatesPlugin,
+  type NLDResult,
+  setIcon,
+  App,
+  SuggestModal2,
+} from "obsidian";
 import type PeriodicNotesPlugin from "src";
 
 import { FileOptionsSwitcher } from "./fileOptionsSwitcher";
@@ -18,7 +24,7 @@ const DEFAULT_INSTRUCTIONS = [
   { command: "esc", purpose: "to dismiss" },
 ];
 
-export class NLDNavigator extends SuggestModal<DateNavigationItem> {
+export class NLDNavigator extends SuggestModal2<DateNavigationItem> {
   private nlDatesPlugin: NLDatesPlugin;
   private granularityLabel: HTMLElement;
   private mode: Granularity = "day";

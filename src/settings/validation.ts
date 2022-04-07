@@ -41,6 +41,7 @@ export function validateFormat(format: string, granularity: Granularity): string
   ) {
     return "Filename must be unique";
   }
+  return "";
 }
 
 export function validateTemplate(app: App, template: string): string {

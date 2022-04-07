@@ -57,12 +57,13 @@ declare module "obsidian" {
     save(file: TFile, foldInfo: FoldInfo): Promise<void>;
   }
 
-  interface Chooser {
+  interface Chooser<T> {
     useSelectedItem(evt: KeyboardEvent): void;
+    setSuggestions(suggestions: T[]);
   }
 
-  export class SuggestModal<T> extends Modal implements ISuggestOwner<T> {
-    chooser: Chooser;
+  export class SuggestModal2<T> extends SuggestModal<T> {
+    chooser: Chooser<T>;
   }
 
   interface Vault {
@@ -81,7 +82,7 @@ declare module "obsidian" {
   }
 
   class DailyNotesPlugin implements PluginInstance {
-    options: DailyNotesSettings;
+    options?: DailyNotesSettings;
   }
 
   export interface ViewRegistry {

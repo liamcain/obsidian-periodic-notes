@@ -1,10 +1,9 @@
 import { App, PluginSettingTab } from "obsidian";
-import type { CalendarSet } from "src/types";
+import type { CalendarSet, PeriodicConfig } from "src/types";
 import type { SvelteComponent } from "svelte";
 
 import type WeeklyNotesPlugin from "../index";
 import SettingsRouter from "./pages/Router.svelte";
-
 
 export interface ISettings {
   showGettingStartedBanner: boolean;
@@ -14,9 +13,10 @@ export interface ISettings {
   calendarSets: CalendarSet[];
 }
 
-export const DEFAULT_SETTINGS = Object.freeze({
+export const DEFAULT_PERIODIC_CONFIG: PeriodicConfig = Object.freeze({
+  enabled: false,
   format: "",
-  template: "",
+  templatePath: "",
   folder: "",
 });
 

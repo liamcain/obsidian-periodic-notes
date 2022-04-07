@@ -2,6 +2,7 @@ import type PeriodicNotesPlugin from "src";
 import { writable, type Readable } from "svelte/store";
 
 import { DEFAULT_FORMAT } from "./constants";
+import { DEFAULT_PERIODIC_CONFIG } from "./settings";
 import {
   granularities,
   type CalendarSet,
@@ -61,9 +62,9 @@ function migrateLegacySettingsToCalendarSet(settings: ILegacySettings): Calendar
 }
 
 const defaultPeriodicSettings = granularities.reduce((acc, g) => {
-  acc[g] = DEFAULT_FORMAT;
+  acc[g] = DEFAULT_PERIODIC_CONFIG;
   return acc;
-}, {} as any);
+}, {} as Record<Granularity, PeriodicConfig>);
 
 const DEFAULT_CALENDARSET_ID = "Default";
 
@@ -109,14 +110,14 @@ export default class CalendarSetManager {
     return activeSet[granularity]?.format ?? DEFAULT_FORMAT[granularity];
   }
 
-  public getActiveConfig(granularity: Granularity): PeriodicConfig | null {
+  public getActiveConfig(granularity: Granularity): PeriodicConfig {
     const settings = this.plugin.settings;
     const activeSet = settings.calendarSets.find((set) => set.id === this.activeSet);
     if (!activeSet) {
       throw new Error("No active calendar set found");
     }
 
-    return activeSet[granularity] ?? null;
+    return activeSet[granularity] ?? DEFAULT_PERIODIC_CONFIG;
   }
 
   public getConfig(
