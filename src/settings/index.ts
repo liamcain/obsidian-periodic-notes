@@ -48,7 +48,6 @@ export class PeriodicNotesSettingsTab extends PluginSettingTab {
         app: this.app,
         manager: this.plugin.calendarSetManager,
         settings: this.plugin.settings,
-        onUpdateSettings: this.plugin.onUpdateSettings,
       },
     });
   }

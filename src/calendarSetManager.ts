@@ -1,5 +1,5 @@
 import type PeriodicNotesPlugin from "src";
-import { writable, type Readable } from "svelte/store";
+import { get } from "svelte/store";
 
 import { DEFAULT_FORMAT } from "./constants";
 import { DEFAULT_PERIODIC_CONFIG } from "./settings";
@@ -68,16 +68,6 @@ const defaultPeriodicSettings = granularities.reduce((acc, g) => {
 
 const DEFAULT_CALENDARSET_ID = "Default";
 
-function createWritableConfig(config: PeriodicConfig | undefined) {
-  const { subscribe, set, update } = writable(config);
-  return {
-    subscribe,
-    set,
-    updateConfig: (newConfig: Partial<PeriodicConfig>) =>
-      update((c) => ({ ...c, ...newConfig })),
-  };
-}
-
 export default class CalendarSetManager {
   public activeSet: string;
 
@@ -93,15 +83,16 @@ export default class CalendarSetManager {
       ctime: window.moment().format(),
     };
 
-    this.plugin.updateSettings((s) => ({
-      calendarSets: [...s.calendarSets, calendarSet],
-    }));
+    this.plugin.settings.update((settings) => {
+      settings.calendarSets.push(calendarSet);
+      return settings;
+    });
 
     return calendarSet;
   }
 
   public getFormat(granularity: Granularity): string {
-    const settings = this.plugin.settings;
+    const settings = get(this.plugin.settings);
     const activeSet = settings.calendarSets.find((set) => set.id === this.activeSet);
     if (!activeSet) {
       throw new Error("No active calendar set found");
@@ -111,7 +102,7 @@ export default class CalendarSetManager {
   }
 
   public getActiveConfig(granularity: Granularity): PeriodicConfig {
-    const settings = this.plugin.settings;
+    const settings = get(this.plugin.settings);
     const activeSet = settings.calendarSets.find((set) => set.id === this.activeSet);
     if (!activeSet) {
       throw new Error("No active calendar set found");
@@ -120,23 +111,8 @@ export default class CalendarSetManager {
     return activeSet[granularity] ?? DEFAULT_PERIODIC_CONFIG;
   }
 
-  public getConfig(
-    calendarSet: string,
-    granularity: Granularity
-  ): Readable<PeriodicConfig> {
-    const settings = this.plugin.settings;
-    const activeSet = settings.calendarSets.find((set) => set.id === calendarSet);
-    if (!activeSet) {
-      throw new Error("No active calendar set found");
-    }
-
-    const store = createWritableConfig(activeSet[granularity]);
-    store.subscribe(() => this.plugin.onUpdateSettings);
-    return store;
-  }
-
   public getCalendarSets(): CalendarSet[] {
-    const settings = this.plugin.settings;
+    const settings = get(this.plugin.settings);
     if (!settings.calendarSets || settings.calendarSets.length === 0) {
       // check for migration
       if (isLegacySettings(settings)) {
@@ -150,11 +126,11 @@ export default class CalendarSetManager {
       }
     }
 
-    return this.plugin.settings.calendarSets;
+    return settings.calendarSets;
   }
 
   public getInactiveGranularities(): Granularity[] {
-    const settings = this.plugin.settings;
+    const settings = get(this.plugin.settings);
     const activeSet = settings.calendarSets.find((set) => set.id === this.activeSet);
     if (!activeSet) {
       throw new Error("No active calendar set found");
@@ -163,7 +139,7 @@ export default class CalendarSetManager {
   }
 
   public getActiveGranularities(): Granularity[] {
-    const settings = this.plugin.settings;
+    const settings = get(this.plugin.settings);
     const activeSet = settings.calendarSets.find((set) => set.id === this.activeSet);
     if (!activeSet) {
       throw new Error("No active calendar set found");
@@ -180,46 +156,42 @@ export default class CalendarSetManager {
       throw new Error("Name required");
     }
 
-    const existingSetWithName = this.plugin.settings.calendarSets.find(
-      (c) => c.id === proposedName
-    );
+    this.plugin.settings.update((settings) => {
+      const existingSetWithName = settings.calendarSets.find(
+        (c) => c.id === proposedName
+      );
 
-    if (existingSetWithName) {
-      throw new Error(`A calendar set with the name '${proposedName}' already exists`);
-    }
+      if (existingSetWithName) {
+        throw new Error(`A calendar set with the name '${proposedName}' already exists`);
+      }
 
-    const calendarSet = this.plugin.settings.calendarSets.find(
-      (c) => c.id === calendarSetId
-    );
+      const calendarSet = settings.calendarSets.find((c) => c.id === calendarSetId);
+      if (calendarSet) {
+        calendarSet.id = proposedName;
+        if (this.activeSet === calendarSetId) {
+          this.activeSet = proposedName;
+          settings.activeCalendarSet = proposedName;
+        }
+      }
 
-    if (!calendarSet) {
-      return;
-    }
-
-    calendarSet.id = proposedName;
-    if (this.activeSet === calendarSetId) {
-      this.activeSet = proposedName;
-      this.plugin.settings.activeCalendarSet = proposedName;
-    }
-
-    this.plugin.onUpdateSettings(this.plugin.settings);
+      return settings;
+    });
   }
 
   deleteCalendarSet(calendarSetId: string): void {
-    const calendarSet = this.plugin.settings.calendarSets.find(
-      (c) => c.id === calendarSetId
-    );
-
-    if (!calendarSet) {
-      return;
-    }
-
-    this.plugin.settings.calendarSets.remove(calendarSet);
-    this.plugin.onUpdateSettings(this.plugin.settings);
+    this.plugin.settings.update((settings) => {
+      const calendarSet = settings.calendarSets.find((c) => c.id === calendarSetId);
+      if (calendarSet) {
+        settings.calendarSets.remove(calendarSet);
+      }
+      return settings;
+    });
   }
 
   setActiveSet(calendarSetId: string): void {
-    this.plugin.settings.activeCalendarSet = calendarSetId;
-    this.plugin.onUpdateSettings(this.plugin.settings);
+    this.plugin.settings.update((settings) => {
+      settings.activeCalendarSet = calendarSetId;
+      return settings;
+    });
   }
 }

@@ -16,6 +16,27 @@
   export let cache: PeriodicNotesCache;
   export let view: MarkdownView;
 
+  let showTimeline: boolean;
+  let weekDays: Moment[];
+  let today = window.moment();
+  let periodicData: PeriodicNoteCachedMetadata | null;
+  let relativeDataStr: string;
+
+  let settings = plugin.settings;
+  let showComplication = $settings.enableTimelineComplication;
+
+  $: {
+    periodicData = cache.get(view.file.path);
+
+    if (periodicData) {
+      weekDays = generateWeekdays(today, periodicData.date);
+      relativeDataStr = getRelativeDate(
+        periodicData.granularity,
+        periodicData.date
+      );
+    }
+  }
+
   function generateWeekdays(_today: Moment, selectedDate: Moment) {
     let days: Moment[] = [];
     let startOfWeek = selectedDate.clone().startOf("week");
@@ -44,31 +65,11 @@
   }
 
   function updateComplicationVisibility() {
-    showComplication = plugin.settings.enableTimelineComplication;
+    showComplication = $settings.enableTimelineComplication;
   }
 
   function toggleCalendarVisibility() {
     showTimeline = !showTimeline;
-  }
-
-  let showComplication: boolean;
-  let showTimeline: boolean;
-
-  let weekDays: Moment[];
-  let today = window.moment();
-  let periodicData: PeriodicNoteCachedMetadata | null;
-  let relativeDataStr: string;
-
-  $: {
-    periodicData = cache.get(view.file.path);
-
-    if (periodicData) {
-      weekDays = generateWeekdays(today, periodicData.date);
-      relativeDataStr = getRelativeDate(
-        periodicData.granularity,
-        periodicData.date
-      );
-    }
   }
 
   function updateView() {

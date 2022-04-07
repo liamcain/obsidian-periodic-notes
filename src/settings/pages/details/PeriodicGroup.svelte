@@ -8,17 +8,44 @@
   import NoteTemplateSetting from "src/settings/components/NoteTemplateSetting.svelte";
   import NoteFolderSetting from "src/settings/components/NoteFolderSetting.svelte";
   import type { Granularity } from "src/types";
-  import CalendarSetManager from "src/calendarSetManager";
   import Arrow from "src/settings/components/Arrow.svelte";
+  import type { ISettings } from "src/settings";
+  import { DEFAULT_PERIODIC_CONFIG } from "src/settings";
+  import type { Writable } from "svelte/store";
+  import writableDerived from "svelte-writable-derived";
 
   export let app: App;
-  export let calendarSet: string;
+  export let calendarSetId: string;
   export let granularity: Granularity;
-  export let manager: CalendarSetManager;
+  export let settings: Writable<ISettings>;
 
   let displayConfig = displayConfigs[granularity];
-  let config = manager.getConfig(calendarSet, granularity);
   let isExpanded = false;
+
+  let calendarSet = writableDerived(
+    settings,
+    ($settings) =>
+      $settings.calendarSets.find((set) => set.id === calendarSetId)!,
+    {
+      withOld(reflecting, $settings) {
+        const idx = $settings.calendarSets.findIndex(
+          (set) => set.id === calendarSetId
+        );
+        $settings.calendarSets[idx] = reflecting;
+        return $settings;
+      },
+    }
+  );
+  let config = writableDerived(
+    calendarSet,
+    ($calendarSet) => $calendarSet?.[granularity] ?? DEFAULT_PERIODIC_CONFIG,
+    {
+      withOld(reflecting, $calendarSet) {
+        $calendarSet[granularity] = reflecting;
+        return $calendarSet;
+      },
+    }
+  );
 
   function toggleExpand() {
     isExpanded = !isExpanded;
@@ -37,11 +64,17 @@
       </h3>
     </div>
     <div class="setting-item-control">
-      <div
+      <label
         class="checkbox-container"
         class:is-enabled={$config.enabled}
-        on:click={() => ($config.enabled = !$config.enabled)}
-      />
+        on:click|stopPropagation
+      >
+        <input
+          type="checkbox"
+          bind:checked={$config.enabled}
+          style="display: none;"
+        />
+      </label>
     </div>
   </div>
   {#if isExpanded}

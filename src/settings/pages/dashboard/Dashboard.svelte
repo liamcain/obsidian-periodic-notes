@@ -20,9 +20,6 @@
   // export let onUpdateSettings: (newSettings: ISettings) => void;
 
   let addEl: HTMLElement;
-  // let settingsStore = writable(settings);
-
-  // const unsubscribeFromSettings = settingsStore.subscribe(onUpdateSettings);
 
   // function migrateDailyNoteSettings(): void {
   //   const dailyNoteSettings = getLegacyDailyNoteSettings(app);

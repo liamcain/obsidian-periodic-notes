@@ -3,13 +3,16 @@
   import type { App } from "obsidian";
   import { Menu, setIcon } from "obsidian";
   import type CalendarSetManager from "src/calendarSetManager";
+  import type { ISettings } from "src/settings";
   import { router } from "src/settings/stores";
 
   import { granularities } from "src/types";
   import { onMount } from "svelte";
+  import type { Writable } from "svelte/store";
   import PeriodicGroup from "./PeriodicGroup.svelte";
 
   export let app: App;
+  export let settings: Writable<ISettings>;
   export let manager: CalendarSetManager;
   export let selectedCalendarSet: string;
 
@@ -100,9 +103,9 @@
   {#each granularities as granularity}
     <PeriodicGroup
       {app}
-      {manager}
       {granularity}
-      calendarSet={selectedCalendarSet}
+      {settings}
+      calendarSetId={selectedCalendarSet}
     />
   {/each}
 </div>

@@ -1,5 +1,6 @@
 import type { Moment } from "moment";
 import { addIcon, Plugin, TFile } from "obsidian";
+import { writable, type Writable } from "svelte/store";
 
 import { PeriodicNotesCache, type PeriodicNoteCachedMetadata } from "./cache";
 import CalendarSetManager from "./calendarSetManager";
@@ -24,7 +25,7 @@ import {
 } from "./utils";
 
 export default class PeriodicNotesPlugin extends Plugin {
-  public settings: ISettings;
+  public settings: Writable<ISettings>;
   private ribbonEl: HTMLElement | null;
 
   private cache: PeriodicNotesCache;
@@ -32,15 +33,15 @@ export default class PeriodicNotesPlugin extends Plugin {
   private timelineManager: TimelineManager;
 
   async onload(): Promise<void> {
+    this.settings = writable<ISettings>();
     await this.loadSettings();
+    this.settings.subscribe(this.onUpdateSettings.bind(this));
 
     this.ribbonEl = null;
     this.cache = new PeriodicNotesCache(this.app, this);
     this.calendarSetManager = new CalendarSetManager(this);
     this.timelineManager = new TimelineManager(this, this.cache);
 
-    this.onUpdateSettings = this.onUpdateSettings.bind(this);
-    this.updateSettings = this.updateSettings.bind(this);
     this.openPeriodicNote = this.openPeriodicNote.bind(this);
     this.addSettingTab(new PeriodicNotesSettingsTab(this.app, this));
 
@@ -122,13 +123,13 @@ export default class PeriodicNotesPlugin extends Plugin {
   }
 
   async loadSettings(): Promise<void> {
-    const settings = await this.loadData();
-
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, settings || {});
+    const savedSettings = await this.loadData();
+    const settings = Object.assign({}, DEFAULT_SETTINGS, savedSettings || {});
+    this.settings.set(settings);
   }
 
-  public async onUpdateSettings(newSettings: ISettings): Promise<void> {
-    this.settings = newSettings;
+  private async onUpdateSettings(newSettings: ISettings): Promise<void> {
+    // this.settings = newSettings;
     await this.saveData(newSettings);
     this.configureCommands();
     this.configureRibbonIcons();
@@ -137,12 +138,12 @@ export default class PeriodicNotesPlugin extends Plugin {
     this.app.workspace.trigger("periodic-notes:settings-updated");
   }
 
-  public updateSettings(tx: (old: ISettings) => Partial<ISettings>): void {
-    const changedSettings = tx(this.settings);
-    const newSettings = Object.assign({}, this.settings, changedSettings);
+  // public updateSettings(tx: (old: ISettings) => Partial<ISettings>): void {
+  //   const changedSettings = tx(this.settings);
+  //   const newSettings = Object.assign({}, this.settings, changedSettings);
 
-    this.onUpdateSettings(newSettings);
-  }
+  //   this.onUpdateSettings(newSettings);
+  // }
 
   public async createPeriodicNote(
     granularity: Granularity,

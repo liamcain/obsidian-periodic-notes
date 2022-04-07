@@ -6109,7 +6109,7 @@ __metadata:
     svelte: 3.46.4
     svelte-check: 2.4.6
     svelte-preprocess: 4.10.4
-    svelte-preprocess-sass: ^2.0.1
+    svelte-writable-derived: ^2.1.3
     ts-jest: 26.5.3
     tslib: 2.3.1
     typescript: ^4.6.3
@@ -7638,24 +7638,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"svelte-preprocess-filter@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "svelte-preprocess-filter@npm:1.0.0"
-  checksum: ada1b940a0cbda2cb88000a61842fd2862b727dc300d4de9886d8268ce9041848b1ab71ce9f01faf9d9e7ed6db5a21109b61d9b75be859e3119fc2e47b90e6bd
-  languageName: node
-  linkType: hard
-
-"svelte-preprocess-sass@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "svelte-preprocess-sass@npm:2.0.1"
-  dependencies:
-    svelte-preprocess-filter: ^1.0.0
-  peerDependencies:
-    sass: ^1.35.2
-  checksum: 76e2b0465bebfd4dc3f5a9c421ef68b08913ac30777886d272c7ba41b5fc88fce2a3d4f490139991aa8b52b05f1b2f64ce0deb630f08b2d158592bf65018e705
-  languageName: node
-  linkType: hard
-
 "svelte-preprocess@npm:4.10.4":
   version: 4.10.4
   resolution: "svelte-preprocess@npm:4.10.4"
@@ -7749,6 +7731,15 @@ __metadata:
     typescript:
       optional: true
   checksum: 2c8d019baaab284d69975d9f9e6863dbcba931a1d29aaafab9c9930534207c90012ac2ecd3ecdad94ea0b43279ad13ae03f4b1b4584594af275bacbf096933fb
+  languageName: node
+  linkType: hard
+
+"svelte-writable-derived@npm:^2.1.3":
+  version: 2.1.3
+  resolution: "svelte-writable-derived@npm:2.1.3"
+  peerDependencies:
+    svelte: ^3.2.1
+  checksum: ccf145b509ac3c68153ad6f28cea3c875529dcd33cf3b8f7dd577365ddad5fe4e6b907108ad073c46d7a588e075288934f6f50db959ed2dedc30049f3d16e0ae
   languageName: node
   linkType: hard
 
