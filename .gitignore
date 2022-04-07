@@ -13,3 +13,5 @@ main.js
 !.yarn/plugins
 !.yarn/sdks
 !.yarn/versions
+
+.env

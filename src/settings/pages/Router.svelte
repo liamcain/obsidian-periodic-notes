@@ -28,5 +28,5 @@
     <Details {app} {settings} {manager} selectedCalendarSet={$router.path[1]} />
   {/key}
 {:else}
-  <Dashboard {settings} {manager} />
+  <Dashboard {app} {settings} {manager} />
 {/if}

@@ -2,9 +2,10 @@ import memoize from "lodash/memoize";
 import type { Moment } from "moment";
 import { App, Component, TAbstractFile, TFile, TFolder } from "obsidian";
 
+import { DEFAULT_FORMAT } from "./constants";
+import type PeriodicNotesPlugin from "./main";
 import { granularities, type Granularity, type PeriodicConfig } from "./types";
 
-import type PeriodicNotesPlugin from "./index";
 
 type MatchType = "filename" | "frontmatter";
 
@@ -34,6 +35,7 @@ function getCanonicalDateString(_granularity: Granularity, date: Moment): string
 
 const memoizedRecurseChildren = memoize(
   (rootFolder: TFolder, cb: (file: TAbstractFile) => void) => {
+    if (!rootFolder) return;
     for (const c of rootFolder.children) {
       if (c instanceof TFile) {
         cb(c);
@@ -54,11 +56,12 @@ export class PeriodicNotesCache extends Component {
   }
 
   public initialize(): void {
-    console.info("[PERIODIC NOTES] initializing cache");
+    console.info("[Periodic Notes] initializing cache");
     this.registerEvent(this.app.metadataCache.on("resolve", this.resolve, this));
 
     for (const calendarSet of this.plugin.calendarSetManager.getCalendarSets()) {
       for (const granularity of granularities) {
+        if (!calendarSet[granularity]?.enabled) continue;
         const config = calendarSet[granularity] as PeriodicConfig;
         const rootFolder = this.app.vault.getAbstractFileByPath(
           config.folder || "/"
@@ -79,7 +82,12 @@ export class PeriodicNotesCache extends Component {
     // Check if file matches any calendar set
     for (const calendarSet of manager.getCalendarSets()) {
       for (const granularity of granularities) {
-        const format = manager.getFormat(granularity);
+        if (!calendarSet[granularity]?.enabled) continue;
+
+        const folder = calendarSet[granularity]?.folder ?? "/";
+        if (!file.path.startsWith(folder)) continue;
+
+        const format = calendarSet[granularity]?.format || DEFAULT_FORMAT[granularity];
         const date = window.moment(file.basename, format, true);
         if (date.isValid()) {
           this.cachedFiles.set(file.path, {

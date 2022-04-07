@@ -2,7 +2,7 @@ import { App, PluginSettingTab } from "obsidian";
 import type { CalendarSet, PeriodicConfig } from "src/types";
 import type { SvelteComponent } from "svelte";
 
-import type WeeklyNotesPlugin from "../index";
+import type WeeklyNotesPlugin from "../main";
 import SettingsRouter from "./pages/Router.svelte";
 
 export interface ISettings {

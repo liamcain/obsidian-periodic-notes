@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { setIcon } from "obsidian";
+  import { App, setIcon } from "obsidian";
   import { onMount } from "svelte";
   import type { Writable } from "svelte/store";
 
@@ -13,8 +13,9 @@
   import Footer from "src/settings/components/Footer.svelte";
   import SettingItem from "src/settings/components/SettingItem.svelte";
   import Toggle from "src/settings/components/Toggle.svelte";
+  import { createNewCalendarSet } from "src/settings/utils";
 
-  // export let app: App;
+  export let app: App;
   export let manager: CalendarSetManager;
   export let settings: Writable<ISettings>;
   // export let onUpdateSettings: (newSettings: ISettings) => void;
@@ -34,12 +35,12 @@
 
   function addCalendarset(): void {
     let iter = 1;
-    const calSets = manager.getCalendarSets();
+    const calSets = $settings.calendarSets;
     while (calSets.find((set) => set.id === `Calendar set ${iter}`)) {
       iter++;
     }
     const id = `Calendar set ${iter}`;
-    manager.createNewCalendarSet(id);
+    settings.update(createNewCalendarSet(id));
     router.navigate(["Periodic Notes", id], {
       shouldRename: true,
     });
@@ -66,10 +67,12 @@
   <div class="clickable-icon" bind:this={addEl} on:click={addCalendarset} />
 </div>
 <div class="calendarset-container">
-  {#each manager.getCalendarSets() as calendarSet}
+  {#each $settings.calendarSets as calendarSet}
     <CalendarSetMenuItem
+      {app}
       {calendarSet}
       {manager}
+      {settings}
       viewDetails={() => router.navigate(["Periodic Notes", calendarSet.id])}
     />
   {/each}

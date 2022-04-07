@@ -6,7 +6,7 @@
     PeriodicNoteCachedMetadata,
     PeriodicNotesCache,
   } from "src/cache";
-  import PeriodicNotesPlugin from "src";
+  import PeriodicNotesPlugin from "src/main";
   import { MarkdownView } from "obsidian";
   import { onMount } from "svelte";
   import type { Granularity } from "src/types";

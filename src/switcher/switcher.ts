@@ -1,8 +1,9 @@
 import capitalize from "lodash/capitalize";
 import type { Moment } from "moment";
 import { type NLDatesPlugin, type NLDResult, setIcon, App, SuggestModal } from "obsidian";
-import type PeriodicNotesPlugin from "src";
-import { getRelativeDate, isIsoFormat } from "src/utils";
+import { DEFAULT_FORMAT } from "src/constants";
+import type PeriodicNotesPlugin from "src/main";
+import { getRelativeDate, isIsoFormat, join } from "src/utils";
 
 import type { Granularity } from "../types";
 import { FileOptionsSwitcher } from "./fileOptionsSwitcher";
@@ -174,6 +175,7 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
   }
 
   getDateSuggestions(query: string): DateNavigationItem[] {
+    const activeGranularities = this.plugin.calendarSetManager.getActiveGranularities();
     const getSuggestion = (dateStr: string, granularity: Granularity) => {
       const date = this.nlDatesPlugin.parseDate(dateStr);
       return {
@@ -197,7 +199,9 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
         getSuggestion(`${reference} Thursday`, "day"),
         getSuggestion(`${reference} Friday`, "day"),
         getSuggestion(`${reference} Saturday`, "day"),
-      ].filter((items) => items.label.toLowerCase().startsWith(query));
+      ]
+        .filter((items) => activeGranularities.includes(items.granularity))
+        .filter((items) => items.label.toLowerCase().startsWith(query));
     }
 
     const relativeDate = query.match(/^in ([+-]?\d+)/i) || query.match(/^([+-]?\d+)/i);
@@ -210,7 +214,9 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
         getSuggestion(`${timeDelta} days ago`, "day"),
         getSuggestion(`${timeDelta} weeks ago`, "day"),
         getSuggestion(`${timeDelta} months ago`, "month"),
-      ].filter((item) => item.label.toLowerCase().startsWith(query));
+      ]
+        .filter((items) => activeGranularities.includes(items.granularity))
+        .filter((item) => item.label.toLowerCase().startsWith(query));
     }
 
     return [
@@ -226,7 +232,9 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
       getSuggestion("This year", "year"),
       getSuggestion("Last year", "year"),
       getSuggestion("Next year", "year"),
-    ].filter((items) => items.label.toLowerCase().startsWith(query));
+    ]
+      .filter((items) => activeGranularities.includes(items.granularity))
+      .filter((items) => items.label.toLowerCase().startsWith(query));
   }
 
   renderSuggestion(value: DateNavigationItem, el: HTMLElement) {
@@ -245,14 +253,16 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
     );
 
     if (!periodicNote) {
-      const format = this.plugin.calendarSetManager.getFormat(value.granularity);
+      const config = this.plugin.calendarSetManager.getActiveConfig(value.granularity);
+      const format = config.format || DEFAULT_FORMAT[value.granularity];
+      const folder = config.folder || "/";
       el.setText(value.label);
       el.createEl("span", { cls: "suggestion-flair", prepend: true }, (el) => {
         setIcon(el, "add-note-glyph", 16);
       });
       el.createEl("div", {
         cls: "suggestion-note",
-        text: value.nldResult.moment.format(format),
+        text: join(folder, value.nldResult.moment.format(format)),
       });
       return;
     }

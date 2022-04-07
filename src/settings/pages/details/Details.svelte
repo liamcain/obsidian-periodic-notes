@@ -1,10 +1,10 @@
 <script lang="ts">
-  import cloneDeep from "lodash/cloneDeep";
   import type { App } from "obsidian";
   import { Menu, setIcon } from "obsidian";
   import type CalendarSetManager from "src/calendarSetManager";
   import type { ISettings } from "src/settings";
   import { router } from "src/settings/stores";
+  import { createNewCalendarSet, deleteCalendarSet } from "src/settings/utils";
 
   import { granularities } from "src/types";
   import { onMount } from "svelte";
@@ -67,10 +67,7 @@
               .getCalendarSets()
               .find((c) => c.id === selectedCalendarSet);
             const newCalendarSet = `${selectedCalendarSet} copy`;
-            manager.createNewCalendarSet(
-              newCalendarSet,
-              cloneDeep(calendarSet)
-            );
+            settings.update(createNewCalendarSet(newCalendarSet, calendarSet));
             router.navigate(["Periodic Notes", newCalendarSet], {
               shouldRename: true,
             });
@@ -82,7 +79,7 @@
           .setIcon("x")
           .setDisabled(manager.getCalendarSets().length === 1)
           .onClick(() => {
-            manager.deleteCalendarSet(selectedCalendarSet);
+            deleteCalendarSet(selectedCalendarSet)($settings);
             router.navigate(["Periodic Notes"]);
           })
       )
@@ -166,7 +163,6 @@
 
   .calendarset-toolbar {
     display: flex;
-    align-items: center;
     gap: 8px;
 
     .view-action {
@@ -182,7 +178,7 @@
     font-size: 0.6em;
     font-weight: 600;
     letter-spacing: 0.25px;
-    padding: 0.1em 0.7em;
+    padding: 6px 8px;
     text-transform: uppercase;
   }
 </style>

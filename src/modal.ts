@@ -1,5 +1,5 @@
 import { App, Menu, Modal, type Point } from "obsidian";
-import type PeriodicNotesPlugin from "src";
+import type PeriodicNotesPlugin from "src/main";
 
 import { displayConfigs } from "./commands";
 

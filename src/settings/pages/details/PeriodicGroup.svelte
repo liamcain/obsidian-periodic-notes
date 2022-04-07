@@ -9,8 +9,8 @@
   import NoteFolderSetting from "src/settings/components/NoteFolderSetting.svelte";
   import type { Granularity } from "src/types";
   import Arrow from "src/settings/components/Arrow.svelte";
-  import type { ISettings } from "src/settings";
   import { DEFAULT_PERIODIC_CONFIG } from "src/settings";
+  import type { ISettings } from "src/settings";
   import type { Writable } from "svelte/store";
   import writableDerived from "svelte-writable-derived";
 
@@ -90,7 +90,7 @@
   {/if}
 </div>
 
-<style>
+<style lang="scss">
   .periodic-group-title {
     display: flex;
   }
@@ -99,19 +99,20 @@
     background: var(--background-primary-alt);
     border: 1px solid var(--background-modifier-border);
     border-radius: 16px;
-  }
 
-  .periodic-group:not(:last-of-type) {
-    margin-bottom: 24px;
+    &:not(:last-of-type) {
+      margin-bottom: 24px;
+    }
   }
 
   .periodic-group-heading {
     cursor: pointer;
     padding: 24px;
-  }
 
-  .periodic-group-heading h3 {
-    margin: 0;
+    h3 {
+      font-size: 1.1em;
+      margin: 0;
+    }
   }
 
   .periodic-group-content {

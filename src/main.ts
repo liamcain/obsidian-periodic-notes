@@ -14,6 +14,7 @@ import {
 } from "./icons";
 import { showFileMenu } from "./modal";
 import { type ISettings, PeriodicNotesSettingsTab, DEFAULT_SETTINGS } from "./settings";
+import { CalendarSetSuggestModal } from "./switcher/calendarSetSwitcher";
 import { NLDNavigator } from "./switcher/switcher";
 import TimelineManager from "./timeline/manager";
 import type { Granularity } from "./types";
@@ -62,6 +63,15 @@ export default class PeriodicNotesPlugin extends Plugin {
           return !!this.app.workspace.activeLeaf;
         }
         new NLDNavigator(this.app, this).open();
+      },
+      hotkeys: [],
+    });
+
+    this.addCommand({
+      id: "switch-calendarset",
+      name: "Switch active calendar set...",
+      callback: () => {
+        new CalendarSetSuggestModal(this.app, this).open();
       },
       hotkeys: [],
     });

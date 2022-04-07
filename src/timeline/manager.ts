@@ -1,6 +1,6 @@
 import { MarkdownView } from "obsidian";
-import PeriodicNotesPlugin from "src";
 import { PeriodicNotesCache } from "src/cache";
+import PeriodicNotesPlugin from "src/main";
 import type { SvelteComponent } from "svelte";
 
 import Timeline from "./Timeline.svelte";

@@ -1,8 +1,9 @@
-import type PeriodicNotesPlugin from "src";
+import type PeriodicNotesPlugin from "src/main";
 import { get } from "svelte/store";
 
 import { DEFAULT_FORMAT } from "./constants";
 import { DEFAULT_PERIODIC_CONFIG } from "./settings";
+import { createNewCalendarSet } from "./settings/utils";
 import {
   granularities,
   type CalendarSet,
@@ -28,6 +29,8 @@ interface ILegacySettings {
   quarterly: IPerioditySettings;
   yearly: IPerioditySettings;
 }
+
+const DEFAULT_CALENDARSET_ID = "Default";
 
 function isLegacySettings(settings: unknown): settings is ILegacySettings {
   const maybeLegacySettings = settings as ILegacySettings;
@@ -61,31 +64,8 @@ function migrateLegacySettingsToCalendarSet(settings: ILegacySettings): Calendar
   };
 }
 
-const defaultPeriodicSettings = granularities.reduce((acc, g) => {
-  acc[g] = DEFAULT_PERIODIC_CONFIG;
-  return acc;
-}, {} as Record<Granularity, PeriodicConfig>);
-
-const DEFAULT_CALENDARSET_ID = "Default";
-
 export default class CalendarSetManager {
   constructor(readonly plugin: PeriodicNotesPlugin) {}
-
-  public createNewCalendarSet(id: string, settings?: Partial<CalendarSet>): CalendarSet {
-    const calendarSet = {
-      ...defaultPeriodicSettings,
-      ...settings,
-      id,
-      ctime: window.moment().format(),
-    };
-
-    this.plugin.settings.update((settings) => {
-      settings.calendarSets.push(calendarSet);
-      return settings;
-    });
-
-    return calendarSet;
-  }
 
   public getFormat(granularity: Granularity): string {
     const settings = get(this.plugin.settings);
@@ -120,13 +100,15 @@ export default class CalendarSetManager {
     if (!settings.calendarSets || settings.calendarSets.length === 0) {
       // check for migration
       if (isLegacySettings(settings)) {
-        this.createNewCalendarSet(
-          DEFAULT_CALENDARSET_ID,
-          migrateLegacySettingsToCalendarSet(settings)
+        this.plugin.settings.update(
+          createNewCalendarSet(
+            DEFAULT_CALENDARSET_ID,
+            migrateLegacySettingsToCalendarSet(settings)
+          )
         );
       } else {
         // otherwise create new default calendar set
-        this.createNewCalendarSet("Default");
+        this.plugin.settings.update(createNewCalendarSet("Default"));
       }
     }
 
@@ -179,22 +161,6 @@ export default class CalendarSetManager {
         if (settings.activeCalendarSet === calendarSetId) {
           settings.activeCalendarSet = proposedName;
         }
-      }
-
-      return settings;
-    });
-  }
-
-  deleteCalendarSet(calendarSetId: string): void {
-    this.plugin.settings.update((settings) => {
-      const calendarSet = settings.calendarSets.find((c) => c.id === calendarSetId);
-      if (calendarSet) {
-        settings.calendarSets.remove(calendarSet);
-      }
-
-      if (calendarSetId === settings.activeCalendarSet) {
-        const fallbackCalendarSet = settings.calendarSets[0].id;
-        settings.activeCalendarSet = fallbackCalendarSet;
       }
 
       return settings;

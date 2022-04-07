@@ -1,4 +1,7 @@
 <script type="ts">
+  import { App, Menu, setIcon } from "obsidian";
+  import { onMount } from "svelte";
+  import type { Writable } from "svelte/store";
   import capitalize from "lodash/capitalize";
 
   import Checkmark from "src/settings/components/Checkmark.svelte";
@@ -6,18 +9,77 @@
   import { granularities } from "src/types";
   import { displayConfigs } from "src/commands";
   import CalendarSetManager from "src/calendarSetManager";
+  import { router } from "src/settings/stores";
+  import type { ISettings } from "src/settings";
+  import { createNewCalendarSet, deleteCalendarSet } from "src/settings/utils";
 
+  export let app: App;
   export let viewDetails: () => void;
   export let calendarSet: CalendarSet;
   export let manager: CalendarSetManager;
+  export let settings: Writable<ISettings>;
 
+  let optionsEl: HTMLDivElement;
   let active = manager.getActiveSet() === calendarSet.id;
   let showEmptyState =
     granularities.filter((g) => calendarSet[g]?.enabled).length === 0;
+
+  function deleteItem() {
+    settings.update(deleteCalendarSet(calendarSet.id));
+  }
+
+  function toggleOptionsMenu(evt: MouseEvent) {
+    const menu = new Menu(app);
+
+    if (!active) {
+      menu
+        .addItem((item) =>
+          item
+            .setTitle("Set as active")
+            .setIcon("check-circle-2")
+            .onClick(() => {
+              manager.setActiveSet(calendarSet.id);
+            })
+        )
+        .addSeparator();
+    }
+    menu
+      .addItem((item) =>
+        item
+          .setTitle("Duplicate calendar set")
+          .setIcon("copy")
+          .onClick(() => {
+            const newCalendarSet = `${calendarSet.id} copy`;
+            settings.update(createNewCalendarSet(newCalendarSet, calendarSet));
+            router.navigate(["Periodic Notes", newCalendarSet], {
+              shouldRename: true,
+            });
+          })
+      )
+      .addItem((item) =>
+        item
+          .setTitle("Delete calendar set")
+          .setIcon("x")
+          .setDisabled(manager.getCalendarSets().length === 1)
+          .onClick(deleteItem)
+      )
+      .showAtMouseEvent(evt);
+  }
+
+  onMount(() => {
+    setIcon(optionsEl, "more-vertical", 18);
+  });
 </script>
 
 <div class="calendarset-container" class:active on:click={viewDetails}>
-  <h4 class="calendarset-name">{calendarSet.id}</h4>
+  <div class="calendarset-titlebar">
+    <h4 class="calendarset-name">{calendarSet.id}</h4>
+    <div
+      class="view-action"
+      bind:this={optionsEl}
+      on:click|stopPropagation={toggleOptionsMenu}
+    />
+  </div>
   <div class="included-types">
     {#each granularities as granularity}
       {#if calendarSet[granularity]?.enabled}
@@ -61,14 +123,29 @@
     }
   }
 
+  .calendarset-titlebar {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+
+    .view-action {
+      margin-right: 0;
+      padding: 2px;
+    }
+  }
+
   .calendarset-name {
     font-weight: 600;
     letter-spacing: 0.25px;
-    margin-top: 0;
+    margin: 0;
   }
 
   .periodicity-text {
     margin-left: 0.4em;
+  }
+
+  .included-types {
+    margin-top: 24px;
   }
 
   .included-type {

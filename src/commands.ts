@@ -1,6 +1,6 @@
 import sortBy from "lodash/sortBy";
 import { type Command, Notice, App, TFile } from "obsidian";
-import type PeriodicNotesPlugin from "src";
+import type PeriodicNotesPlugin from "src/main";
 
 import type { Granularity } from "./types";
 

@@ -1,10 +1,8 @@
-import { App, PopoverSuggest, TAbstractFile, TFile, TFolder } from "obsidian";
+import { TAbstractFile, TFile, TFolder } from "obsidian";
 
-export class FileSuggest extends PopoverSuggest<TFile> {
-  constructor(readonly app: App, readonly inputEl: HTMLInputElement) {
-    super(app);
-  }
+import { TextInputSuggest } from "./suggest";
 
+export class FileSuggest extends TextInputSuggest<TFile> {
   getSuggestions(inputStr: string): TFile[] {
     const abstractFiles = this.app.vault.getAllLoadedFiles();
     const files: TFile[] = [];
@@ -34,11 +32,7 @@ export class FileSuggest extends PopoverSuggest<TFile> {
   }
 }
 
-export class FolderSuggest extends PopoverSuggest<TFolder> {
-  constructor(readonly app: App, readonly inputEl: HTMLInputElement) {
-    super(app);
-  }
-
+export class FolderSuggest extends TextInputSuggest<TFolder> {
   getSuggestions(inputStr: string): TFolder[] {
     const abstractFiles = this.app.vault.getAllLoadedFiles();
     const folders: TFolder[] = [];
