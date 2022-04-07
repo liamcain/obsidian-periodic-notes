@@ -23,7 +23,7 @@
   {/each}
 </div>
 
-<style>
+<style lang="scss">
   .breadcrumbs {
     align-items: center;
     color: var(--text-muted);
@@ -34,13 +34,13 @@
   .crumb {
     cursor: pointer;
     margin: 0 0.4em;
-  }
 
-  .crumb:last-of-type {
-    color: var(--text-normal);
-  }
+    &:last-of-type {
+      color: var(--text-normal);
+    }
 
-  .crumb:hover {
-    color: var(--text-accent);
+    &:hover {
+      color: var(--text-accent);
+    }
   }
 </style>

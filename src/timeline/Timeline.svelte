@@ -111,7 +111,7 @@
   </div>
 {/if}
 
-<style>
+<style lang="scss">
   .timeline-container {
     align-items: flex-end;
     flex-direction: column;
@@ -119,8 +119,8 @@
     gap: 12px;
     height: 56px;
     position: absolute;
-    right: 24px;
-    top: 48px;
+    right: 16px;
+    top: 56px;
     z-index: 1;
   }
 
@@ -137,10 +137,10 @@
     padding: 0.3em 0.9em;
     text-transform: uppercase;
     transition: 0.2s border-color ease-in;
-  }
 
-  .leaf-periodic-button:hover {
-    border-color: var(--background-modifier-border);
+    &:hover {
+      border-color: var(--background-modifier-border);
+    }
   }
 
   .timeline-view {
@@ -162,10 +162,19 @@
     height: 28px;
     line-height: 26px;
     width: 28px;
-  }
 
-  .timeline-day:hover {
-    border-color: var(--background-modifier-border);
+    &:hover {
+      border-color: var(--background-modifier-border);
+    }
+
+    .is-selected & {
+      background-color: var(--background-secondary);
+    }
+
+    .is-today & {
+      color: var(--text-accent);
+      font-weight: 600;
+    }
   }
 
   .timeline-day-of-week {
@@ -173,18 +182,9 @@
     font-size: 0.9em;
     font-weight: 600;
     letter-spacing: 0.2px;
-  }
 
-  .is-selected .timeline-day {
-    background-color: var(--background-secondary);
-  }
-
-  .is-selected .timeline-day-of-week {
-    color: var(--text-normal);
-  }
-
-  .is-today .timeline-day {
-    color: var(--text-accent);
-    font-weight: 600;
+    .is-selected & {
+      color: var(--text-normal);
+    }
   }
 </style>
