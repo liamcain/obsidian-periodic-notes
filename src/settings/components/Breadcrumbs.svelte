@@ -12,8 +12,8 @@
     <div
       class="crumb"
       on:click={() => router.navigate(crumbsSoFar)}
-      in:fly={{ x: -8 }}
-      out:fly={{ x: -8 }}
+      in:fly={{ x: -6 }}
+      out:fly={{ x: -6 }}
     >
       {crumb}
     </div>

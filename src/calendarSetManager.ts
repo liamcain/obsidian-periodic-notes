@@ -107,7 +107,7 @@ export default class CalendarSetManager {
       throw new Error("No active calendar set found");
     }
 
-    return activeSet[granularity]?.format ?? DEFAULT_FORMAT[granularity];
+    return activeSet[granularity]?.format || DEFAULT_FORMAT[granularity];
   }
 
   public getActiveConfig(granularity: Granularity): PeriodicConfig {

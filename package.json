@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "lint": "svelte-check && eslint . --ext .ts && tsc --noEmit",
-    "lint:fix": "svelte-check && eslint --fix",
+    "lint:fix": "svelte-check && eslint . --ext .ts --fix",
     "dev": "node esbuild.config.mjs",
     "build": "yarn run lint && node esbuild.config.mjs production",
     "release": "standard-version",

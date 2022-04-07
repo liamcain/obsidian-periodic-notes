@@ -11,3 +11,9 @@ export const DEFAULT_FORMAT = Object.freeze({
   quarter: DEFAULT_QUARTERLY_NOTE_FORMAT,
   year: DEFAULT_YEARLY_NOTE_FORMAT,
 });
+
+export const HUMANIZE_FORMAT = Object.freeze({
+  month: "MMMM YYYY",
+  quarter: "YYYY Q[Q]",
+  year: "YYYY",
+});

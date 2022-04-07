@@ -1,4 +1,3 @@
-
 import type { Moment } from "moment";
 import { addIcon, Plugin, TFile } from "obsidian";
 
@@ -15,7 +14,8 @@ import {
 } from "./icons";
 import { showFileMenu } from "./modal";
 import { type ISettings, PeriodicNotesSettingsTab } from "./settings";
-import { NLDNavigator } from "./switcher";
+import { NLDNavigator } from "./switcher/switcher";
+import TimelineManager from "./timeline/manager";
 import type { Granularity } from "./types";
 import {
   applyTemplateTransformations,
@@ -30,6 +30,7 @@ export default class PeriodicNotesPlugin extends Plugin {
 
   private cache: PeriodicNotesCache;
   public calendarSetManager: CalendarSetManager;
+  private timelineManager: TimelineManager;
 
   async onload(): Promise<void> {
     await this.loadSettings();
@@ -37,9 +38,11 @@ export default class PeriodicNotesPlugin extends Plugin {
     this.ribbonEl = null;
     this.cache = new PeriodicNotesCache(this.app, this);
     this.calendarSetManager = new CalendarSetManager(this);
+    this.timelineManager = new TimelineManager(this, this.cache);
 
     this.onUpdateSettings = this.onUpdateSettings.bind(this);
     this.updateSettings = this.updateSettings.bind(this);
+    this.openPeriodicNote = this.openPeriodicNote.bind(this);
     this.addSettingTab(new PeriodicNotesSettingsTab(this.app, this));
 
     addIcon("calendar-day", calendarDayIcon);
@@ -161,7 +164,6 @@ export default class PeriodicNotesPlugin extends Plugin {
       templateContents
     );
     const destPath = await getNoteCreationPath(this.app, filename, config);
-    console.log("attempting to create file at path:", destPath);
     return this.app.vault.create(destPath, renderedContents);
   }
 

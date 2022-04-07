@@ -1,10 +1,10 @@
+import memoize from "lodash/memoize";
 import type { Moment } from "moment";
-import { App, Component, TAbstractFile, TFile, TFolder, Vault } from "obsidian";
+import { App, Component, TAbstractFile, TFile, TFolder } from "obsidian";
 
 import { granularities, type Granularity, type PeriodicConfig } from "./types";
 
 import type PeriodicNotesPlugin from "./index";
-
 
 type MatchType = "filename" | "frontmatter";
 
@@ -29,9 +29,20 @@ export interface PeriodicNoteCachedMetadata {
 }
 
 function getCanonicalDateString(_granularity: Granularity, date: Moment): string {
-  // TODO support all granularities
-  return date.format("YYYY-MM-DD");
+  return date.toISOString();
 }
+
+const memoizedRecurseChildren = memoize(
+  (rootFolder: TFolder, cb: (file: TAbstractFile) => void) => {
+    for (const c of rootFolder.children) {
+      if (c instanceof TFile) {
+        cb(c);
+      } else if (c instanceof TFolder) {
+        memoizedRecurseChildren(c, cb);
+      }
+    }
+  }
+);
 
 export class PeriodicNotesCache extends Component {
   // Map the full filename to
@@ -52,8 +63,7 @@ export class PeriodicNotesCache extends Component {
         const rootFolder = this.app.vault.getAbstractFileByPath(
           config.folder || "/"
         ) as TFolder;
-        // TODO: memoize this
-        Vault.recurseChildren(rootFolder, (file: TAbstractFile) => {
+        memoizedRecurseChildren(rootFolder, (file: TAbstractFile) => {
           if (file instanceof TFile) {
             this.resolve(file);
           }

@@ -8,7 +8,8 @@ import {
   type DailyNotesSettings,
 } from "obsidian";
 
-import type { PeriodicConfig } from "./types";
+import { HUMANIZE_FORMAT } from "./constants";
+import type { Granularity, PeriodicConfig } from "./types";
 
 export const wrapAround = (value: number, size: number): number => {
   return ((value % size) + size) % size;
@@ -191,4 +192,44 @@ async function ensureFolderExists(app: App, path: string): Promise<void> {
       await app.vault.createFolder(dir);
     }
   }
+}
+
+export function getRelativeDate(granularity: Granularity, date: Moment) {
+  if (granularity == "week") {
+    const thisWeek = window.moment().startOf(granularity);
+    const fromNow = window.moment(date).diff(thisWeek, "week");
+    if (fromNow === 0) {
+      return "This week";
+    } else if (fromNow === -1) {
+      return "Last week";
+    } else if (fromNow === 1) {
+      return "Next week";
+    }
+    return window.moment.duration(fromNow, granularity).humanize(true);
+  } else if (granularity === "day") {
+    const fromNow = window.moment(date).fromNow();
+    return window.moment(date).calendar(null, {
+      lastWeek: "[Last] dddd",
+      lastDay: "[Yesterday]",
+      sameDay: "[Today]",
+      nextDay: "[Tomorrow]",
+      nextWeek: "dddd",
+      sameElse: function () {
+        return "[" + fromNow + "]";
+      },
+    });
+  } else {
+    return date.format(HUMANIZE_FORMAT[granularity]);
+  }
+}
+
+function removeEscapedCharacters(format: string): string {
+  const withoutBrackets = format.replace(/\[[^\]]*\]/g, ""); // remove everything within brackets
+
+  return withoutBrackets.replace(/\\./g, "");
+}
+
+export function isIsoFormat(format: string): boolean {
+  const cleanFormat = removeEscapedCharacters(format);
+  return /w{1,2}/.test(cleanFormat);
 }

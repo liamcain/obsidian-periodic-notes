@@ -62,10 +62,6 @@ declare module "obsidian" {
     setSuggestions(suggestions: T[]);
   }
 
-  export class SuggestModal2<T> extends SuggestModal<T> {
-    chooser: Chooser<T>;
-  }
-
   interface Vault {
     config: Record<string, unknown>;
     getConfig<T extends keyof VaultSettings>(setting: T): VaultSettings[T];
