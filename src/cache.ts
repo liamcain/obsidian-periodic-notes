@@ -93,6 +93,8 @@ export class PeriodicNotesCache extends Component {
               matchType: "filename",
             },
           });
+
+          this.app.workspace.trigger("periodic-notes:resolve", granularity, file);
           return;
         }
       }

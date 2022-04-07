@@ -23,9 +23,9 @@
 
 <Breadcrumbs />
 
-{#if $router.length > 1}
-  {#key $router[1]}
-    <Details {app} {settings} {manager} selectedCalendarSet={$router[1]} />
+{#if $router.path.length > 1}
+  {#key $router.path[1]}
+    <Details {app} {settings} {manager} selectedCalendarSet={$router.path[1]} />
   {/key}
 {:else}
   <Dashboard {settings} {manager} />

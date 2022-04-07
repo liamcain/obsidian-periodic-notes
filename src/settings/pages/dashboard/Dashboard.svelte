@@ -40,7 +40,9 @@
     }
     const id = `Calendar set ${iter}`;
     manager.createNewCalendarSet(id);
-    router.navigate(["Periodic Notes", id]);
+    router.navigate(["Periodic Notes", id], {
+      shouldRename: true,
+    });
   }
 
   onMount(() => {

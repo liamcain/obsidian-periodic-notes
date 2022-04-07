@@ -78,7 +78,11 @@
     </div>
   </div>
   {#if isExpanded}
-    <div class="periodic-group-content" in:slide out:slide>
+    <div
+      class="periodic-group-content"
+      in:slide={{ duration: 300 }}
+      out:slide={{ duration: 300 }}
+    >
       <NoteFormatSetting {config} {granularity} />
       <NoteTemplateSetting {app} {config} {granularity} />
       <NoteFolderSetting {app} {config} {granularity} />

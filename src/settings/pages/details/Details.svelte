@@ -16,6 +16,7 @@
   export let manager: CalendarSetManager;
   export let selectedCalendarSet: string;
 
+  let nameEl: HTMLDivElement;
   let optionsEl: HTMLDivElement;
   let calendarsetName = selectedCalendarSet;
   let errorMsg = "";
@@ -64,7 +65,9 @@
               newCalendarSet,
               cloneDeep(calendarSet)
             );
-            router.navigate(["Periodic Notes", newCalendarSet]);
+            router.navigate(["Periodic Notes", newCalendarSet], {
+              shouldRename: true,
+            });
           })
       )
       .addItem((item) =>
@@ -79,9 +82,23 @@
       .showAtMouseEvent(evt);
   }
 
+  function focusEditableEl(el: HTMLDivElement) {
+    el.focus();
+    const range = document.createRange();
+    range.selectNodeContents(el);
+
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  }
+
   onMount(() => {
     setIcon(optionsEl, "more-vertical", 18);
     document.getElementsByClassName("vertical-tab-content")[0].scroll(0, 0);
+
+    if ($router.eState["shouldRename"]) {
+      focusEditableEl(nameEl);
+    }
   });
 </script>
 
@@ -90,6 +107,7 @@
     class="calendarset-title"
     contenteditable="true"
     bind:innerHTML={calendarsetName}
+    bind:this={nameEl}
     on:blur={tryToRename}
     on:keypress={submitOnEnter}
   />

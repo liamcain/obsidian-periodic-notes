@@ -6,18 +6,18 @@
 </script>
 
 <div class="breadcrumbs">
-  {#each $router as crumb, i}
-    {@const crumbsSoFar = $router.slice(0, i + 1)}
+  {#each $router.path as crumb, i}
+    {@const crumbsSoFar = $router.path.slice(0, i + 1)}
 
     <div
       class="crumb"
       on:click={() => router.navigate(crumbsSoFar)}
-      in:fly={{ x: -6 }}
-      out:fly={{ x: -6 }}
+      in:fly={{ x: -6, duration: 250 }}
+      out:fly={{ x: -6, duration: 250 }}
     >
       {crumb}
     </div>
-    {#if i < $router.length - 1}
+    {#if i < $router.path.length - 1}
       <Arrow isExpanded={false} />
     {/if}
   {/each}

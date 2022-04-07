@@ -87,6 +87,9 @@
   onMount(() => {
     plugin.registerEvent(plugin.app.workspace.on("file-open", updateView));
     plugin.registerEvent(
+      plugin.app.workspace.on("periodic-notes:resolve", updateView)
+    );
+    plugin.registerEvent(
       plugin.app.workspace.on(
         "periodic-notes:settings-updated",
         updateComplicationVisibility

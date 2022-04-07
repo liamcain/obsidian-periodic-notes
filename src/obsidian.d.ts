@@ -18,6 +18,12 @@ declare module "obsidian" {
       /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       ctx?: any
     ): EventRef;
+    on(
+      name: "periodic-notes:resolve",
+      callback: () => void,
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+      ctx?: any
+    ): EventRef;
   }
 
   interface CommandManager {
