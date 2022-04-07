@@ -1,5 +1,5 @@
-import capitalize from "lodash/capitalize";
-import { type NLDatesPlugin, type NLDResult, setIcon, App, SuggestModal } from "obsidian";
+import type { Moment } from "moment";
+import { type NLDatesPlugin, setIcon, App, SuggestModal } from "obsidian";
 import type { MatchType } from "src/cache";
 import { DEFAULT_FORMAT } from "src/constants";
 import type PeriodicNotesPlugin from "src/main";
@@ -10,7 +10,7 @@ import { RelatedFilesSwitcher } from "./relatedFilesSwitcher";
 
 export interface DateNavigationItem {
   granularity: Granularity;
-  nldResult: NLDResult;
+  date: Moment;
   label: string;
   matchData?: {
     exact: boolean;
@@ -19,7 +19,7 @@ export interface DateNavigationItem {
 }
 
 const DEFAULT_INSTRUCTIONS = [
-  { command: "↑↓", purpose: "to navigate" },
+  { command: "⇥", purpose: "show related files" },
   { command: "↵", purpose: "to open" },
   { command: "ctrl ↵", purpose: "to open in a new pane" },
   { command: "esc", purpose: "to dismiss" },
@@ -63,7 +63,7 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
   }
 
   /** XXX: this is pretty messy currently. Not sure if I like the format yet */
-  private getPeriodicNotesFromQuery(query: string, nldResult: NLDResult) {
+  private getPeriodicNotesFromQuery(query: string, date: Moment) {
     let granularity: Granularity = "day";
 
     const granularityExp = /\b(week|month|quarter|year)s?\b/.exec(query);
@@ -75,31 +75,25 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
     if (granularity === "week") {
       const format = this.plugin.calendarSetManager.getFormat("week");
       const weekNumber = isIsoFormat(format) ? "WW" : "ww";
-      label = nldResult.moment.format(`GGGG [Week] ${weekNumber}`);
+      label = date.format(`GGGG [Week] ${weekNumber}`);
     } else if (granularity === "day") {
-      label = `${getRelativeDate(
-        granularity,
-        nldResult.moment
-      )}, ${nldResult.moment.format("MMMM DD")}`;
+      label = `${getRelativeDate(granularity, date)}, ${date.format("MMMM DD")}`;
     } else {
-      label = capitalize(query);
+      label = query;
     }
 
     const suggestions = [
       {
         label,
-        nldResult,
+        date,
         granularity,
       },
     ];
 
     if (granularity !== "day") {
       suggestions.push({
-        label: `${getRelativeDate(
-          granularity,
-          nldResult.moment
-        )}, ${nldResult.moment.format("MMMM DD")}`,
-        nldResult,
+        label: `${getRelativeDate(granularity, date)}, ${date.format("MMMM DD")}`,
+        date,
         granularity: "day",
       });
     }
@@ -110,7 +104,7 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
   getSuggestions(query: string): DateNavigationItem[] {
     const dateInQuery = this.nlDatesPlugin.parseDate(query);
     if (dateInQuery.moment.isValid()) {
-      return this.getPeriodicNotesFromQuery(query, dateInQuery);
+      return this.getPeriodicNotesFromQuery(query, dateInQuery.moment);
     }
 
     return this.getDateSuggestions(query);
@@ -122,7 +116,7 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
       const date = this.nlDatesPlugin.parseDate(dateStr);
       return {
         granularity,
-        nldResult: date,
+        date: date.moment,
         label: dateStr,
       };
     };
@@ -162,18 +156,18 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
     }
 
     return [
-      getSuggestion("Today", "day"),
-      getSuggestion("Yesterday", "day"),
-      getSuggestion("Tomorrow", "day"),
-      getSuggestion("This week", "week"),
-      getSuggestion("Last week", "week"),
-      getSuggestion("Next week", "week"),
-      getSuggestion("This month", "month"),
-      getSuggestion("Last month", "month"),
-      getSuggestion("Next month", "month"),
-      getSuggestion("This year", "year"),
-      getSuggestion("Last year", "year"),
-      getSuggestion("Next year", "year"),
+      getSuggestion("today", "day"),
+      getSuggestion("yesterday", "day"),
+      getSuggestion("tomorrow", "day"),
+      getSuggestion("this week", "week"),
+      getSuggestion("last week", "week"),
+      getSuggestion("next week", "week"),
+      getSuggestion("this month", "month"),
+      getSuggestion("last month", "month"),
+      getSuggestion("next month", "month"),
+      getSuggestion("this year", "year"),
+      getSuggestion("last year", "year"),
+      getSuggestion("next year", "year"),
     ]
       .filter((items) => activeGranularities.includes(items.granularity))
       .filter((items) => items.label.toLowerCase().startsWith(query));
@@ -181,19 +175,10 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
 
   renderSuggestion(value: DateNavigationItem, el: HTMLElement) {
     const numRelatedNotes = this.plugin
-      .getPeriodicNotes(value.granularity, value.nldResult.moment)
+      .getPeriodicNotes(value.granularity, value.date)
       .filter((e) => e.matchData.exact === false).length;
 
-    const periodicNote = this.plugin.getPeriodicNote(
-      value.granularity,
-      value.nldResult.moment
-    );
-    console.log(
-      "periodic note for value",
-      value.label,
-      periodicNote,
-      this.plugin.calendarSetManager.getActiveSet()
-    );
+    const periodicNote = this.plugin.getPeriodicNote(value.granularity, value.date);
 
     if (!periodicNote) {
       const config = this.plugin.calendarSetManager.getActiveConfig(value.granularity);
@@ -208,7 +193,7 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
       }
       el.createEl("div", {
         cls: "suggestion-note",
-        text: join(folder, value.nldResult.moment.format(format)),
+        text: join(folder, value.date.format(format)),
       });
       return;
     }
@@ -227,6 +212,6 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
   }
 
   async onChooseSuggestion(item: DateNavigationItem, _evt: MouseEvent | KeyboardEvent) {
-    this.plugin.openPeriodicNote(item.granularity, item.nldResult.moment, false);
+    this.plugin.openPeriodicNote(item.granularity, item.date, false);
   }
 }

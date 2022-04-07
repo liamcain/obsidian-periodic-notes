@@ -184,17 +184,31 @@ export default class PeriodicNotesPlugin extends Plugin {
   // What API do I want for this?
   public getPeriodicNotes(
     granularity: Granularity,
-    date: Moment
+    date: Moment,
+    includeFinerGranularities = false
   ): PeriodicNoteCachedMetadata[] {
     return this.cache.getPeriodicNotes(
       this.calendarSetManager.getActiveSet(),
       granularity,
-      date
+      date,
+      includeFinerGranularities
     );
   }
 
-  public getFileMetadata(filePath: string): PeriodicNoteCachedMetadata | null {
-    return this.cache.get(filePath);
+  public isPeriodic(filePath: string, granularity?: Granularity): boolean {
+    return this.cache.isPeriodic(filePath, granularity);
+  }
+
+  public findAdjacent(
+    calendarSet: string,
+    filePath: string,
+    direction: "forwards" | "backwards"
+  ): PeriodicNoteCachedMetadata | null {
+    return this.cache.findAdjacent(calendarSet, filePath, direction);
+  }
+
+  public findInCache(filePath: string): PeriodicNoteCachedMetadata | null {
+    return this.cache.find(filePath);
   }
 
   public async openPeriodicNote(
@@ -214,9 +228,5 @@ export default class PeriodicNotesPlugin extends Plugin {
 
     const leaf = inNewSplit ? workspace.splitActiveLeaf() : workspace.getUnpinnedLeaf();
     await leaf.openFile(file, { active: true });
-  }
-
-  public getCachedFiles(): Map<string, PeriodicNoteCachedMetadata> {
-    return this.cache.getCachedFiles();
   }
 }

@@ -63,3 +63,8 @@ input.has-error {
   right: 10px;
   top: 6px;
 }
+
+.minimal-theme .suggestion-badge {
+  padding: 0.1em 0.5em;
+  right: 36px;
+}

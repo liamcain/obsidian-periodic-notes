@@ -1,5 +1,4 @@
-import sortBy from "lodash/sortBy";
-import { type Command, Notice, App, TFile } from "obsidian";
+import { type Command, App, TFile } from "obsidian";
 import type PeriodicNotesPlugin from "src/main";
 
 import type { Granularity } from "./types";
@@ -41,60 +40,51 @@ export const displayConfigs: Record<Granularity, IDisplayConfig> = {
 async function openNextNote(
   app: App,
   plugin: PeriodicNotesPlugin,
-  granularity: Granularity
+  _granularity: Granularity
 ): Promise<void> {
   const activeFile = app.workspace.getActiveFile();
-  const config = displayConfigs[granularity];
 
   if (!activeFile) return;
+  const activeFileMeta = plugin.findInCache(activeFile.path);
+  if (!activeFileMeta) return;
 
-  try {
-    const allNotes = sortBy(Array.from(plugin.getCachedFiles().values()), [
-      "canonicalDateStr",
-    ]);
-    const activeNoteIndex = allNotes.findIndex((m) => m.filePath === activeFile.path);
+  const nextNoteMeta = plugin.findAdjacent(
+    activeFileMeta.calendarSet,
+    activeFile.path,
+    "forwards"
+  );
 
-    const nextNoteMeta = allNotes[activeNoteIndex + 1];
-    if (nextNoteMeta) {
-      const file = app.vault.getAbstractFileByPath(nextNoteMeta.filePath);
-      if (file && file instanceof TFile) {
-        const leaf = app.workspace.getUnpinnedLeaf();
-        await leaf.openFile(file, { active: true });
-      }
+  if (nextNoteMeta) {
+    const file = app.vault.getAbstractFileByPath(nextNoteMeta.filePath);
+    if (file && file instanceof TFile) {
+      const leaf = app.workspace.getUnpinnedLeaf();
+      await leaf.openFile(file, { active: true });
     }
-  } catch (err) {
-    console.error(`failed to find your ${config.periodicity} notes folder`, err);
-    new Notice(`Failed to find your ${config.periodicity} notes folder`);
   }
 }
 
 async function openPrevNote(
   app: App,
   plugin: PeriodicNotesPlugin,
-  granularity: Granularity
+  _granularity: Granularity // TODO switch these commands to be generic?
 ): Promise<void> {
   const activeFile = app.workspace.getActiveFile();
-  const config = displayConfigs[granularity];
-
   if (!activeFile) return;
+  const activeFileMeta = plugin.findInCache(activeFile.path);
+  if (!activeFileMeta) return;
 
-  try {
-    const allNotes = sortBy(Array.from(plugin.getCachedFiles().values()), [
-      "canonicalDateStr",
-    ]);
-    const activeNoteIndex = allNotes.findIndex((m) => m.filePath === activeFile.path);
+  const prevNoteMeta = plugin.findAdjacent(
+    activeFileMeta.calendarSet,
+    activeFile.path,
+    "backwards"
+  );
 
-    const prevNoteMeta = allNotes[activeNoteIndex - 1];
-    if (prevNoteMeta) {
-      const file = app.vault.getAbstractFileByPath(prevNoteMeta.filePath);
-      if (file && file instanceof TFile) {
-        const leaf = app.workspace.getUnpinnedLeaf();
-        await leaf.openFile(file, { active: true });
-      }
+  if (prevNoteMeta) {
+    const file = app.vault.getAbstractFileByPath(prevNoteMeta.filePath);
+    if (file && file instanceof TFile) {
+      const leaf = app.workspace.getUnpinnedLeaf();
+      await leaf.openFile(file, { active: true });
     }
-  } catch (err) {
-    console.error(`failed to find your ${config.periodicity} notes folder`, err);
-    new Notice(`Failed to find your ${config.periodicity} notes folder`);
   }
 }
 
@@ -119,8 +109,7 @@ export function getCommands(
         const activeFile = app.workspace.getActiveFile();
         if (checking) {
           if (!activeFile) return false;
-          const activeFileMeta = plugin.getFileMetadata(activeFile.path);
-          return !!(activeFileMeta && activeFileMeta.granularity === granularity);
+          return plugin.isPeriodic(activeFile.path, granularity);
         }
         openNextNote(app, plugin, granularity);
       },
@@ -133,8 +122,7 @@ export function getCommands(
         const activeFile = app.workspace.getActiveFile();
         if (checking) {
           if (!activeFile) return false;
-          const activeFileMeta = plugin.getFileMetadata(activeFile.path);
-          return !!(activeFileMeta && activeFileMeta.granularity === granularity);
+          return plugin.isPeriodic(activeFile.path, granularity);
         }
         openPrevNote(app, plugin, granularity);
       },

@@ -26,7 +26,7 @@
   let showComplication = $settings.enableTimelineComplication;
 
   $: {
-    periodicData = cache.get(view.file?.path);
+    periodicData = cache.find(view.file?.path);
 
     if (periodicData) {
       weekDays = generateWeekdays(today, periodicData.date);
@@ -72,7 +72,7 @@
   }
 
   function updateView() {
-    periodicData = cache.get(view.file?.path);
+    periodicData = cache.find(view.file?.path);
 
     if (periodicData) {
       weekDays = generateWeekdays(today, periodicData.date);
