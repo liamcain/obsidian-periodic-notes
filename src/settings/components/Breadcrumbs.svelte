@@ -1,0 +1,46 @@
+<script lang="ts">
+  import { fly } from "svelte/transition";
+  import { router } from "src/settings/stores";
+
+  import Arrow from "./Arrow.svelte";
+</script>
+
+<div class="breadcrumbs">
+  {#each $router as crumb, i}
+    {@const crumbsSoFar = $router.slice(0, i + 1)}
+
+    <div
+      class="crumb"
+      on:click={() => router.navigate(crumbsSoFar)}
+      in:fly={{ x: -8 }}
+      out:fly={{ x: -8 }}
+    >
+      {crumb}
+    </div>
+    {#if i < $router.length - 1}
+      <Arrow isExpanded={false} />
+    {/if}
+  {/each}
+</div>
+
+<style>
+  .breadcrumbs {
+    align-items: center;
+    color: var(--text-muted);
+    display: flex;
+    margin-bottom: 48px;
+  }
+
+  .crumb {
+    cursor: pointer;
+    margin: 0 0.4em;
+  }
+
+  .crumb:last-of-type {
+    color: var(--text-normal);
+  }
+
+  .crumb:hover {
+    color: var(--text-accent);
+  }
+</style>

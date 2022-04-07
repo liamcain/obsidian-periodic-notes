@@ -1,31 +1,17 @@
 import { App, PluginSettingTab } from "obsidian";
-import type { IPeriodicNoteSettings } from "obsidian-daily-notes-interface";
+import type { CalendarSet } from "src/types";
 import type { SvelteComponent } from "svelte";
 
 import type WeeklyNotesPlugin from "../index";
-import SettingsTab from "./SettingsTab.svelte";
+import SettingsRouter from "./pages/Router.svelte";
 
-export type IPeriodicity =
-  | "daily"
-  | "weekly"
-  | "monthly"
-  | "quarterly"
-  | "yearly";
-
-interface IPerioditySettings extends IPeriodicNoteSettings {
-  enabled: boolean;
-}
 
 export interface ISettings {
   showGettingStartedBanner: boolean;
   hasMigratedDailyNoteSettings: boolean;
   hasMigratedWeeklyNoteSettings: boolean;
 
-  daily: IPerioditySettings;
-  weekly: IPerioditySettings;
-  monthly: IPerioditySettings;
-  quarterly: IPerioditySettings;
-  yearly: IPerioditySettings;
+  calendarSets: CalendarSet[];
 }
 
 export const DEFAULT_SETTINGS = Object.freeze({
@@ -35,11 +21,9 @@ export const DEFAULT_SETTINGS = Object.freeze({
 });
 
 export class PeriodicNotesSettingsTab extends PluginSettingTab {
-  public plugin: WeeklyNotesPlugin;
-
   private view: SvelteComponent;
 
-  constructor(app: App, plugin: WeeklyNotesPlugin) {
+  constructor(readonly app: App, readonly plugin: WeeklyNotesPlugin) {
     super(app, plugin);
     this.plugin = plugin;
   }
@@ -47,12 +31,19 @@ export class PeriodicNotesSettingsTab extends PluginSettingTab {
   display(): void {
     this.containerEl.empty();
 
-    this.view = new SettingsTab({
+    this.view = new SettingsRouter({
       target: this.containerEl,
       props: {
+        app: this.app,
+        manager: this.plugin.calendarSetManager,
         settings: this.plugin.settings,
-        onUpdateSettings: this.plugin.updateSettings,
+        onUpdateSettings: this.plugin.onUpdateSettings,
       },
     });
+  }
+
+  hide() {
+    super.hide();
+    this.view.$destroy();
   }
 }

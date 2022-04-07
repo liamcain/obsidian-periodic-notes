@@ -1,46 +1,31 @@
 <script lang="ts">
-  import {
-    DEFAULT_DAILY_NOTE_FORMAT,
-    DEFAULT_MONTHLY_NOTE_FORMAT,
-    DEFAULT_WEEKLY_NOTE_FORMAT,
-    DEFAULT_QUARTERLY_NOTE_FORMAT,
-    DEFAULT_YEARLY_NOTE_FORMAT,
-  } from "obsidian-daily-notes-interface";
   import { onMount } from "svelte";
-  import type { Writable } from "svelte/store";
 
-  import type { IPeriodicity, ISettings } from "./index";
+  import { DEFAULT_FORMAT } from "src/constants";
+  import type { Granularity, PeriodicConfig } from "src/types";
+  import { getBasename, validateFormat } from "../validation";
+  import type { Readable } from "svelte/store";
 
-  import { getBasename, validateFormat } from "./validation";
+  export let granularity: Granularity;
+  export let config: Readable<PeriodicConfig>;
 
-  export let settings: Writable<ISettings>;
-  export let periodicity: IPeriodicity;
-
-  const DEFAULT_FORMATS = {
-    daily: DEFAULT_DAILY_NOTE_FORMAT,
-    weekly: DEFAULT_WEEKLY_NOTE_FORMAT,
-    monthly: DEFAULT_MONTHLY_NOTE_FORMAT,
-    quarterly: DEFAULT_QUARTERLY_NOTE_FORMAT,
-    yearly: DEFAULT_YEARLY_NOTE_FORMAT,
-  };
-  const defaultFormat = DEFAULT_FORMATS[periodicity];
+  const defaultFormat = DEFAULT_FORMAT[granularity];
 
   let inputEl: HTMLInputElement;
-  let value: string;
+  let value: string = "";
   let error: string;
 
   let isTemplateNested: boolean;
   let basename: string;
 
   $: {
-    value = $settings[periodicity].format || "";
-
+    value = $config.format || "";
     isTemplateNested = value.indexOf("/") !== -1;
     basename = getBasename(value);
   }
 
   onMount(() => {
-    error = validateFormat(inputEl.value, periodicity);
+    error = validateFormat(inputEl.value, granularity);
   });
 
   function clearError() {
@@ -48,7 +33,7 @@
   }
 
   function onChange() {
-    error = validateFormat(inputEl.value, periodicity);
+    error = validateFormat(inputEl.value, granularity);
   }
 </script>
 
@@ -77,7 +62,7 @@
   </div>
   <div class="setting-item-control">
     <input
-      bind:value={$settings[periodicity].format}
+      bind:value={$config.format}
       bind:this={inputEl}
       class:has-error={!!error}
       type="text"

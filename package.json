@@ -6,41 +6,44 @@
   "main": "main.js",
   "license": "MIT",
   "scripts": {
-    "lint": "eslint . --ext .ts",
-    "build": "npm run lint && rollup -c",
+    "lint": "svelte-check && eslint . --ext .ts",
+    "lint:fix": "svelte-check && eslint . --ext .ts --fix",
+    "dev": "node esbuild.config.mjs",
+    "build": "yarn run lint && node esbuild.config.mjs production",
+    "release": "standard-version",
     "test": "jest --passWithNoTests",
     "test:watch": "yarn test -- --watch"
   },
+  "standard-version": {
+    "t": ""
+  },
   "dependencies": {
-    "@popperjs/core": "2.9.1",
-    "obsidian": "0.12.16",
-    "obsidian-daily-notes-interface": "0.9.4",
-    "svelte": "3.35.0",
-    "tslib": "2.1.0"
+    "lodash": "4.17.21",
+    "obsidian": "0.13.30",
+    "svelte": "3.46.4",
+    "tslib": "2.3.1"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "17.1.0",
-    "@rollup/plugin-node-resolve": "11.2.0",
-    "@rollup/plugin-typescript": "8.2.0",
     "@testing-library/jest-dom": "5.11.9",
-    "@tsconfig/svelte": "1.0.10",
+    "@tsconfig/svelte": "3.0.0",
     "@types/jest": "26.0.20",
+    "@types/lodash": "4.14.179",
     "@types/moment": "2.13.0",
-    "@types/node": "14.14.34",
-    "@typescript-eslint/eslint-plugin": "4.17.0",
-    "@typescript-eslint/parser": "4.17.0",
-    "eslint": "7.22.0",
+    "@types/node": "17.0.22",
+    "@typescript-eslint/eslint-plugin": "^5.16.0",
+    "@typescript-eslint/parser": "^5.16.0",
+    "builtin-modules": "^3.2.0",
+    "esbuild": "0.14.28",
+    "esbuild-svelte": "0.6.3",
+    "eslint": "8.11.0",
+    "eslint-plugin-import": "^2.25.4",
     "jest": "26.6.3",
     "moment": "2.29.1",
-    "rollup": "2.41.2",
-    "rollup-plugin-svelte": "7.1.0",
-    "svelte-check": "1.2.5",
-    "svelte-preprocess": "4.6.9",
+    "standard-version": "^9.3.2",
+    "svelte-check": "2.4.6",
+    "svelte-preprocess": "4.10.4",
     "ts-jest": "26.5.3",
-    "typescript": "4.2.3"
-  },
-  "resolutions": {
-    "obsidian": "0.12.16"
+    "typescript": "^4.6.3"
   },
   "jest": {
     "moduleNameMapper": {

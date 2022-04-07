@@ -1,25 +1,27 @@
-import { App, Menu, Modal, Point } from "obsidian";
+import { App, Menu, Modal, type Point } from "obsidian";
+import type PeriodicNotesPlugin from "src";
 
-import { openPeriodicNote, periodConfigs } from "./commands";
-import type { IPeriodicity, ISettings } from "./settings";
+import { displayConfigs } from "./commands";
+import { granularities } from "./types";
+
 
 export function showFileMenu(
   app: App,
-  settings: ISettings,
+  plugin: PeriodicNotesPlugin,
   position: Point
 ): void {
   const contextMenu = new Menu(app);
 
-  ["daily", "weekly", "monthly"]
-    .filter((periodicity) => settings[periodicity].enabled)
-    .forEach((periodicity: IPeriodicity) => {
-      const config = periodConfigs[periodicity];
+  granularities
+    .filter((granularity) => plugin.settings[granularity])
+    .forEach((granularity) => {
+      const config = displayConfigs[granularity];
       contextMenu.addItem((item) =>
         item
-          .setTitle(`Open ${config.relativeUnit}`)
-          .setIcon(`calendar-${config.unitOfTime}`)
+          .setTitle(config.labelOpenPresent)
+          .setIcon(`calendar-${granularity}`)
           .onClick(() => {
-            openPeriodicNote(periodicity, window.moment(), false);
+            plugin.openPeriodicNote(granularity, window.moment(), false);
           })
       );
     });
@@ -27,35 +29,29 @@ export function showFileMenu(
   contextMenu.showAtPosition(position);
 }
 export class PeriodicNoteCreateModal extends Modal {
-  constructor(app: App, settings: ISettings) {
+  constructor(app: App, readonly plugin: PeriodicNotesPlugin) {
     super(app);
 
     this.contentEl.addClass("periodic-modal");
     this.contentEl.createEl("h2", { text: "Open Periodic Note" });
 
-    ["daily", "weekly", "monthly"]
-      .filter((periodicity) => settings[periodicity].enabled)
-      .forEach((periodicity: IPeriodicity) => {
-        const config = periodConfigs[periodicity];
-
-        const noteExists = config.getNote(
-          window.moment(),
-          config.getAllNotes()
-        );
-
-        const template = settings[periodicity].template;
+    const settings = plugin.settings;
+    granularities
+      .filter((granularity) => settings[granularity]?.enabled)
+      .forEach((granularity) => {
+        const config = displayConfigs[granularity];
+        const noteExists = plugin.getPeriodicNote(granularity, window.moment());
+        const template = settings[granularity].templatePath;
 
         this.contentEl.createDiv("setting-item", (rowEl) => {
           rowEl.createDiv("setting-item-info", (descEl) => {
             descEl.createDiv({
-              text: `Create ${periodicity} note`,
+              text: `Create ${config.periodicity} note`,
               cls: "setting-item-name",
             });
             descEl.createDiv({
               cls: "setting-item-description",
-              text: template
-                ? `Using template from ${template}`
-                : "No template found",
+              text: template ? `Using template from ${template}` : "No template found",
             });
           });
 
@@ -73,7 +69,7 @@ export class PeriodicNoteCreateModal extends Modal {
             }
 
             button.addEventListener("click", () => {
-              openPeriodicNote(periodicity, window.moment(), false);
+              plugin.openPeriodicNote(granularity, window.moment(), false);
               this.close();
             });
           });

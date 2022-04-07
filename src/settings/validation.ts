@@ -1,9 +1,9 @@
-import { normalizePath } from "obsidian";
-import type { IPeriodicity } from "./index";
+import { App, normalizePath } from "obsidian";
+import type { Granularity } from "src/types";
 
 export function getBasename(format: string): string {
   const isTemplateNested = format.indexOf("/") !== -1;
-  return isTemplateNested ? format.split("/").pop() : format;
+  return isTemplateNested ? format.split("/").pop() ?? "" : format;
 }
 
 function isValidFilename(filename: string): boolean {
@@ -20,10 +20,7 @@ function isValidFilename(filename: string): boolean {
   );
 }
 
-export function validateFormat(
-  format: string,
-  periodicity: IPeriodicity
-): string {
+export function validateFormat(format: string, granularity: Granularity): string {
   if (!format) {
     return "";
   }
@@ -33,7 +30,7 @@ export function validateFormat(
   }
 
   if (
-    periodicity === "daily" &&
+    granularity === "day" &&
     !["m", "d", "y"].every(
       (requiredChar) =>
         getBasename(format)
@@ -46,13 +43,12 @@ export function validateFormat(
   }
 }
 
-export function validateTemplate(template: string): string {
+export function validateTemplate(app: App, template: string): string {
   if (!template) {
     return "";
   }
 
-  const { metadataCache } = window.app;
-  const file = metadataCache.getFirstLinkpathDest(template, "");
+  const file = app.metadataCache.getFirstLinkpathDest(template, "");
   if (!file) {
     return "Template file not found";
   }
@@ -60,13 +56,12 @@ export function validateTemplate(template: string): string {
   return "";
 }
 
-export function validateFolder(folder: string): string {
+export function validateFolder(app: App, folder: string): string {
   if (!folder || folder === "/") {
     return "";
   }
 
-  const { vault } = window.app;
-  if (!vault.getAbstractFileByPath(normalizePath(folder))) {
+  if (!app.vault.getAbstractFileByPath(normalizePath(folder))) {
     return "Folder not found in vault";
   }
 

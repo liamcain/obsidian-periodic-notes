@@ -1,14 +1,16 @@
 <script type="ts">
+  import type { App } from "obsidian";
   import { slide } from "svelte/transition";
   import type { Writable } from "svelte/store";
 
-  import type { ISettings } from "./index";
-  import Checkmark from "./Checkmark.svelte";
+  import type { ISettings } from "src/settings";
   import {
     hasLegacyDailyNoteSettings,
-    hasLegacyWeeklyNoteSettings,
-  } from "../utils";
+    // hasLegacyWeeklyNoteSettings,
+  } from "src/utils";
+  import Checkmark from "src/settings/components/Checkmark.svelte";
 
+  export let app: App;
   export let settings: Writable<ISettings>;
   export let handleTeardown: () => void;
   export let migrateDailyNoteSettings: () => void;
@@ -17,8 +19,8 @@
   let hasWeeklyNoteSettings: boolean;
 
   $: {
-    hasDailyNoteSettings = hasLegacyDailyNoteSettings();
-    hasWeeklyNoteSettings = hasLegacyWeeklyNoteSettings();
+    hasDailyNoteSettings = hasLegacyDailyNoteSettings(app);
+    // hasWeeklyNoteSettings = hasLegacyWeeklyNoteSettings();
   }
 </script>
 

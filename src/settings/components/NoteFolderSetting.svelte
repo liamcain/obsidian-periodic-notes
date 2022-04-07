@@ -1,22 +1,22 @@
 <script lang="ts">
+  import type { App } from "obsidian";
   import { onMount } from "svelte";
-  import type { Writable } from "svelte/store";
 
-  import type { ISettings } from "./index";
-  import { FolderSuggest } from "../ui/file-suggest";
-  import { validateFolder } from "./validation";
+  import { FolderSuggest } from "src/ui/file-suggest";
+  import type { Granularity, PeriodicConfig } from "src/types";
 
-  export let settings: Writable<ISettings>;
-  export let periodicity: string;
+  import { validateFolder } from "../validation";
+  import type { Readable } from "svelte/store";
+
+  export let config: Readable<PeriodicConfig>;
+  export let app: App;
+  export let granularity: Granularity;
 
   let inputEl: HTMLInputElement;
-  let value: string;
   let error: string;
 
-  $: value = $settings[periodicity].folder || "";
-
   function onChange() {
-    error = validateFolder(inputEl.value);
+    error = validateFolder(app, inputEl.value);
   }
 
   function clearError() {
@@ -24,8 +24,8 @@
   }
 
   onMount(() => {
-    error = validateFolder(inputEl.value);
-    new FolderSuggest(window.app, inputEl);
+    error = validateFolder(app, inputEl.value);
+    new FolderSuggest(app, inputEl);
   });
 </script>
 
@@ -33,7 +33,7 @@
   <div class="setting-item-info">
     <div class="setting-item-name">Note Folder</div>
     <div class="setting-item-description">
-      New {periodicity} notes will be placed here
+      New {granularity} notes will be placed here
     </div>
     {#if error}
       <div class="has-error">{error}</div>
@@ -41,7 +41,7 @@
   </div>
   <div class="setting-item-control">
     <input
-      bind:value={$settings[periodicity].folder}
+      bind:value={$config.folder}
       bind:this={inputEl}
       class:has-error={!!error}
       type="text"

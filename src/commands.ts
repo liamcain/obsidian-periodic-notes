@@ -1,183 +1,142 @@
-import type { Moment } from "moment";
-import { Command, MarkdownView, Notice, TFile } from "obsidian";
-import {
-  createDailyNote,
-  createMonthlyNote,
-  createQuarterlyNote,
-  createWeeklyNote,
-  createYearlyNote,
-  getAllDailyNotes,
-  getAllMonthlyNotes,
-  getAllQuarterlyNotes,
-  getAllWeeklyNotes,
-  getAllYearlyNotes,
-  getDailyNote,
-  getDateFromFile,
-  getMonthlyNote,
-  getQuarterlyNote,
-  getWeeklyNote,
-  getYearlyNote,
-} from "obsidian-daily-notes-interface";
+import sortBy from "lodash/sortBy";
+import { type Command, Notice, App, TFile } from "obsidian";
+import type PeriodicNotesPlugin from "src";
 
-import type { IPeriodicity } from "src/settings";
-import { orderedValues } from "src/utils";
+import type { Granularity } from "./types";
 
-interface IPeriodConfig {
-  unitOfTime: "day" | "week" | "month" | "quarter" | "year";
+interface IDisplayConfig {
+  periodicity: string;
   relativeUnit: string;
-  createNote: (date: Moment) => Promise<TFile>;
-  getNote: (date: Moment, allFiles: Record<string, TFile>) => TFile;
-  getAllNotes: () => Record<string, TFile>;
+  labelOpenPresent: string;
 }
 
-export const periodConfigs: Record<IPeriodicity, IPeriodConfig> = {
-  daily: {
-    unitOfTime: "day",
+export const displayConfigs: Record<Granularity, IDisplayConfig> = {
+  day: {
+    periodicity: "daily",
     relativeUnit: "today",
-    createNote: createDailyNote,
-    getNote: getDailyNote,
-    getAllNotes: getAllDailyNotes,
+    labelOpenPresent: "Open today's daily note",
   },
-  weekly: {
-    unitOfTime: "week",
+  week: {
+    periodicity: "weekly",
     relativeUnit: "this week",
-    createNote: createWeeklyNote,
-    getNote: getWeeklyNote,
-    getAllNotes: getAllWeeklyNotes,
+    labelOpenPresent: "Open this week's note",
   },
-  monthly: {
-    unitOfTime: "month",
+  month: {
+    periodicity: "monthly",
     relativeUnit: "this month",
-    createNote: createMonthlyNote,
-    getNote: getMonthlyNote,
-    getAllNotes: getAllMonthlyNotes,
+    labelOpenPresent: "Open this month's note",
   },
-  quarterly: {
-    unitOfTime: "quarter",
+  quarter: {
+    periodicity: "quarterly",
     relativeUnit: "this quarter",
-    createNote: createQuarterlyNote,
-    getNote: getQuarterlyNote,
-    getAllNotes: getAllQuarterlyNotes,
+    labelOpenPresent: "Open this quarter's note",
   },
-  yearly: {
-    unitOfTime: "year",
+  year: {
+    periodicity: "yearly",
     relativeUnit: "this year",
-    createNote: createYearlyNote,
-    getNote: getYearlyNote,
-    getAllNotes: getAllYearlyNotes,
+    labelOpenPresent: "Open this years's note",
   },
 };
 
-export async function openPeriodicNote(
-  periodicity: IPeriodicity,
-  date: Moment,
-  inNewSplit: boolean
+async function openNextNote(
+  app: App,
+  plugin: PeriodicNotesPlugin,
+  granularity: Granularity
 ): Promise<void> {
-  const config = periodConfigs[periodicity];
-  const startOfPeriod = date.clone().startOf(config.unitOfTime);
+  const activeFile = app.workspace.getActiveFile();
+  const config = displayConfigs[granularity];
 
-  let allNotes: Record<string, TFile>;
-  try {
-    allNotes = config.getAllNotes();
-  } catch (err) {
-    console.error(`failed to find your ${periodicity} notes folder`, err);
-    new Notice(`Failed to find your ${periodicity} notes folder`);
-    return;
-  }
-
-  let periodicNote = config.getNote(startOfPeriod, allNotes);
-  if (!periodicNote) {
-    periodicNote = await config.createNote(startOfPeriod);
-  }
-  await openFile(periodicNote, inNewSplit);
-}
-
-function getActiveFile(): TFile | null {
-  const { workspace } = window.app;
-  const activeView = workspace.getActiveViewOfType(MarkdownView);
-  return activeView?.file;
-}
-
-async function openFile(file: TFile, inNewSplit: boolean): Promise<void> {
-  const { workspace } = window.app;
-  const leaf = inNewSplit
-    ? workspace.splitActiveLeaf()
-    : workspace.getUnpinnedLeaf();
-
-  await leaf.openFile(file, { active: true });
-}
-
-async function openNextNote(periodicity: IPeriodicity): Promise<void> {
-  const config = periodConfigs[periodicity];
-  const activeFile = getActiveFile();
+  if (!activeFile) return;
 
   try {
-    const allNotes = orderedValues(config.getAllNotes());
-    const activeNoteIndex = allNotes.findIndex((file) => file === activeFile);
+    const allNotes = sortBy(Array.from(plugin.getCachedFiles().values()), [
+      "canonicalDateStr",
+    ]);
+    const activeNoteIndex = allNotes.findIndex((m) => m.filePath === activeFile.path);
 
-    const nextNote = allNotes[activeNoteIndex + 1];
-    if (nextNote) {
-      await openFile(nextNote, false);
+    const nextNoteMeta = allNotes[activeNoteIndex + 1];
+    if (nextNoteMeta) {
+      const file = app.vault.getAbstractFileByPath(nextNoteMeta.filePath);
+      if (file && file instanceof TFile) {
+        const leaf = app.workspace.getUnpinnedLeaf();
+        await leaf.openFile(file, { active: true });
+      }
     }
   } catch (err) {
-    console.error(`failed to find your ${periodicity} notes folder`, err);
-    new Notice(`Failed to find your ${periodicity} notes folder`);
+    console.error(`failed to find your ${config.periodicity} notes folder`, err);
+    new Notice(`Failed to find your ${config.periodicity} notes folder`);
   }
 }
 
-async function openPrevNote(periodicity: IPeriodicity): Promise<void> {
-  const config = periodConfigs[periodicity];
-  const activeFile = getActiveFile();
+async function openPrevNote(
+  app: App,
+  plugin: PeriodicNotesPlugin,
+  granularity: Granularity
+): Promise<void> {
+  const activeFile = app.workspace.getActiveFile();
+  const config = displayConfigs[granularity];
+
+  if (!activeFile) return;
 
   try {
-    const allNotes = orderedValues(config.getAllNotes());
-    const activeNoteIndex = allNotes.findIndex((file) => file === activeFile);
+    const allNotes = sortBy(Array.from(plugin.getCachedFiles().values()), [
+      "canonicalDateStr",
+    ]);
+    const activeNoteIndex = allNotes.findIndex((m) => m.filePath === activeFile.path);
 
-    const prevNote = allNotes[activeNoteIndex - 1];
-    if (prevNote) {
-      await openFile(prevNote, false);
+    const prevNoteMeta = allNotes[activeNoteIndex - 1];
+    if (prevNoteMeta) {
+      const file = app.vault.getAbstractFileByPath(prevNoteMeta.filePath);
+      if (file && file instanceof TFile) {
+        const leaf = app.workspace.getUnpinnedLeaf();
+        await leaf.openFile(file, { active: true });
+      }
     }
   } catch (err) {
-    console.error(`failed to find your ${periodicity} notes folder`, err);
-    new Notice(`Failed to find your ${periodicity} notes folder`);
+    console.error(`failed to find your ${config.periodicity} notes folder`, err);
+    new Notice(`Failed to find your ${config.periodicity} notes folder`);
   }
 }
 
-export function getCommands(periodicity: IPeriodicity): Command[] {
-  const config = periodConfigs[periodicity];
+export function getCommands(
+  app: App,
+  plugin: PeriodicNotesPlugin,
+  granularity: Granularity
+): Command[] {
+  const config = displayConfigs[granularity];
 
   return [
     {
-      id: `open-${periodicity}-note`,
-      name: `Open ${periodicity} note`,
-      callback: () => openPeriodicNote(periodicity, window.moment(), false),
+      id: `open-${config.periodicity}-note`,
+      name: config.labelOpenPresent,
+      callback: () => plugin.openPeriodicNote(granularity, window.moment(), false),
     },
 
     {
-      id: `next-${periodicity}-note`,
-      name: `Open next ${periodicity} note`,
+      id: `next-${config.periodicity}-note`,
+      name: `Open next ${config.periodicity} note`,
       checkCallback: (checking: boolean) => {
+        const activeFile = app.workspace.getActiveFile();
         if (checking) {
-          const activeFile = getActiveFile();
-          return !!(
-            activeFile && getDateFromFile(activeFile, config.unitOfTime)
-          );
+          if (!activeFile) return false;
+          const activeFileMeta = plugin.getFileMetadata(activeFile.path);
+          return !!(activeFileMeta && activeFileMeta.granularity === granularity);
         }
-        openNextNote(periodicity);
+        openNextNote(app, plugin, granularity);
       },
     },
 
     {
-      id: `prev-${periodicity}-note`,
-      name: `Open previous ${periodicity} note`,
+      id: `prev-${config.periodicity}-note`,
+      name: `Open previous ${config.periodicity} note`,
       checkCallback: (checking: boolean) => {
+        const activeFile = app.workspace.getActiveFile();
         if (checking) {
-          const activeFile = getActiveFile();
-          return !!(
-            activeFile && getDateFromFile(activeFile, config.unitOfTime)
-          );
+          if (!activeFile) return false;
+          const activeFileMeta = plugin.getFileMetadata(activeFile.path);
+          return !!(activeFileMeta && activeFileMeta.granularity === granularity);
         }
-        openPrevNote(periodicity);
+        openPrevNote(app, plugin, granularity);
       },
     },
   ];

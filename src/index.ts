@@ -1,7 +1,10 @@
-import type moment from "moment";
-import { addIcon, App, Plugin } from "obsidian";
 
-import { getCommands, openPeriodicNote, periodConfigs } from "./commands";
+import type { Moment } from "moment";
+import { addIcon, Plugin, TFile } from "obsidian";
+
+import { PeriodicNotesCache, type PeriodicNoteCachedMetadata } from "./cache";
+import CalendarSetManager from "./calendarSetManager";
+import { displayConfigs, getCommands } from "./commands";
 import { SETTINGS_UPDATED } from "./events";
 import {
   calendarDayIcon,
@@ -11,94 +14,82 @@ import {
   calendarYearIcon,
 } from "./icons";
 import { showFileMenu } from "./modal";
+import { type ISettings, PeriodicNotesSettingsTab } from "./settings";
+import { NLDNavigator } from "./switcher";
+import type { Granularity } from "./types";
 import {
-  DEFAULT_SETTINGS,
-  IPeriodicity,
-  ISettings,
-  PeriodicNotesSettingsTab,
-} from "./settings";
-import {
-  getLegacyWeeklyNoteSettings,
-  hasLegacyWeeklyNoteSettings,
+  applyTemplateTransformations,
+  getNoteCreationPath,
+  getTemplateContents,
   isMetaPressed,
 } from "./utils";
 
-declare global {
-  interface Window {
-    app: App;
-    moment: typeof moment;
-  }
-}
-
 export default class PeriodicNotesPlugin extends Plugin {
   public settings: ISettings;
-  public isInitialLoad: boolean;
+  private ribbonEl: HTMLElement | null;
 
-  private ribbonEl: HTMLElement;
+  private cache: PeriodicNotesCache;
+  public calendarSetManager: CalendarSetManager;
 
   async onload(): Promise<void> {
-    this.ribbonEl = null;
-
-    this.updateSettings = this.updateSettings.bind(this);
-
     await this.loadSettings();
-    this.addSettingTab(new PeriodicNotesSettingsTab(this.app, this));
 
-    this.app.workspace.onLayoutReady(this.onLayoutReady.bind(this));
+    this.ribbonEl = null;
+    this.cache = new PeriodicNotesCache(this.app, this);
+    this.calendarSetManager = new CalendarSetManager(this);
+
+    this.onUpdateSettings = this.onUpdateSettings.bind(this);
+    this.updateSettings = this.updateSettings.bind(this);
+    this.addSettingTab(new PeriodicNotesSettingsTab(this.app, this));
 
     addIcon("calendar-day", calendarDayIcon);
     addIcon("calendar-week", calendarWeekIcon);
     addIcon("calendar-month", calendarMonthIcon);
     addIcon("calendar-quarter", calendarQuarterIcon);
     addIcon("calendar-year", calendarYearIcon);
-  }
 
-  onLayoutReady(): void {
-    // If the user has Calendar Weekly Notes settings, migrate them automatically,
-    // since the functionality will be deprecated.
-    if (this.isInitialLoad && hasLegacyWeeklyNoteSettings()) {
-      this.migrateWeeklySettings();
-      this.settings.weekly.enabled = true;
-    }
-
-    this.configureRibbonIcons();
-    this.configureCommands();
-  }
-
-  private migrateWeeklySettings(): void {
-    const calendarSettings = getLegacyWeeklyNoteSettings();
-    this.updateSettings({
-      ...this.settings,
-      ...{
-        weekly: { ...calendarSettings, enabled: true },
-        hasMigratedWeeklyNoteSettings: true,
+    this.addCommand({
+      id: "show-date-switcher",
+      name: "Show date switcher...",
+      checkCallback: (checking: boolean) => {
+        const leaf = this.app.workspace.activeLeaf;
+        if (checking) {
+          return !!leaf;
+        }
+        new NLDNavigator(this.app, this).open();
       },
+      hotkeys: [],
+    });
+
+    this.app.workspace.onLayoutReady(() => {
+      // If the user has Calendar Weekly Notes settings, migrate them automatically,
+      // since the functionality will be deprecated.
+      // if (hasLegacyWeeklyNoteSettings(this.app)) {
+      //   this.migrateWeeklySettings();
+      //   this.settings.weekly.enabled = true;
+      // }
+      this.cache.initialize();
+
+      this.configureRibbonIcons();
+      this.configureCommands();
     });
   }
 
   private configureRibbonIcons() {
     this.ribbonEl?.detach();
 
-    const configuredPeriodicities = [
-      "daily",
-      "weekly",
-      "monthly",
-      "quarterly",
-      "yearly",
-    ].filter((periodicity) => this.settings[periodicity].enabled);
-
-    if (configuredPeriodicities.length) {
-      const periodicity = configuredPeriodicities[0] as IPeriodicity;
-      const config = periodConfigs[periodicity];
-
+    const configuredGranularities = this.calendarSetManager.getActiveGranularities();
+    if (configuredGranularities.length) {
+      const granularity = configuredGranularities[0];
+      const config = displayConfigs[granularity];
       this.ribbonEl = this.addRibbonIcon(
-        `calendar-${config.unitOfTime}`,
-        `Open ${config.relativeUnit}`,
+        `calendar-${granularity}`,
+        `Open ${config.labelOpenPresent}`,
         (event: MouseEvent) =>
-          openPeriodicNote(periodicity, window.moment(), isMetaPressed(event))
+          this.openPeriodicNote(granularity, window.moment(), isMetaPressed(event))
       );
       this.ribbonEl.addEventListener("contextmenu", (ev: MouseEvent) => {
-        showFileMenu(this.app, this.settings, {
+        showFileMenu(this.app, this, {
           x: ev.pageX,
           y: ev.pageY,
         });
@@ -108,31 +99,24 @@ export default class PeriodicNotesPlugin extends Plugin {
 
   private configureCommands() {
     // Remove disabled commands
-    ["daily", "weekly", "monthly", "quarterly", "yearly"]
-      .filter((periodicity) => !this.settings[periodicity].enabled)
-      .forEach((periodicity: IPeriodicity) => {
-        getCommands(periodicity).forEach((command) =>
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (this.app as any).commands.removeCommand(
-            `periodic-notes:${command.id}`
-          )
+    this.calendarSetManager
+      .getInactiveGranularities()
+      .forEach((granularity: Granularity) => {
+        getCommands(this.app, this, granularity).forEach((command) =>
+          this.app.commands.removeCommand(`periodic-notes:${command.id}`)
         );
       });
 
     // register enabled commands
-    ["daily", "weekly", "monthly", "quarterly", "yearly"]
-      .filter((periodicity) => this.settings[periodicity].enabled)
-      .forEach((periodicity: IPeriodicity) => {
-        getCommands(periodicity).forEach(this.addCommand.bind(this));
+    this.calendarSetManager
+      .getActiveGranularities()
+      .forEach((granularity: Granularity) => {
+        getCommands(this.app, this, granularity).forEach(this.addCommand.bind(this));
       });
   }
 
   async loadSettings(): Promise<void> {
     const settings = await this.loadData();
-
-    if (!settings) {
-      this.isInitialLoad = true;
-    }
 
     this.settings = Object.assign(
       {},
@@ -140,18 +124,14 @@ export default class PeriodicNotesPlugin extends Plugin {
         showGettingStartedBanner: true,
         hasMigratedDailyNoteSettings: false,
         hasMigratedWeeklyNoteSettings: false,
-
-        daily: { ...DEFAULT_SETTINGS },
-        weekly: { ...DEFAULT_SETTINGS },
-        monthly: { ...DEFAULT_SETTINGS },
-        quarterly: { ...DEFAULT_SETTINGS },
-        yearly: { ...DEFAULT_SETTINGS },
+        calendarSets: [],
       },
       settings || {}
     );
   }
 
-  private onSettingsUpdate(): void {
+  public async onUpdateSettings(newSettings: ISettings): Promise<void> {
+    await this.saveData(newSettings);
     this.configureCommands();
     this.configureRibbonIcons();
 
@@ -159,10 +139,64 @@ export default class PeriodicNotesPlugin extends Plugin {
     this.app.workspace.trigger(SETTINGS_UPDATED);
   }
 
-  async updateSettings(val: ISettings): Promise<void> {
-    this.settings = val;
-    await this.saveData(this.settings);
+  public updateSettings(tx: (old: ISettings) => Partial<ISettings>): void {
+    const changedSettings = tx(this.settings);
+    const newSettings = Object.assign({}, this.settings, changedSettings);
 
-    this.onSettingsUpdate();
+    this.onUpdateSettings(newSettings);
+  }
+
+  public async createPeriodicNote(
+    granularity: Granularity,
+    date: Moment
+  ): Promise<TFile> {
+    const config = this.calendarSetManager.getActiveConfig(granularity);
+    const format = this.calendarSetManager.getFormat(granularity);
+    const filename = date.format(format);
+    const templateContents = await getTemplateContents(this.app, config);
+    const renderedContents = applyTemplateTransformations(
+      filename,
+      date,
+      format,
+      templateContents
+    );
+    const destPath = await getNoteCreationPath(this.app, filename, config);
+    console.log("attempting to create file at path:", destPath);
+    return this.app.vault.create(destPath, renderedContents);
+  }
+
+  public getPeriodicNote(granularity: Granularity, date: Moment): TFile | null {
+    return this.cache.getPeriodicNote(
+      this.calendarSetManager.activeSet,
+      granularity,
+      date
+    );
+  }
+
+  public getFileMetadata(filePath: string): PeriodicNoteCachedMetadata | null {
+    return this.cache.get(filePath);
+  }
+
+  public async openPeriodicNote(
+    granularity: Granularity,
+    date: Moment,
+    inNewSplit: boolean
+  ): Promise<void> {
+    const { workspace } = this.app;
+    let file = this.cache.getPeriodicNote(
+      this.calendarSetManager.activeSet,
+      granularity,
+      date
+    );
+    if (!file) {
+      file = await this.createPeriodicNote(granularity, date);
+    }
+
+    const leaf = inNewSplit ? workspace.splitActiveLeaf() : workspace.getUnpinnedLeaf();
+    await leaf.openFile(file, { active: true });
+  }
+
+  public getCachedFiles(): Map<string, PeriodicNoteCachedMetadata> {
+    return this.cache.getCachedFiles();
   }
 }
