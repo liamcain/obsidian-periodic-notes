@@ -96,7 +96,7 @@
   }
 
   .periodic-group {
-    background: var(--background-primary);
+    background: var(--background-primary-alt);
     border: 1px solid var(--background-modifier-border);
     border-radius: 16px;
   }

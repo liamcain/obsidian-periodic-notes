@@ -69,6 +69,7 @@
   {#each manager.getCalendarSets() as calendarSet}
     <CalendarSetMenuItem
       {calendarSet}
+      {manager}
       viewDetails={() => router.navigate(["Periodic Notes", calendarSet.id])}
     />
   {/each}

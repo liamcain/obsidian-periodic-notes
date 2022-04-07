@@ -48,7 +48,7 @@
       class:has-error={!!error}
       type="text"
       spellcheck={false}
-      placeholder="Example: folder/note"
+      placeholder="e.g. templates/template-file"
       bind:value={$config.templatePath}
       bind:this={inputEl}
       on:change={validateOnBlur}

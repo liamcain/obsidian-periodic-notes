@@ -46,7 +46,7 @@
       class:has-error={!!error}
       type="text"
       spellcheck={false}
-      placeholder="Example: folder 1/folder 2"
+      placeholder="e.g. folder 1/folder 2"
       on:change={onChange}
       on:input={clearError}
     />

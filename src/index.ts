@@ -55,9 +55,11 @@ export default class PeriodicNotesPlugin extends Plugin {
       id: "show-date-switcher",
       name: "Show date switcher...",
       checkCallback: (checking: boolean) => {
-        const leaf = this.app.workspace.activeLeaf;
+        if (!this.app.plugins.getPlugin("nldates-obsidian")) {
+          return false;
+        }
         if (checking) {
-          return !!leaf;
+          return !!this.app.workspace.activeLeaf;
         }
         new NLDNavigator(this.app, this).open();
       },

@@ -15,7 +15,7 @@
 
 <style>
   .check {
-    margin-left: 6px;
+    color: var(--text-accent);
     width: 12px;
     height: 12px;
   }

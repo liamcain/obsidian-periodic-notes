@@ -33,6 +33,7 @@
 
   .crumb {
     cursor: pointer;
+    font-weight: 600;
     margin: 0 0.4em;
 
     &:first-of-type {

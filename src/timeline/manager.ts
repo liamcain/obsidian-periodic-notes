@@ -44,7 +44,7 @@ export default class TimelineManager {
             props: {
               plugin: this.plugin,
               cache: this.cache,
-              view: view,
+              view,
             },
           })
         );

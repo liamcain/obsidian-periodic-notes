@@ -109,8 +109,10 @@ declare module "obsidian" {
     viewRegistry: ViewRegistry;
   }
 
+  type PluginId = "nldates-obsidian" | "calendar" | string;
+
   export interface CommunityPluginManager {
-    getPlugin(id: string): Plugin;
+    getPlugin(id: PluginId): Plugin;
   }
 
   export interface InstalledPlugin {

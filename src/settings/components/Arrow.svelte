@@ -17,7 +17,7 @@
   .arrow {
     align-items: center;
     display: flex;
-    margin-right: 0.2em;
+    margin-right: 0.6em;
     transition: 0.2s transform ease-in;
   }
 

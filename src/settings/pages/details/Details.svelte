@@ -46,7 +46,7 @@
       .addItem((item) =>
         item
           .setTitle("Set as active")
-          .setIcon("x")
+          .setIcon("check-circle-2")
           .onClick(() => {
             manager.setActiveSet(selectedCalendarSet);
           })
@@ -132,6 +132,7 @@
   .calendarset-titlebar {
     display: flex;
     justify-content: space-between;
+    margin-top: 12px;
   }
 
   .calendarset-title {
