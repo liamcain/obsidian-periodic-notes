@@ -1,4 +1,4 @@
-import { type Command, App, TFile } from "obsidian";
+import { type Command, App, TFile, Notice } from "obsidian";
 import type PeriodicNotesPlugin from "src/main";
 
 import type { Granularity } from "./types";
@@ -37,55 +37,54 @@ export const displayConfigs: Record<Granularity, IDisplayConfig> = {
   },
 };
 
-async function openNextNote(
+async function jumpToAdjacentNote(
   app: App,
   plugin: PeriodicNotesPlugin,
-  _granularity: Granularity
+  direction: "forwards" | "backwards"
 ): Promise<void> {
   const activeFile = app.workspace.getActiveFile();
-
   if (!activeFile) return;
   const activeFileMeta = plugin.findInCache(activeFile.path);
   if (!activeFileMeta) return;
 
-  const nextNoteMeta = plugin.findAdjacent(
+  const adjacentNoteMeta = plugin.findAdjacent(
     activeFileMeta.calendarSet,
     activeFile.path,
-    "forwards"
+    direction
   );
 
-  if (nextNoteMeta) {
-    const file = app.vault.getAbstractFileByPath(nextNoteMeta.filePath);
+  if (adjacentNoteMeta) {
+    const file = app.vault.getAbstractFileByPath(adjacentNoteMeta.filePath);
     if (file && file instanceof TFile) {
       const leaf = app.workspace.getUnpinnedLeaf();
       await leaf.openFile(file, { active: true });
     }
+  } else {
+    const qualifier = direction === "forwards" ? "after" : "before";
+    new Notice(
+      `There's no ${
+        displayConfigs[activeFileMeta.granularity].periodicity
+      } note ${qualifier} this`
+    );
   }
 }
 
-async function openPrevNote(
+async function openAdjacentNote(
   app: App,
   plugin: PeriodicNotesPlugin,
-  _granularity: Granularity // TODO switch these commands to be generic?
+  direction: "forwards" | "backwards"
 ): Promise<void> {
   const activeFile = app.workspace.getActiveFile();
   if (!activeFile) return;
   const activeFileMeta = plugin.findInCache(activeFile.path);
   if (!activeFileMeta) return;
 
-  const prevNoteMeta = plugin.findAdjacent(
-    activeFileMeta.calendarSet,
-    activeFile.path,
-    "backwards"
-  );
+  const offset = direction === "forwards" ? 1 : -1;
+  const adjacentDate = activeFileMeta.date
+    .clone()
+    .add(offset, activeFileMeta.granularity);
 
-  if (prevNoteMeta) {
-    const file = app.vault.getAbstractFileByPath(prevNoteMeta.filePath);
-    if (file && file instanceof TFile) {
-      const leaf = app.workspace.getUnpinnedLeaf();
-      await leaf.openFile(file, { active: true });
-    }
-  }
+  plugin.openPeriodicNote(activeFileMeta.granularity, adjacentDate, false);
 }
 
 export function getCommands(
@@ -104,6 +103,30 @@ export function getCommands(
 
     {
       id: `next-${config.periodicity}-note`,
+      name: `Jump forwards to closest ${config.periodicity} note`,
+      checkCallback: (checking: boolean) => {
+        const activeFile = app.workspace.getActiveFile();
+        if (checking) {
+          if (!activeFile) return false;
+          return plugin.isPeriodic(activeFile.path, granularity);
+        }
+        jumpToAdjacentNote(app, plugin, "forwards");
+      },
+    },
+    {
+      id: `prev-${config.periodicity}-note`,
+      name: `Jump backwards to closest ${config.periodicity} note`,
+      checkCallback: (checking: boolean) => {
+        const activeFile = app.workspace.getActiveFile();
+        if (checking) {
+          if (!activeFile) return false;
+          return plugin.isPeriodic(activeFile.path, granularity);
+        }
+        openAdjacentNote(app, plugin, "backwards");
+      },
+    },
+    {
+      id: `open-next-${config.periodicity}-note`,
       name: `Open next ${config.periodicity} note`,
       checkCallback: (checking: boolean) => {
         const activeFile = app.workspace.getActiveFile();
@@ -111,12 +134,11 @@ export function getCommands(
           if (!activeFile) return false;
           return plugin.isPeriodic(activeFile.path, granularity);
         }
-        openNextNote(app, plugin, granularity);
+        openAdjacentNote(app, plugin, "forwards");
       },
     },
-
     {
-      id: `prev-${config.periodicity}-note`,
+      id: `open-prev-${config.periodicity}-note`,
       name: `Open previous ${config.periodicity} note`,
       checkCallback: (checking: boolean) => {
         const activeFile = app.workspace.getActiveFile();
@@ -124,7 +146,7 @@ export function getCommands(
           if (!activeFile) return false;
           return plugin.isPeriodic(activeFile.path, granularity);
         }
-        openPrevNote(app, plugin, granularity);
+        openAdjacentNote(app, plugin, "backwards");
       },
     },
   ];

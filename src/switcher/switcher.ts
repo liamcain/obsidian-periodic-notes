@@ -146,10 +146,16 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
       return [
         getSuggestion(`in ${timeDelta} days`, "day"),
         getSuggestion(`in ${timeDelta} weeks`, "day"),
-        getSuggestion(`in ${timeDelta} months`, "day"),
+        getSuggestion(`in ${timeDelta} weeks`, "week"),
+        getSuggestion(`in ${timeDelta} months`, "month"),
+        getSuggestion(`in ${timeDelta} years`, "day"),
+        getSuggestion(`in ${timeDelta} years`, "year"),
         getSuggestion(`${timeDelta} days ago`, "day"),
         getSuggestion(`${timeDelta} weeks ago`, "day"),
+        getSuggestion(`${timeDelta} weeks ago`, "week"),
         getSuggestion(`${timeDelta} months ago`, "month"),
+        getSuggestion(`${timeDelta} years ago`, "day"),
+        getSuggestion(`${timeDelta} years ago`, "year"),
       ]
         .filter((items) => activeGranularities.includes(items.granularity))
         .filter((item) => item.label.toLowerCase().startsWith(query));
@@ -165,6 +171,9 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
       getSuggestion("this month", "month"),
       getSuggestion("last month", "month"),
       getSuggestion("next month", "month"),
+      getSuggestion("this quarter", "quarter"),
+      getSuggestion("last quarter", "quarter"),
+      getSuggestion("next quarter", "quarter"),
       getSuggestion("this year", "year"),
       getSuggestion("last year", "year"),
       getSuggestion("next year", "year"),

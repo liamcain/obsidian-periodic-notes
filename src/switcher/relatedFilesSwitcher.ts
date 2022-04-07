@@ -12,7 +12,9 @@ const DEFAULT_INSTRUCTIONS = [
 ];
 
 export class RelatedFilesSwitcher extends SuggestModal<DateNavigationItem> {
+  private inputLabel: HTMLElement;
   private includeFinerGranularities: boolean;
+
   constructor(
     readonly app: App,
     readonly plugin: PeriodicNotesPlugin,
@@ -24,6 +26,17 @@ export class RelatedFilesSwitcher extends SuggestModal<DateNavigationItem> {
     this.includeFinerGranularities = false;
     this.setInstructions(DEFAULT_INSTRUCTIONS);
     this.setPlaceholder(`Search notes related to ${selectedItem.label}...`);
+
+    this.inputEl.parentElement?.prepend(
+      createDiv("periodic-notes-switcher-input-container", (inputContainer) => {
+        inputContainer.appendChild(this.inputEl);
+        this.inputLabel = inputContainer.createDiv({
+          cls: "related-notes-mode-indicator",
+          text: "Expanded",
+        });
+        this.inputLabel.toggleVisibility(false);
+      })
+    );
 
     this.scope.register([], "Tab", (evt: KeyboardEvent) => {
       evt.preventDefault();
@@ -38,6 +51,9 @@ export class RelatedFilesSwitcher extends SuggestModal<DateNavigationItem> {
     this.scope.register(["Shift"], "8", (evt: KeyboardEvent) => {
       evt.preventDefault();
       this.includeFinerGranularities = !this.includeFinerGranularities;
+      this.inputLabel.style.visibility = this.includeFinerGranularities
+        ? "visible"
+        : "hidden";
       this.inputEl.dispatchEvent(new Event("input"));
     });
   }
