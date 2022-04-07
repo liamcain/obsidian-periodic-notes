@@ -30,15 +30,6 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
 
   constructor(readonly app: App, readonly plugin: PeriodicNotesPlugin) {
     super(app);
-    // this.inputEl.parentElement.prepend(
-    //   createDiv("periodic-notes-switcher-input-container", (inputContainer) => {
-    //     inputContainer.appendChild(this.inputEl);
-    //     this.granularityLabel = inputContainer.createDiv({
-    //       cls: "mode-indicator",
-    //       text: this.mode,
-    //     });
-    //   })
-    // );
 
     this.setInstructions(DEFAULT_INSTRUCTIONS);
     this.setPlaceholder("Type date to find related notes");
@@ -127,6 +118,7 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
       return [
         getSuggestion(`${reference} week`, "week"),
         getSuggestion(`${reference} month`, "month"),
+        // getSuggestion(`${reference} quarter`, "quarter"),
         getSuggestion(`${reference} year`, "year"),
         getSuggestion(`${reference} Sunday`, "day"),
         getSuggestion(`${reference} Monday`, "day"),
@@ -171,9 +163,10 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
       getSuggestion("this month", "month"),
       getSuggestion("last month", "month"),
       getSuggestion("next month", "month"),
-      getSuggestion("this quarter", "quarter"),
-      getSuggestion("last quarter", "quarter"),
-      getSuggestion("next quarter", "quarter"),
+      // TODO - requires adding new parser to NLDates
+      // getSuggestion("this quarter", "quarter"),
+      // getSuggestion("last quarter", "quarter"),
+      // getSuggestion("next quarter", "quarter"),
       getSuggestion("this year", "year"),
       getSuggestion("last year", "year"),
       getSuggestion("next year", "year"),
