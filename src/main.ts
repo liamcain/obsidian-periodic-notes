@@ -18,7 +18,12 @@ import {
   calendarYearIcon,
 } from "./icons";
 import { showFileMenu } from "./modal";
-import { type ISettings, PeriodicNotesSettingsTab, DEFAULT_SETTINGS } from "./settings";
+import {
+  type ISettings,
+  PeriodicNotesSettingsTab,
+  DEFAULT_SETTINGS,
+  DEFAULT_PERIODIC_CONFIG,
+} from "./settings";
 import {
   createNewCalendarSet,
   findStartupNoteConfig,
@@ -177,7 +182,14 @@ export default class PeriodicNotesPlugin extends Plugin {
         );
       } else {
         // otherwise create new default calendar set
-        this.settings.update(createNewCalendarSet(DEFAULT_CALENDARSET_ID));
+        this.settings.update(
+          createNewCalendarSet(DEFAULT_CALENDARSET_ID, {
+            day: {
+              ...DEFAULT_PERIODIC_CONFIG,
+              enabled: true,
+            },
+          })
+        );
       }
       this.settings.update(setActiveSet(DEFAULT_CALENDARSET_ID));
     }

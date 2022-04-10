@@ -1,97 +1,27 @@
-# Periodic Notes ⌚
+# Periodic Notes
 
-The Periodic Notes plugin expands on the idea of daily notes and introduces weekly and monthly notes.
+Create and manage all of your time-based notes within Obsidian.
 
-## Weekly Notes
+This plugin allows you to:
+- Create notes for any periodic of time (daily, weekly, monthly, etc)
+- Jump to any time-based notes using natural language (requires NL Dates plugin)
+- Easily orient yourself in a sea of `202204101611 Zettelkasten Prefixed notes`
 
-### Commands
+## Features
 
-#### Open Weekly Note
+### Calendar sets
 
-Opens the weekly note for the current week. If one doesn't exist, it will create one automatically for you.
+A **calendar set** describes a collection of periodic notes. Now you no longer need to have a single Daily Note, instead you can have one for each pillar of your life. Have a clean break between Personal and Work. Track a project. Track client work. Organize your school work. Calendar sets offer _flexibility_ for you to live more strict.
 
-#### Next Weekly Note
+### Date switcher
 
-Navigates to the next weekly note chronologically. Skips over weeks with no weekly note file.
 
-> **Note:** This command is only available if the active focused note is a weekly note.
 
-#### Previous Weekly Note
+Two of the biggest pain points in workflows involving Periodic notes and Zettelkasten-ish notes are **note recall** and **navigation**. The date switcher attempts to solve both of these issues. Use natural language to quickly find periodic notes and other date-related notes. Looking for a meeting note from last week? Just search: `last week ⇥ meeting`. It's my proudest feature of this release and I really hope you love it.
 
-Navigates to the previous weekly note chronologically. Skips over weeks with no weekly note file.
+### Timeline **complication**
 
-> **Note:** This command is only available if the active focused note is a weekly note.
-
-### Calendar Plugin Integration
-
-If you have "Week numbers" enabled from the Calendar plugin, the calendar will automatically use your weekly note settings to create a seamless experience.
-
-#### Weekly Notes are moving
-
-If you currently use the Calendar plugin, you might be thinking "doesn't the Calendar plugin already do this?" To which the answer is: **yes**. This plugin provides the same functionality as the Calendar plugin's weekly notes. However, [weekly notes are moving away from the Calendar plugin to this one](https://github.com/liamcain/obsidian-calendar-plugin#weekly-notes-have-a-new-home).
-
-#### Migrating
-
-If you currently use weekly notes with the Calendar plugin, your settings will automatically be migrated over and the calendar plugin still function the same way it did before.
-
-You can create a Daily Note either by clicking on the calendar icon in the left panel, or with the Command palette. You can also set a hotkey in Keyboard shortcuts.
-
-### Weekly Settings
-
-| Setting  | Description                                                                                                                                                                                          |
-| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Folder   | The folder that your weekly notes go into. It can be the same or different from your daily notes. By default they are placed in your vault root.                                                     |
-| Template | Configure a template for weekly notes. Weekly notes have slightly different template tags than daily notes. See here for the list of supported [weekly note template tags](#weekly-template-tags).          |
-| Format   | The date format for the weekly note filename. Defaults to `gggg-[W]ww`. If you use `DD` in the week format, this will refer to first day of the week (Sunday or Monday, depending on your settings). |
-
-### Weekly Template Tags
-
-| Tag                                                                                    | Description                                                                                                                                                                                                  |
-| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `title`                                                                                | Works the same as the daily note `{{title}}`. It will insert the title of the note                                                                                                                           |
-| `date`, `time`                                                                         | Works the same as the daily note `{{date}}` and `{{time}}`. It will insert the date and time of the first day of the week. Useful for creating a heading (e.g. `# {{date:gggg [Week] ww}}`).                 |
-| `sunday`, `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday`, `sunday` | Because weekly tags refer to main days, you can refer to individual days like this `{{sunday:YYYY-MM-DD}}` to automatically insert the date for that particular day. Note, you must specify the date format! |
-
-## Monthly Notes
-
-### Commands
-
-#### Open Monthly Note
-
-Opens the monthly note for the current week. If one doesn't exist, it will create one automatically for you.
-
-#### Next Monthly Note
-
-Navigates to the next monthly note chronologically. Skips over weeks with no monthly note file.
-
-> **Note:** This command is only available if the active focused note is a monthly note.
-
-#### Previous Monthly Note
-
-Navigates to the previous monthly note chronologically. Skips over weeks with no monthly note file.
-
-> **Note:** This command is only available if the active focused note is a monthly note.
-
-### Calendar Plugin Integration
-
-Coming soon! I just have to figure out a good place to show it in the UI.
-
-### Monthly Settings
-
-| Setting  | Description                                                                                                                                                                                        |
-| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Folder   | The folder that your monthly notes go into. It can be the same or different from your daily notes. By default they are placed in your vault root.                                                  |
-| Template | Configure a template for monthly notes. Monthly notes have slightly different template tags than daily notes. See here for the list of supported [monthly note template tags](#monthly-template-tags).     |
-| Format   | The date format for the monthly note filename. Defaults to `YYYY-MM`. If you use `DD` in the week format, this will refer to first day of the week (Sunday or Monday, depending on your settings). |
-
-### Monthly Template Tags
-
-| Tag            | Description                                                                                                                                                                            |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `title`        | Works the same as the daily note `{{title}}`. It will insert the title of the note                                                                                                     |
-| `date`, `time` | Works the same as the daily note `{{date}}` and `{{time}}`. It will insert the date and time of the first day of the week. Useful for creating a heading (e.g. `# {{date:MMM YYYY}}`). |
-
----
+The date switcher will have you zipping around from note to note so fast you might start getting a bit lost. But don't fret! There is now a timeline "complication" on the top-right of your periodic notes that shows you in natural language exactly where you are.
 
 ## FAQ
 

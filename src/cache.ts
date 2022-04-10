@@ -53,19 +53,6 @@ function getCanonicalDateString(_granularity: Granularity, date: Moment): string
   return date.toISOString();
 }
 
-const memoizedRecurseChildren = memoize(
-  (rootFolder: TFolder, cb: (file: TAbstractFile) => void) => {
-    if (!rootFolder) return;
-    for (const c of rootFolder.children) {
-      if (c instanceof TFile) {
-        cb(c);
-      } else if (c instanceof TFolder) {
-        memoizedRecurseChildren(c, cb);
-      }
-    }
-  }
-);
-
 export class PeriodicNotesCache extends Component {
   // Map the full filename to
   public cachedFiles: Map<string, Map<string, PeriodicNoteCachedMetadata>>;
@@ -89,11 +76,25 @@ export class PeriodicNotesCache extends Component {
   }
 
   public reset(): void {
+    console.info("[Periodic Notes] reseting cache");
     this.cachedFiles.clear();
     this.initialize();
   }
 
   public initialize(): void {
+    const memoizedRecurseChildren = memoize(
+      (rootFolder: TFolder, cb: (file: TAbstractFile) => void) => {
+        if (!rootFolder) return;
+        for (const c of rootFolder.children) {
+          if (c instanceof TFile) {
+            cb(c);
+          } else if (c instanceof TFolder) {
+            memoizedRecurseChildren(c, cb);
+          }
+        }
+      }
+    );
+
     for (const calendarSet of this.plugin.calendarSetManager.getCalendarSets()) {
       const activeGranularities = granularities.filter((g) => calendarSet[g]?.enabled);
       for (const granularity of activeGranularities) {
