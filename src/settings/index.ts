@@ -1,4 +1,5 @@
 import { App, PluginSettingTab } from "obsidian";
+import { DEFAULT_CALENDARSET_ID } from "src/calendarSetManager";
 import type { CalendarSet, PeriodicConfig } from "src/types";
 import type { SvelteComponent } from "svelte";
 
@@ -9,6 +10,7 @@ export interface ISettings {
   showGettingStartedBanner: boolean;
   hasMigratedDailyNoteSettings: boolean;
   hasMigratedWeeklyNoteSettings: boolean;
+  installedVersion: string;
 
   activeCalendarSet: string;
   calendarSets: CalendarSet[];
@@ -16,7 +18,9 @@ export interface ISettings {
   enableTimelineComplication: boolean;
 }
 
-export const DEFAULT_SETTINGS = {
+export const DEFAULT_SETTINGS: ISettings = {
+  installedVersion: "1.0.0-beta1",
+  activeCalendarSet: DEFAULT_CALENDARSET_ID,
   showGettingStartedBanner: true,
   hasMigratedDailyNoteSettings: false,
   hasMigratedWeeklyNoteSettings: false,
@@ -26,6 +30,8 @@ export const DEFAULT_SETTINGS = {
 
 export const DEFAULT_PERIODIC_CONFIG: PeriodicConfig = Object.freeze({
   enabled: false,
+  openAtStartup: false,
+
   format: "",
   templatePath: "",
   folder: "",

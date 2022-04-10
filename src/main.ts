@@ -3,7 +3,12 @@ import { addIcon, Plugin, TFile } from "obsidian";
 import { writable, type Writable } from "svelte/store";
 
 import { PeriodicNotesCache, type PeriodicNoteCachedMetadata } from "./cache";
-import CalendarSetManager from "./calendarSetManager";
+import CalendarSetManager, {
+  DEFAULT_CALENDARSET_ID,
+  isLegacySettings,
+  migrateDailyNoteSettings,
+  migrateLegacySettingsToCalendarSet,
+} from "./calendarSetManager";
 import { displayConfigs, getCommands } from "./commands";
 import {
   calendarDayIcon,
@@ -14,6 +19,11 @@ import {
 } from "./icons";
 import { showFileMenu } from "./modal";
 import { type ISettings, PeriodicNotesSettingsTab, DEFAULT_SETTINGS } from "./settings";
+import {
+  createNewCalendarSet,
+  findStartupNoteConfig,
+  setActiveSet,
+} from "./settings/utils";
 import { CalendarSetSuggestModal } from "./switcher/calendarSetSwitcher";
 import { NLDNavigator } from "./switcher/switcher";
 import TimelineManager from "./timeline/manager";
@@ -22,8 +32,14 @@ import {
   applyTemplateTransformations,
   getNoteCreationPath,
   getTemplateContents,
+  hasLegacyDailyNoteSettings,
   isMetaPressed,
 } from "./utils";
+
+interface IOpenOpts {
+  inNewSplit?: boolean;
+  calendarSet?: string;
+}
 
 export default class PeriodicNotesPlugin extends Plugin {
   public settings: Writable<ISettings>;
@@ -85,6 +101,13 @@ export default class PeriodicNotesPlugin extends Plugin {
       // }
       this.configureRibbonIcons();
       this.configureCommands();
+
+      const startupNoteConfig = findStartupNoteConfig(this.settings);
+      if (startupNoteConfig) {
+        this.openPeriodicNote(startupNoteConfig.granularity, window.moment(), {
+          calendarSet: startupNoteConfig.calendarSet,
+        });
+      }
     });
   }
 
@@ -100,7 +123,9 @@ export default class PeriodicNotesPlugin extends Plugin {
         config.labelOpenPresent,
         (e: MouseEvent) => {
           if (e.type !== "auxclick") {
-            this.openPeriodicNote(granularity, window.moment(), isMetaPressed(e));
+            this.openPeriodicNote(granularity, window.moment(), {
+              inNewSplit: isMetaPressed(e),
+            });
           }
         }
       );
@@ -136,6 +161,26 @@ export default class PeriodicNotesPlugin extends Plugin {
     const savedSettings = await this.loadData();
     const settings = Object.assign({}, DEFAULT_SETTINGS, savedSettings || {});
     this.settings.set(settings);
+
+    if (!settings.calendarSets || settings.calendarSets.length === 0) {
+      // check for migration
+      if (isLegacySettings(settings)) {
+        this.settings.update(
+          createNewCalendarSet(
+            DEFAULT_CALENDARSET_ID,
+            migrateLegacySettingsToCalendarSet(settings)
+          )
+        );
+      } else if (hasLegacyDailyNoteSettings(app)) {
+        this.settings.update(
+          createNewCalendarSet(DEFAULT_CALENDARSET_ID, migrateDailyNoteSettings(settings))
+        );
+      } else {
+        // otherwise create new default calendar set
+        this.settings.update(createNewCalendarSet(DEFAULT_CALENDARSET_ID));
+      }
+      this.settings.update(setActiveSet(DEFAULT_CALENDARSET_ID));
+    }
   }
 
   private async onUpdateSettings(newSettings: ISettings): Promise<void> {
@@ -147,13 +192,6 @@ export default class PeriodicNotesPlugin extends Plugin {
     // Integrations (i.e. Calendar Plugin) can listen for changes to settings
     this.app.workspace.trigger("periodic-notes:settings-updated");
   }
-
-  // public updateSettings(tx: (old: ISettings) => Partial<ISettings>): void {
-  //   const changedSettings = tx(this.settings);
-  //   const newSettings = Object.assign({}, this.settings, changedSettings);
-
-  //   this.onUpdateSettings(newSettings);
-  // }
 
   public async createPeriodicNote(
     granularity: Granularity,
@@ -214,11 +252,12 @@ export default class PeriodicNotesPlugin extends Plugin {
   public async openPeriodicNote(
     granularity: Granularity,
     date: Moment,
-    inNewSplit: boolean
+    opts?: IOpenOpts
   ): Promise<void> {
+    const { inNewSplit = false, calendarSet } = opts ?? {};
     const { workspace } = this.app;
     let file = this.cache.getPeriodicNote(
-      this.calendarSetManager.getActiveSet(),
+      calendarSet ?? this.calendarSetManager.getActiveSet(),
       granularity,
       date
     );

@@ -5,7 +5,7 @@ import {
   type Granularity,
   type PeriodicConfig,
 } from "src/types";
-import { type Updater } from "svelte/store";
+import { get, type Updater, type Writable } from "svelte/store";
 
 import { DEFAULT_PERIODIC_CONFIG, type ISettings } from ".";
 
@@ -59,4 +59,43 @@ export const setActiveSet: UpdateActiveFunc = (id: string) => {
     settings.activeCalendarSet = id;
     return settings;
   };
+};
+
+export const clearStartupNote: Updater<ISettings> = (settings: ISettings) => {
+  for (const calendarSet of settings.calendarSets) {
+    for (const granularity of granularities) {
+      const config = calendarSet[granularity];
+      if (config && config.openAtStartup) {
+        config.openAtStartup = false;
+      }
+    }
+  }
+  return settings;
+};
+
+interface StartupNoteConfig {
+  calendarSet: string;
+  granularity: Granularity;
+}
+
+type FindStartupNoteConfigFunc = (
+  settings: Writable<ISettings>
+) => StartupNoteConfig | null;
+export const findStartupNoteConfig: FindStartupNoteConfigFunc = (
+  settings: Writable<ISettings>
+) => {
+  const calendarSets = get(settings).calendarSets;
+  for (const calendarSet of calendarSets) {
+    for (const granularity of granularities) {
+      const config = calendarSet[granularity];
+      if (config && config.openAtStartup) {
+        return {
+          calendarSet: calendarSet.id,
+          granularity,
+        };
+      }
+    }
+  }
+
+  return null;
 };

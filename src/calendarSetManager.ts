@@ -1,9 +1,9 @@
+import type { DailyNotesSettings } from "obsidian";
 import type PeriodicNotesPlugin from "src/main";
 import { get } from "svelte/store";
 
 import { DEFAULT_FORMAT } from "./constants";
 import { DEFAULT_PERIODIC_CONFIG } from "./settings";
-import { createNewCalendarSet } from "./settings/utils";
 import {
   granularities,
   type CalendarSet,
@@ -30,9 +30,9 @@ interface ILegacySettings {
   yearly: IPerioditySettings;
 }
 
-const DEFAULT_CALENDARSET_ID = "Default";
+export const DEFAULT_CALENDARSET_ID = "Default";
 
-function isLegacySettings(settings: unknown): settings is ILegacySettings {
+export function isLegacySettings(settings: unknown): settings is ILegacySettings {
   const maybeLegacySettings = settings as ILegacySettings;
   return !!(
     maybeLegacySettings.daily ||
@@ -43,14 +43,35 @@ function isLegacySettings(settings: unknown): settings is ILegacySettings {
   );
 }
 
-function migrateLegacySettingsToCalendarSet(settings: ILegacySettings): CalendarSet {
+export function migrateDailyNoteSettings(settings: ILegacySettings): CalendarSet {
+  const migrateConfig = (settings: DailyNotesSettings) => {
+    return {
+      enabled: true,
+      format: settings.format || "",
+      folder: settings.folder || "",
+      openAtStartup: settings.autorun,
+      templatePath: settings.template,
+    } as PeriodicConfig;
+  };
+
+  return {
+    id: DEFAULT_CALENDARSET_ID,
+    ctime: window.moment().format(),
+    day: migrateConfig(settings.daily),
+  };
+}
+
+export function migrateLegacySettingsToCalendarSet(
+  settings: ILegacySettings
+): CalendarSet {
   const migrateConfig = (settings: ILegacySettings["daily"]) => {
     return {
       enabled: settings.enabled,
       format: settings.format || "",
       folder: settings.folder || "",
+      openAtStartup: false,
       templatePath: settings.template,
-    };
+    } as PeriodicConfig;
   };
 
   return {
@@ -96,23 +117,7 @@ export default class CalendarSetManager {
   }
 
   public getCalendarSets(): CalendarSet[] {
-    const settings = get(this.plugin.settings);
-    if (!settings.calendarSets || settings.calendarSets.length === 0) {
-      // check for migration
-      if (isLegacySettings(settings)) {
-        this.plugin.settings.update(
-          createNewCalendarSet(
-            DEFAULT_CALENDARSET_ID,
-            migrateLegacySettingsToCalendarSet(settings)
-          )
-        );
-      } else {
-        // otherwise create new default calendar set
-        this.plugin.settings.update(createNewCalendarSet("Default"));
-      }
-    }
-
-    return settings.calendarSets;
+    return get(this.plugin.settings).calendarSets;
   }
 
   public getInactiveGranularities(): Granularity[] {

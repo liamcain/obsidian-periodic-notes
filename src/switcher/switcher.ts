@@ -3,7 +3,7 @@ import { type NLDatesPlugin, setIcon, App, SuggestModal } from "obsidian";
 import type { MatchType } from "src/cache";
 import { DEFAULT_FORMAT } from "src/constants";
 import type PeriodicNotesPlugin from "src/main";
-import { getRelativeDate, isIsoFormat, join } from "src/utils";
+import { getRelativeDate, isIsoFormat, isMetaPressed, join } from "src/utils";
 
 import type { Granularity } from "../types";
 import { RelatedFilesSwitcher } from "./relatedFilesSwitcher";
@@ -213,7 +213,9 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
     }
   }
 
-  async onChooseSuggestion(item: DateNavigationItem, _evt: MouseEvent | KeyboardEvent) {
-    this.plugin.openPeriodicNote(item.granularity, item.date, false);
+  async onChooseSuggestion(item: DateNavigationItem, evt: MouseEvent | KeyboardEvent) {
+    this.plugin.openPeriodicNote(item.granularity, item.date, {
+      inNewSplit: isMetaPressed(evt),
+    });
   }
 }

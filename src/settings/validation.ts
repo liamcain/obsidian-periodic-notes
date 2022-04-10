@@ -1,6 +1,17 @@
 import { App, normalizePath } from "obsidian";
 import type { Granularity } from "src/types";
 
+export function removeEscapedCharacters(format: string): string {
+  const withoutBrackets = format.replace(/\[[^\]]*\]/g, ""); // remove everything within brackets
+
+  return withoutBrackets.replace(/\\./g, "");
+}
+
+function withoutExtension(filePath: string): string {
+  const lastDotPosition = filePath.lastIndexOf(".");
+  return lastDotPosition === -1 ? filePath : filePath.substring(0, lastDotPosition);
+}
+
 export function getBasename(format: string): string {
   const isTemplateNested = format.indexOf("/") !== -1;
   return isTemplateNested ? format.split("/").pop() ?? "" : format;
@@ -29,19 +40,62 @@ export function validateFormat(format: string, granularity: Granularity): string
     return "Format contains illegal characters";
   }
 
-  if (
-    granularity === "day" &&
-    !["m", "d", "y"].every(
-      (requiredChar) =>
-        getBasename(format)
-          .replace(/\[[^\]]*\]/g, "") // remove everything within brackets
-          .toLowerCase()
-          .indexOf(requiredChar) !== -1
-    )
-  ) {
-    return "Filename must be unique";
+  if (granularity === "day") {
+    const testFormattedDate = window.moment().format(format);
+    const parsedDate = window.moment(testFormattedDate, format, true);
+
+    if (!parsedDate.isValid()) {
+      return "Failed to parse format";
+    }
   }
+
   return "";
+}
+
+export function validateFormatComplexity(
+  format: string,
+  granularity: Granularity
+): "valid" | "fragile-basename" | "loose-parsing" {
+  const testFormattedDate = window.moment().format(format);
+  const parsedDate = window.moment(testFormattedDate, format, true);
+  if (!parsedDate.isValid()) {
+    return "loose-parsing";
+  }
+
+  const strippedFormat = removeEscapedCharacters(format);
+  if (strippedFormat.includes("/")) {
+    if (
+      granularity === "day" &&
+      !["m", "d", "y"].every(
+        (requiredChar) =>
+          getBasename(format)
+            .replace(/\[[^\]]*\]/g, "") // remove everything within brackets
+            .toLowerCase()
+            .indexOf(requiredChar) !== -1
+      )
+    ) {
+      return "fragile-basename";
+    }
+  }
+
+  return "valid";
+}
+
+export function getDateInput(
+  filePath: string,
+  format: string,
+  granularity: Granularity
+): string {
+  // pseudo-intelligently find files when the format is YYYY/MM/DD for example
+  if (validateFormatComplexity(format, granularity) === "fragile-basename") {
+    const strippedFilename = withoutExtension(filePath);
+    const strippedFormat = removeEscapedCharacters(format);
+    const nestingLvl = (strippedFormat.match(/\//g)?.length ?? 0) + 1;
+    const pathParts = strippedFilename.split("/");
+    return pathParts.slice(-nestingLvl).join("/");
+  }
+
+  return filePath;
 }
 
 export function validateTemplate(app: App, template: string): string {

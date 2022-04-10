@@ -86,7 +86,8 @@ declare module "obsidian" {
     id: string;
   }
 
-  interface DailyNotesSettings {
+  export interface DailyNotesSettings {
+    autorun?: boolean;
     format?: string;
     folder?: string;
     template?: string;
@@ -116,6 +117,7 @@ declare module "obsidian" {
   }
 
   export interface InstalledPlugin {
+    disable: (onUserDisable: boolean) => void;
     enabled: boolean;
     instance: PluginInstance;
   }

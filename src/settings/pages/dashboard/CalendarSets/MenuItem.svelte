@@ -24,7 +24,6 @@
   export let settings: Writable<ISettings>;
 
   let optionsEl: HTMLDivElement;
-  let active = manager.getActiveSet() === calendarSet.id;
   let showEmptyState =
     granularities.filter((g) => calendarSet[g]?.enabled).length === 0;
 
@@ -32,18 +31,20 @@
     settings.update(deleteCalendarSet(calendarSet.id));
   }
 
+  function setAsActive() {
+    settings.update(setActiveSet(calendarSet.id));
+  }
+
   function toggleOptionsMenu(evt: MouseEvent) {
     const menu = new Menu(app);
 
-    if (!active) {
+    if ($settings.activeCalendarSet !== calendarSet.id) {
       menu
         .addItem((item) =>
           item
             .setTitle("Set as active")
             .setIcon("check-circle-2")
-            .onClick(() => {
-              settings.update(setActiveSet(calendarSet.id));
-            })
+            .onClick(setAsActive)
         )
         .addSeparator();
     }
@@ -75,7 +76,11 @@
   });
 </script>
 
-<div class="calendarset-container" class:active on:click={viewDetails}>
+<div
+  class="calendarset-container"
+  class:active={calendarSet.id === $settings.activeCalendarSet}
+  on:click={viewDetails}
+>
   <div class="calendarset-titlebar">
     <h4 class="calendarset-name">{calendarSet.id}</h4>
     <div
@@ -92,6 +97,9 @@
           <span class="periodicity-text">
             {capitalize(displayConfigs[granularity].periodicity)} notes
           </span>
+          {#if calendarSet[granularity]?.openAtStartup}
+            <span class="badge">Opens at startup </span>
+          {/if}
         </div>
       {/if}
     {/each}
@@ -148,11 +156,23 @@
     margin-left: 0.4em;
   }
 
+  .badge {
+    background: var(--interactive-accent);
+    border-radius: 6px;
+    color: var(--text-on-accent);
+    font-size: 70%;
+    margin-left: 0.8em;
+    padding: 0.1em 0.5em;
+    line-height: 20px;
+  }
+
   .included-types {
     margin-top: 24px;
   }
 
   .included-type {
+    display: flex;
+    align-items: baseline;
     margin-top: 6px;
 
     &:first-of-type {

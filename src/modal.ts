@@ -17,7 +17,7 @@ export function showFileMenu(
         .setTitle(config.labelOpenPresent)
         .setIcon(`calendar-${granularity}`)
         .onClick(() => {
-          plugin.openPeriodicNote(granularity, window.moment(), false);
+          plugin.openPeriodicNote(granularity, window.moment());
         })
     );
   });
@@ -64,7 +64,7 @@ export class PeriodicNoteCreateModal extends Modal {
           }
 
           button.addEventListener("click", () => {
-            plugin.openPeriodicNote(granularity, window.moment(), false);
+            plugin.openPeriodicNote(granularity, window.moment());
             this.close();
           });
         });

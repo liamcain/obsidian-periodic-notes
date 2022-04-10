@@ -13,6 +13,7 @@
   import type { ISettings } from "src/settings";
   import type { Writable } from "svelte/store";
   import writableDerived from "svelte-writable-derived";
+  import OpenAtStartupSetting from "src/settings/components/OpenAtStartupSetting.svelte";
 
   export let app: App;
   export let calendarSetId: string;
@@ -61,6 +62,9 @@
       <h3 class="setting-item-name periodic-group-title">
         <Arrow {isExpanded} />
         {capitalize(displayConfig.periodicity)} Notes
+        {#if $config.openAtStartup}
+          <span class="badge">Opens at startup</span>
+        {/if}
       </h3>
     </div>
     <div class="setting-item-control">
@@ -80,12 +84,13 @@
   {#if isExpanded}
     <div
       class="periodic-group-content"
-      in:slide={{ duration: 300 }}
-      out:slide={{ duration: 300 }}
+      in:slide|local={{ duration: 300 }}
+      out:slide|local={{ duration: 300 }}
     >
       <NoteFormatSetting {config} {granularity} />
       <NoteTemplateSetting {app} {config} {granularity} />
       <NoteFolderSetting {app} {config} {granularity} />
+      <OpenAtStartupSetting {config} {settings} {granularity} />
     </div>
   {/if}
 </div>
@@ -93,6 +98,14 @@
 <style lang="scss">
   .periodic-group-title {
     display: flex;
+  }
+
+  .badge {
+    font-style: italic;
+    margin-left: 1em;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 70%;
   }
 
   .periodic-group {

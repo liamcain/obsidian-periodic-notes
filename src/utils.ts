@@ -9,6 +9,7 @@ import {
 } from "obsidian";
 
 import { HUMANIZE_FORMAT } from "./constants";
+import { removeEscapedCharacters } from "./settings/validation";
 import type { Granularity, PeriodicConfig } from "./types";
 
 export const wrapAround = (value: number, size: number): number => {
@@ -19,22 +20,21 @@ export const wrapAround = (value: number, size: number): number => {
 //   return app.plugins.getPlugin("calendar") as CalendarPlugin;
 // }
 
+export function isDailyNotesPluginEnabled(app: App): boolean {
+  return app.internalPlugins.getPluginById("daily-notes").enabled;
+}
+
 function getDailyNotesPlugin(app: App): DailyNotesPlugin | null {
   const installedPlugin = app.internalPlugins.getPluginById("daily-notes");
-  if (installedPlugin && installedPlugin.instance instanceof DailyNotesPlugin) {
-    return installedPlugin.instance;
+  if (installedPlugin) {
+    return installedPlugin.instance as DailyNotesPlugin;
   }
   return null;
 }
 
 export function hasLegacyDailyNoteSettings(app: App): boolean {
-  const dailyNotesPlugin = app.internalPlugins.plugins["daily-notes"];
-  if (dailyNotesPlugin && dailyNotesPlugin.enabled) {
-    return false;
-  }
-
-  const options = getDailyNotesPlugin(app)?.options;
-  return !!(options?.format || options?.folder || options?.template);
+  const options = getDailyNotesPlugin(app)?.options || {};
+  return !!(options.format || options.folder || options.template);
 }
 
 export function getLegacyDailyNoteSettings(app: App): DailyNotesSettings {
@@ -47,8 +47,12 @@ export function getLegacyDailyNoteSettings(app: App): DailyNotesSettings {
     };
   }
 
-  const dailyNotesPlugin = dailyNotesInstalledPlugin.instance as DailyNotesPlugin;
-  const options = dailyNotesPlugin.options || {};
+  const options = {
+    format: "",
+    folder: "",
+    template: "",
+    ...getDailyNotesPlugin(app)?.options,
+  };
   return {
     format: options.format,
     folder: options.folder?.trim(),
@@ -56,30 +60,11 @@ export function getLegacyDailyNoteSettings(app: App): DailyNotesSettings {
   };
 }
 
-// export function hasLegacyWeeklyNoteSettings(app: App): boolean {
-//   const calendarPlugin = getCalendarPlugin(app);
-//   if (!calendarPlugin) {
-//     return false;
-//   }
+export function disableDailyNotesPlugin(app: App): void {
+  app.internalPlugins.getPluginById("daily-notes").disable(true);
+}
 
-//   const options = calendarPlugin.options || ({} as IWeeklyNoteOptions);
-//   return !!(
-//     options.weeklyNoteFormat ||
-//     options.weeklyNoteFolder ||
-//     options.weeklyNoteTemplate
-//   );
-// }
-
-// export function getLegacyWeeklyNoteSettings(app: App): IPeriodicNoteSettings {
-//   const options = getCalendarPlugin(app).options || ({} as IWeeklyNoteOptions);
-//   return {
-//     format: options.weeklyNoteFormat || "",
-//     folder: options.weeklyNoteFolder?.trim() || "",
-//     template: options.weeklyNoteTemplate?.trim() || "",
-//   };
-// }
-
-export function isMetaPressed(e: MouseEvent): boolean {
+export function isMetaPressed(e: MouseEvent | KeyboardEvent): boolean {
   return Platform.isMacOS ? e.metaKey : e.ctrlKey;
 }
 
@@ -141,7 +126,7 @@ export async function getNoteCreationPath(
   filename: string,
   periodicConfig: PeriodicConfig
 ): Promise<string> {
-  const directory = periodicConfig.folder;
+  const directory = periodicConfig.folder ?? "";
   const filenameWithExt = !filename.endsWith(".md") ? `${filename}.md` : filename;
 
   const path = normalizePath(join(directory, filenameWithExt));
@@ -217,12 +202,6 @@ export function getRelativeDate(granularity: Granularity, date: Moment) {
   } else {
     return date.format(HUMANIZE_FORMAT[granularity]);
   }
-}
-
-function removeEscapedCharacters(format: string): string {
-  const withoutBrackets = format.replace(/\[[^\]]*\]/g, ""); // remove everything within brackets
-
-  return withoutBrackets.replace(/\\./g, "");
 }
 
 export function isIsoFormat(format: string): boolean {

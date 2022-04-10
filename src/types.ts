@@ -16,6 +16,8 @@ export const granularities: Granularity[] = [
 
 export interface PeriodicConfig {
   enabled: boolean;
+  openAtStartup: boolean;
+
   format: string;
   folder: string;
   templatePath?: string;

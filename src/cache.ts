@@ -1,11 +1,20 @@
 import memoize from "lodash/memoize";
 import sortBy from "lodash/sortBy";
 import type { Moment } from "moment";
-import { App, Component, TAbstractFile, TFile, TFolder } from "obsidian";
+import {
+  App,
+  Component,
+  parseFrontMatterEntry,
+  TAbstractFile,
+  TFile,
+  TFolder,
+  type CachedMetadata,
+} from "obsidian";
 
 import { DEFAULT_FORMAT } from "./constants";
 import type PeriodicNotesPlugin from "./main";
 import { getLooselyMatchedDate } from "./parser";
+import { getDateInput } from "./settings/validation";
 import { granularities, type Granularity, type PeriodicConfig } from "./types";
 
 export type MatchType = "filename" | "frontmatter" | "date-prefixed";
@@ -71,6 +80,9 @@ export class PeriodicNotesCache extends Component {
       this.registerEvent(this.app.vault.on("create", this.resolve, this));
       this.registerEvent(this.app.vault.on("rename", this.resolveRename, this));
       this.registerEvent(
+        this.app.metadataCache.on("changed", this.resolveChangedMetadata, this)
+      );
+      this.registerEvent(
         this.app.workspace.on("periodic-notes:settings-updated", this.reset, this)
       );
     });
@@ -89,11 +101,65 @@ export class PeriodicNotesCache extends Component {
         const rootFolder = this.app.vault.getAbstractFileByPath(
           config.folder || "/"
         ) as TFolder;
+
+        // Scan for filename matches
         memoizedRecurseChildren(rootFolder, (file: TAbstractFile) => {
           if (file instanceof TFile) {
             this.resolve(file);
+            const metadata = app.metadataCache.getFileCache(file);
+            if (metadata) {
+              this.resolveChangedMetadata(file, "", metadata);
+            }
           }
         });
+      }
+    }
+  }
+
+  private resolveChangedMetadata(
+    file: TFile,
+    _data: string,
+    cache: CachedMetadata
+  ): void {
+    const manager = this.plugin.calendarSetManager;
+    // Check if file matches any calendar set
+    calendarsets: for (const calendarSet of manager.getCalendarSets()) {
+      const activeGranularities = granularities.filter((g) => calendarSet[g]?.enabled);
+      if (activeGranularities.length === 0) continue calendarsets;
+
+      granularities: for (const granularity of activeGranularities) {
+        const folder = calendarSet[granularity]?.folder || "";
+        if (!file.path.startsWith(folder)) continue granularities;
+        const frontmatterEntry = parseFrontMatterEntry(cache.frontmatter, granularity);
+        if (!frontmatterEntry) continue granularities;
+
+        const format = DEFAULT_FORMAT[granularity];
+        let date: Moment;
+        if (typeof frontmatterEntry === "string") {
+          // e.g. `day: 2022-02-02`
+          date = window.moment(frontmatterEntry, format, true);
+          if (date.isValid()) {
+            this.set(calendarSet.id, file.path, {
+              calendarSet: calendarSet.id,
+              filePath: file.path,
+              date,
+              granularity,
+              canonicalDateStr: getCanonicalDateString(granularity, date),
+              matchData: {
+                exact: true,
+                matchType: "frontmatter",
+              },
+            });
+          } else {
+            // TODO: custom format?
+            // semester:
+            //   start_date: X
+            //   end_date: Y
+            //
+          }
+
+          continue calendarsets;
+        }
       }
     }
   }
@@ -115,12 +181,19 @@ export class PeriodicNotesCache extends Component {
       const activeGranularities = granularities.filter((g) => calendarSet[g]?.enabled);
       if (activeGranularities.length === 0) continue calendarsets;
 
+      // 'frontmatter' entries should supercede 'filename'
+      const existingEntry = this.cachedFiles.get(calendarSet.id)?.get(file.path);
+      if (existingEntry && existingEntry.matchData.matchType === "frontmatter") {
+        continue calendarsets;
+      }
+
       granularities: for (const granularity of activeGranularities) {
-        const folder = calendarSet[granularity]?.folder || "/";
+        const folder = calendarSet[granularity]?.folder || "";
         if (!file.path.startsWith(folder)) continue granularities;
 
         const format = calendarSet[granularity]?.format || DEFAULT_FORMAT[granularity];
-        const date = window.moment(file.basename, format, true);
+        const dateInputStr = getDateInput(file.path, format, granularity);
+        const date = window.moment(dateInputStr, format, true);
         if (date.isValid()) {
           this.set(calendarSet.id, file.path, {
             calendarSet: calendarSet.id,

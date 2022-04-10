@@ -7,31 +7,19 @@
   import { router } from "src/settings/stores";
   import type { ISettings } from "src/settings/index";
   // import { getLegacyDailyNoteSettings } from "src/utils";
-
-  // import GettingStartedBanner from "./GettingStartedBanner.svelte";
-  import CalendarSetMenuItem from "./CalendarSets/MenuItem.svelte";
   import Footer from "src/settings/components/Footer.svelte";
   import SettingItem from "src/settings/components/SettingItem.svelte";
   import Toggle from "src/settings/components/Toggle.svelte";
   import { createNewCalendarSet } from "src/settings/utils";
 
+  import GettingStartedBanner from "./GettingStartedBanner.svelte";
+  import CalendarSetMenuItem from "./CalendarSets/MenuItem.svelte";
+
   export let app: App;
   export let manager: CalendarSetManager;
   export let settings: Writable<ISettings>;
-  // export let onUpdateSettings: (newSettings: ISettings) => void;
 
   let addEl: HTMLElement;
-
-  // function migrateDailyNoteSettings(): void {
-  //   const dailyNoteSettings = getLegacyDailyNoteSettings(app);
-  //   settingsStore.update((old) => ({
-  //     ...old,
-  //     ...{
-  //       daily: { ...dailyNoteSettings, enabled: true },
-  //       hasMigratedDailyNoteSettings: true,
-  //     },
-  //   }));
-  // }
 
   function addCalendarset(): void {
     let iter = 1;
@@ -51,16 +39,14 @@
   });
 </script>
 
-<!-- {#if $settingsStore.showGettingStartedBanner}
+{#if $settings.showGettingStartedBanner}
   <GettingStartedBanner
     {app}
-    {migrateDailyNoteSettings}
-    settings={settingsStore}
     handleTeardown={() => {
-      $settingsStore.showGettingStartedBanner = false;
+      $settings.showGettingStartedBanner = false;
     }}
   />
-{/if} -->
+{/if}
 
 <div class="section-nav">
   <h3 class="section-title">Calendar Sets</h3>

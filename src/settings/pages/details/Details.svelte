@@ -155,6 +155,7 @@
 
   .calendarset-title {
     font-size: 1.6em;
+    min-width: 100px;
   }
 
   .calendarset-error {
@@ -166,6 +167,7 @@
   }
 
   .calendarset-toolbar {
+    align-items: center;
     display: flex;
     gap: 8px;
 
@@ -182,7 +184,7 @@
     font-size: 0.6em;
     font-weight: 600;
     letter-spacing: 0.25px;
-    padding: 6px 8px;
+    padding: 0.2em 0.8em;
     text-transform: uppercase;
   }
 </style>

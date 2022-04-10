@@ -3,8 +3,9 @@
 
   import { DEFAULT_FORMAT } from "src/constants";
   import type { Granularity, PeriodicConfig } from "src/types";
-  import { getBasename, validateFormat } from "../validation";
+  import { validateFormat, validateFormatComplexity } from "../validation";
   import type { Readable } from "svelte/store";
+  import { displayConfigs } from "src/commands";
 
   export let granularity: Granularity;
   export let config: Readable<PeriodicConfig>;
@@ -14,18 +15,15 @@
   let inputEl: HTMLInputElement;
   let value: string = "";
   let error: string;
-
-  let isTemplateNested: boolean;
-  let basename: string;
+  let warning: string;
 
   $: {
     value = $config.format || "";
-    isTemplateNested = value.indexOf("/") !== -1;
-    basename = getBasename(value);
   }
 
   onMount(() => {
     error = validateFormat(inputEl.value, granularity);
+    warning = validateFormatComplexity(inputEl.value, granularity);
   });
 
   function clearError() {
@@ -34,6 +32,7 @@
 
   function onChange() {
     error = validateFormat(inputEl.value, granularity);
+    warning = validateFormatComplexity(inputEl.value, granularity);
   }
 </script>
 
@@ -49,15 +48,24 @@
           >{window.moment().format(value || defaultFormat)}
         </b>
       </div>
-      {#if isTemplateNested}
-        <div>
-          New files will be created at <strong>{value}</strong><br />
-          Format: <strong>{basename}</strong>
-        </div>
-      {/if}
     </div>
     {#if error}
       <div class="has-error">{error}</div>
+    {:else if warning !== "valid"}
+      <div class="alert-warning">
+        {#if warning === "loose-parsing"}
+          Your filename format cannot be parsed. If you would still like to use
+          this format for your {displayConfigs[granularity].periodicity} notes, you
+          will need to include the following in the frontmatter of your template
+          file:
+          <pre><code>{granularity}: {DEFAULT_FORMAT[granularity]}</code></pre>
+        {:else if warning === "fragile-basename"}
+          Your base filename is not uniquely identifiable. If you would still
+          like to use this format, it is recommended that you include the
+          following in the frontmatter of your daily note template:
+          <pre><code>{granularity}: {DEFAULT_FORMAT[granularity]}</code></pre>
+        {/if}
+      </div>
     {/if}
   </div>
   <div class="setting-item-control">
@@ -73,3 +81,14 @@
     />
   </div>
 </div>
+
+<style>
+  .alert-warning {
+    color: var(--text-muted);
+    font-size: 80%;
+    margin-top: 0.6em;
+  }
+  .setting-item-control input {
+    flex-grow: 1;
+  }
+</style>

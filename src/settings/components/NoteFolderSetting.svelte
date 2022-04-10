@@ -7,6 +7,7 @@
 
   import { validateFolder } from "../validation";
   import type { Readable } from "svelte/store";
+  import { displayConfigs } from "src/commands";
 
   export let config: Readable<PeriodicConfig>;
   export let app: App;
@@ -33,7 +34,7 @@
   <div class="setting-item-info">
     <div class="setting-item-name">Note Folder</div>
     <div class="setting-item-description">
-      New {granularity} notes will be placed here
+      New {displayConfigs[granularity].periodicity} notes will be placed here
     </div>
     {#if error}
       <div class="has-error">{error}</div>
@@ -52,3 +53,9 @@
     />
   </div>
 </div>
+
+<style>
+  .setting-item-control input {
+    flex-grow: 1;
+  }
+</style>

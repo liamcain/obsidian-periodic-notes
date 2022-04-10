@@ -84,7 +84,7 @@ async function openAdjacentNote(
     .clone()
     .add(offset, activeFileMeta.granularity);
 
-  plugin.openPeriodicNote(activeFileMeta.granularity, adjacentDate, false);
+  plugin.openPeriodicNote(activeFileMeta.granularity, adjacentDate);
 }
 
 export function getCommands(
@@ -98,7 +98,7 @@ export function getCommands(
     {
       id: `open-${config.periodicity}-note`,
       name: config.labelOpenPresent,
-      callback: () => plugin.openPeriodicNote(granularity, window.moment(), false),
+      callback: () => plugin.openPeriodicNote(granularity, window.moment()),
     },
 
     {

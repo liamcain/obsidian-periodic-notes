@@ -56,3 +56,9 @@
     />
   </div>
 </div>
+
+<style>
+  .setting-item-control input {
+    flex-grow: 1;
+  }
+</style>
