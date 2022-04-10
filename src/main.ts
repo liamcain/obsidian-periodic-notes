@@ -55,8 +55,8 @@ export default class PeriodicNotesPlugin extends Plugin {
     this.settings.subscribe(this.onUpdateSettings.bind(this));
 
     this.ribbonEl = null;
-    this.cache = new PeriodicNotesCache(this.app, this);
     this.calendarSetManager = new CalendarSetManager(this);
+    this.cache = new PeriodicNotesCache(this.app, this);
     this.timelineManager = new TimelineManager(this, this.cache);
 
     this.openPeriodicNote = this.openPeriodicNote.bind(this);
