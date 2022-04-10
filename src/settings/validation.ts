@@ -1,4 +1,4 @@
-import { App, normalizePath } from "obsidian";
+import { App, normalizePath, TFile } from "obsidian";
 import type { Granularity } from "src/types";
 
 export function removeEscapedCharacters(format: string): string {
@@ -7,9 +7,9 @@ export function removeEscapedCharacters(format: string): string {
   return withoutBrackets.replace(/\\./g, "");
 }
 
-function withoutExtension(filePath: string): string {
-  const lastDotPosition = filePath.lastIndexOf(".");
-  return lastDotPosition === -1 ? filePath : filePath.substring(0, lastDotPosition);
+function pathWithoutExtension(file: TFile): string {
+  const extLen = file.path.length;
+  return file.path.slice(-extLen);
 }
 
 export function getBasename(format: string): string {
@@ -82,20 +82,19 @@ export function validateFormatComplexity(
 }
 
 export function getDateInput(
-  filePath: string,
+  file: TFile,
   format: string,
   granularity: Granularity
 ): string {
   // pseudo-intelligently find files when the format is YYYY/MM/DD for example
   if (validateFormatComplexity(format, granularity) === "fragile-basename") {
-    const strippedFilename = withoutExtension(filePath);
+    const fileName = pathWithoutExtension(file);
     const strippedFormat = removeEscapedCharacters(format);
     const nestingLvl = (strippedFormat.match(/\//g)?.length ?? 0) + 1;
-    const pathParts = strippedFilename.split("/");
+    const pathParts = fileName.split("/");
     return pathParts.slice(-nestingLvl).join("/");
   }
-
-  return filePath;
+  return file.basename;
 }
 
 export function validateTemplate(app: App, template: string): string {

@@ -192,7 +192,7 @@ export class PeriodicNotesCache extends Component {
         if (!file.path.startsWith(folder)) continue granularities;
 
         const format = calendarSet[granularity]?.format || DEFAULT_FORMAT[granularity];
-        const dateInputStr = getDateInput(file.path, format, granularity);
+        const dateInputStr = getDateInput(file, format, granularity);
         const date = window.moment(dateInputStr, format, true);
         if (date.isValid()) {
           this.set(calendarSet.id, file.path, {
