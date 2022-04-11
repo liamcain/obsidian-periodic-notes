@@ -7,11 +7,14 @@ interface ParseData {
   date: Moment;
 }
 
+// TODO rename these to remove 'prefix'
 const FULL_DATE_PREFIX = /(\d{4})[-.]?(0[1-9]|1[0-2])[-.]?(0[1-9]|[12][0-9]|3[01])/;
 const MONTH_PREFIX = /(\d{4})[-.]?(0[1-9]|1[0-2])/;
 const YEAR_PREFIX = /(\d{4})/;
 
 export function getLooselyMatchedDate(inputStr: string): ParseData | null {
+  // TODO: include 'unparsed characters' in match data
+  // to show what _isn't_ a date/timestamp
   const fullDateExp = FULL_DATE_PREFIX.exec(inputStr);
   if (fullDateExp) {
     return {
