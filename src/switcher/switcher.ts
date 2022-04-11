@@ -36,6 +36,11 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
 
     this.nlDatesPlugin = app.plugins.getPlugin("nldates-obsidian") as NLDatesPlugin;
 
+    this.scope.register(["Meta"], "Enter", (evt: KeyboardEvent) => {
+      // @ts-expect-error this.chooser exists but is not exposed
+      this.chooser.useSelectedItem(evt);
+    });
+
     this.scope.register([], "Tab", (evt: KeyboardEvent) => {
       evt.preventDefault();
       this.close();
