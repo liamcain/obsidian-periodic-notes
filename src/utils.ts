@@ -176,6 +176,7 @@ async function ensureFolderExists(app: App, path: string): Promise<void> {
 }
 
 export function getRelativeDate(granularity: Granularity, date: Moment) {
+  const today = window.moment().startOf("day");
   if (granularity == "week") {
     const thisWeek = window.moment().startOf(granularity);
     const fromNow = window.moment(date).diff(thisWeek, "week");
@@ -188,7 +189,7 @@ export function getRelativeDate(granularity: Granularity, date: Moment) {
     }
     return window.moment.duration(fromNow, granularity).humanize(true);
   } else if (granularity === "day") {
-    const fromNow = window.moment(date).fromNow();
+    const fromNow = window.moment(date).from(today);
     return window.moment(date).calendar(null, {
       lastWeek: "[Last] dddd",
       lastDay: "[Yesterday]",

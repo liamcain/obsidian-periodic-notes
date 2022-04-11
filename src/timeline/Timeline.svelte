@@ -7,7 +7,7 @@
     PeriodicNotesCache,
   } from "src/cache";
   import PeriodicNotesPlugin from "src/main";
-  import { MarkdownView } from "obsidian";
+  import { MarkdownView, setIcon } from "obsidian";
   import { onMount } from "svelte";
   import type { Granularity } from "src/types";
   import { getRelativeDate } from "src/utils";
@@ -16,6 +16,7 @@
   export let cache: PeriodicNotesCache;
   export let view: MarkdownView;
 
+  let relativeIconEl: HTMLSpanElement;
   let showTimeline: boolean;
   let weekDays: Moment[];
   let today = window.moment();
@@ -84,6 +85,8 @@
   }
 
   onMount(() => {
+    setIcon(relativeIconEl, "forward-arrow", 12);
+
     plugin.registerEvent(plugin.app.workspace.on("file-open", updateView));
     plugin.registerEvent(
       plugin.app.workspace.on("periodic-notes:resolve", updateView)
@@ -100,6 +103,10 @@
 {#if showComplication && periodicData}
   <div class="timeline-container">
     <div class="leaf-periodic-button" on:click={toggleCalendarVisibility}>
+      <span
+        class:exact-match={periodicData.matchData.exact}
+        bind:this={relativeIconEl}
+      />
       {relativeDataStr}
     </div>
     {#if showTimeline}
@@ -141,6 +148,10 @@
     :global(.native-scrollbars) & {
       right: 16px;
     }
+  }
+
+  .exact-match {
+    display: none;
   }
 
   .leaf-periodic-button {
