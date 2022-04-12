@@ -92,7 +92,6 @@ export function getDateInput(
     const strippedFormat = removeEscapedCharacters(format);
     const nestingLvl = (strippedFormat.match(/\//g)?.length ?? 0) + 1;
     const pathParts = fileName.split("/");
-    console.log("path", pathParts.slice(-nestingLvl).join("/"));
     return pathParts.slice(-nestingLvl).join("/");
   }
   return file.basename;
