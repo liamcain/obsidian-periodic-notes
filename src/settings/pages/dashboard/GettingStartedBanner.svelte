@@ -1,12 +1,11 @@
 <script type="ts">
   import type { App } from "obsidian";
-  import { slide } from "svelte/transition";
-
   import {
-    hasLegacyDailyNoteSettings,
     disableDailyNotesPlugin,
+    hasLegacyDailyNoteSettings,
     isDailyNotesPluginEnabled,
-  } from "src/utils";
+  } from "src/settings/utils";
+  import { slide } from "svelte/transition";
 
   export let app: App;
   export let handleTeardown: () => void;

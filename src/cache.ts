@@ -16,6 +16,7 @@ import type PeriodicNotesPlugin from "./main";
 import { getLooselyMatchedDate } from "./parser";
 import { getDateInput } from "./settings/validation";
 import { granularities, type Granularity, type PeriodicConfig } from "./types";
+import { applyPeriodicTemplateToFile, getFormat } from "./utils";
 
 export type MatchType = "filename" | "frontmatter" | "date-prefixed";
 
@@ -106,7 +107,7 @@ export class PeriodicNotesCache extends Component {
         // Scan for filename matches
         memoizedRecurseChildren(rootFolder, (file: TAbstractFile) => {
           if (file instanceof TFile) {
-            this.resolve(file);
+            this.resolve(file, "initialize");
             const metadata = app.metadataCache.getFileCache(file);
             if (metadata) {
               this.resolveChangedMetadata(file, "", metadata);
@@ -169,12 +170,15 @@ export class PeriodicNotesCache extends Component {
     for (const [, cache] of this.cachedFiles) {
       if (file instanceof TFile) {
         cache.delete(oldPath);
-        this.resolve(file);
+        this.resolve(file, "rename");
       }
     }
   }
 
-  private resolve(file: TFile): void {
+  private resolve(
+    file: TFile,
+    reason: "create" | "rename" | "initialize" = "create"
+  ): void {
     const manager = this.plugin.calendarSetManager;
 
     // Check if file matches any calendar set
@@ -192,11 +196,11 @@ export class PeriodicNotesCache extends Component {
         const folder = calendarSet[granularity]?.folder || "";
         if (!file.path.startsWith(folder)) continue granularities;
 
-        const format = calendarSet[granularity]?.format || DEFAULT_FORMAT[granularity];
+        const format = getFormat(calendarSet, granularity);
         const dateInputStr = getDateInput(file, format, granularity);
         const date = window.moment(dateInputStr, format, true);
         if (date.isValid()) {
-          this.set(calendarSet.id, file.path, {
+          const metadata = {
             calendarSet: calendarSet.id,
             filePath: file.path,
             date,
@@ -206,7 +210,12 @@ export class PeriodicNotesCache extends Component {
               exact: true,
               matchType: "filename",
             },
-          });
+          } as PeriodicNoteCachedMetadata;
+          this.set(calendarSet.id, file.path, metadata);
+
+          if (reason === "create" && file.stat.size === 0) {
+            applyPeriodicTemplateToFile(app, file, calendarSet, metadata);
+          }
 
           this.app.workspace.trigger("periodic-notes:resolve", granularity, file);
           continue calendarsets;
@@ -344,7 +353,7 @@ export class PeriodicNotesCache extends Component {
 
     // Otherwise, check all calendar sets, starting with the active one
     const activeCache = this.cachedFiles.get(
-      this.plugin.calendarSetManager.getActiveSet()
+      this.plugin.calendarSetManager.getActiveId()
     );
     const metadata = activeCache?.get(filePath);
     if (metadata) {

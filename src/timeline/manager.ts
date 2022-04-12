@@ -10,9 +10,19 @@ export default class TimelineManager {
 
   constructor(readonly plugin: PeriodicNotesPlugin, readonly cache: PeriodicNotesCache) {
     this.btnComponents = [];
-    plugin.registerEvent(
-      plugin.app.workspace.on("layout-change", this.onLayoutChange, this)
-    );
+
+    this.plugin.app.workspace.onLayoutReady(() => {
+      plugin.registerEvent(
+        plugin.app.workspace.on("layout-change", this.onLayoutChange, this)
+      );
+      this.onLayoutChange();
+    });
+  }
+
+  public cleanup() {
+    for (const existingEl of this.btnComponents) {
+      existingEl.$destroy();
+    }
   }
 
   private onLayoutChange(): void {
@@ -23,7 +33,7 @@ export default class TimelineManager {
       }
     });
 
-    // Clear up leaves that
+    // Clean up timelines on closed leaves
     for (const existingEl of this.btnComponents) {
       if (
         !openViews

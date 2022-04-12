@@ -27,6 +27,7 @@ import {
 import {
   createNewCalendarSet,
   findStartupNoteConfig,
+  hasLegacyDailyNoteSettings,
   setActiveSet,
 } from "./settings/utils";
 import { CalendarSetSuggestModal } from "./switcher/calendarSetSwitcher";
@@ -37,7 +38,6 @@ import {
   applyTemplateTransformations,
   getNoteCreationPath,
   getTemplateContents,
-  hasLegacyDailyNoteSettings,
   isMetaPressed,
 } from "./utils";
 
@@ -53,6 +53,10 @@ export default class PeriodicNotesPlugin extends Plugin {
   private cache: PeriodicNotesCache;
   public calendarSetManager: CalendarSetManager;
   private timelineManager: TimelineManager;
+
+  unload(): void {
+    this.timelineManager?.cleanup();
+  }
 
   async onload(): Promise<void> {
     this.settings = writable<ISettings>();
@@ -98,12 +102,6 @@ export default class PeriodicNotesPlugin extends Plugin {
     });
 
     this.app.workspace.onLayoutReady(() => {
-      // If the user has Calendar Weekly Notes settings, migrate them automatically,
-      // since the functionality will be deprecated.
-      // if (hasLegacyWeeklyNoteSettings(this.app)) {
-      //   this.migrateWeeklySettings();
-      //   this.settings.weekly.enabled = true;
-      // }
       this.configureRibbonIcons();
       this.configureCommands();
 
@@ -212,7 +210,7 @@ export default class PeriodicNotesPlugin extends Plugin {
     const config = this.calendarSetManager.getActiveConfig(granularity);
     const format = this.calendarSetManager.getFormat(granularity);
     const filename = date.format(format);
-    const templateContents = await getTemplateContents(this.app, config);
+    const templateContents = await getTemplateContents(this.app, config.templatePath);
     const renderedContents = applyTemplateTransformations(
       filename,
       date,
@@ -225,20 +223,20 @@ export default class PeriodicNotesPlugin extends Plugin {
 
   public getPeriodicNote(granularity: Granularity, date: Moment): TFile | null {
     return this.cache.getPeriodicNote(
-      this.calendarSetManager.getActiveSet(),
+      this.calendarSetManager.getActiveId(),
       granularity,
       date
     );
   }
 
-  // What API do I want for this?
+  // TODO: What API do I want for this?
   public getPeriodicNotes(
     granularity: Granularity,
     date: Moment,
     includeFinerGranularities = false
   ): PeriodicNoteCachedMetadata[] {
     return this.cache.getPeriodicNotes(
-      this.calendarSetManager.getActiveSet(),
+      this.calendarSetManager.getActiveId(),
       granularity,
       date,
       includeFinerGranularities
@@ -269,7 +267,7 @@ export default class PeriodicNotesPlugin extends Plugin {
     const { inNewSplit = false, calendarSet } = opts ?? {};
     const { workspace } = this.app;
     let file = this.cache.getPeriodicNote(
-      calendarSet ?? this.calendarSetManager.getActiveSet(),
+      calendarSet ?? this.calendarSetManager.getActiveId(),
       granularity,
       date
     );

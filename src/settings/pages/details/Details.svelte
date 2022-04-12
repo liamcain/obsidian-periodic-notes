@@ -23,7 +23,7 @@
   let nameEl: HTMLDivElement;
   let optionsEl: HTMLDivElement;
   let calendarsetName = selectedCalendarSet;
-  let isActive = selectedCalendarSet === manager.getActiveSet();
+  let isActive = selectedCalendarSet === manager.getActiveId();
   let errorMsg = "";
 
   function tryToRename(e: FocusEvent) {

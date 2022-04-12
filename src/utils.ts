@@ -1,68 +1,11 @@
 import type { Moment } from "moment";
-import {
-  normalizePath,
-  App,
-  Notice,
-  Platform,
-  DailyNotesPlugin,
-  type DailyNotesSettings,
-} from "obsidian";
+import { normalizePath, App, Notice, Platform, TFile } from "obsidian";
 
-import { HUMANIZE_FORMAT } from "./constants";
+import type { PeriodicNoteCachedMetadata } from "./cache";
+import { DEFAULT_FORMAT, HUMANIZE_FORMAT } from "./constants";
+import { DEFAULT_PERIODIC_CONFIG } from "./settings";
 import { removeEscapedCharacters } from "./settings/validation";
-import type { Granularity, PeriodicConfig } from "./types";
-
-export const wrapAround = (value: number, size: number): number => {
-  return ((value % size) + size) % size;
-};
-
-// function getCalendarPlugin(app: App): CalendarPlugin {
-//   return app.plugins.getPlugin("calendar") as CalendarPlugin;
-// }
-
-export function isDailyNotesPluginEnabled(app: App): boolean {
-  return app.internalPlugins.getPluginById("daily-notes").enabled;
-}
-
-function getDailyNotesPlugin(app: App): DailyNotesPlugin | null {
-  const installedPlugin = app.internalPlugins.getPluginById("daily-notes");
-  if (installedPlugin) {
-    return installedPlugin.instance as DailyNotesPlugin;
-  }
-  return null;
-}
-
-export function hasLegacyDailyNoteSettings(app: App): boolean {
-  const options = getDailyNotesPlugin(app)?.options || {};
-  return !!(options.format || options.folder || options.template);
-}
-
-export function getLegacyDailyNoteSettings(app: App): DailyNotesSettings {
-  const dailyNotesInstalledPlugin = app.internalPlugins.plugins["daily-notes"];
-  if (!dailyNotesInstalledPlugin) {
-    return {
-      folder: "",
-      template: "",
-      format: "",
-    };
-  }
-
-  const options = {
-    format: "",
-    folder: "",
-    template: "",
-    ...getDailyNotesPlugin(app)?.options,
-  };
-  return {
-    format: options.format,
-    folder: options.folder?.trim(),
-    template: options.template?.trim(),
-  };
-}
-
-export function disableDailyNotesPlugin(app: App): void {
-  app.internalPlugins.getPluginById("daily-notes").disable(true);
-}
+import { type CalendarSet, type Granularity, type PeriodicConfig } from "./types";
 
 export function isMetaPressed(e: MouseEvent | KeyboardEvent): boolean {
   return Platform.isMacOS ? e.metaKey : e.ctrlKey;
@@ -101,21 +44,59 @@ export function applyTemplateTransformations(
     .replace(/{{\s*tomorrow\s*}}/gi, date.clone().add(1, "d").format(format));
 }
 
+export function getFormat(calendarSet: CalendarSet, granularity: Granularity): string {
+  return calendarSet[granularity]?.format || DEFAULT_FORMAT[granularity];
+}
+
+export function getFolder(calendarSet: CalendarSet, granularity: Granularity): string {
+  return calendarSet[granularity]?.folder || "/";
+}
+
+export function getConfig(
+  calendarSet: CalendarSet,
+  granularity: Granularity
+): PeriodicConfig {
+  return calendarSet[granularity] ?? DEFAULT_PERIODIC_CONFIG;
+}
+
+export async function applyPeriodicTemplateToFile(
+  app: App,
+  file: TFile,
+  calendarSet: CalendarSet,
+  metadata: PeriodicNoteCachedMetadata
+) {
+  const format = getFormat(calendarSet, metadata.granularity);
+  const templateContents = await getTemplateContents(
+    app,
+    calendarSet[metadata.granularity]?.templatePath
+  );
+  const renderedContents = applyTemplateTransformations(
+    file.basename,
+    metadata.date,
+    format,
+    templateContents
+  );
+  return app.vault.modify(file, renderedContents);
+}
+
 export async function getTemplateContents(
   app: App,
-  periodicConfig: PeriodicConfig
+  templatePath: string | undefined
 ): Promise<string> {
   const { metadataCache, vault } = app;
-  const templatePath = normalizePath(periodicConfig.templatePath ?? "");
+  const normalizedTemplatePath = normalizePath(templatePath ?? "");
   if (templatePath === "/") {
     return Promise.resolve("");
   }
 
   try {
-    const templateFile = metadataCache.getFirstLinkpathDest(templatePath, "");
+    const templateFile = metadataCache.getFirstLinkpathDest(normalizedTemplatePath, "");
     return templateFile ? vault.cachedRead(templateFile) : "";
   } catch (err) {
-    console.error(`Failed to read the daily note template '${templatePath}'`, err);
+    console.error(
+      `Failed to read the daily note template '${normalizedTemplatePath}'`,
+      err
+    );
     new Notice("Failed to read the daily note template");
     return "";
   }

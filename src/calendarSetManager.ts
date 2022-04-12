@@ -2,14 +2,13 @@ import type { DailyNotesSettings } from "obsidian";
 import type PeriodicNotesPlugin from "src/main";
 import { get } from "svelte/store";
 
-import { DEFAULT_FORMAT } from "./constants";
-import { DEFAULT_PERIODIC_CONFIG } from "./settings";
 import {
   granularities,
   type CalendarSet,
   type Granularity,
   type PeriodicConfig,
 } from "./types";
+import { getConfig, getFormat } from "./utils";
 
 interface IPerioditySettings {
   enabled: boolean;
@@ -88,23 +87,11 @@ export function migrateLegacySettingsToCalendarSet(
 export default class CalendarSetManager {
   constructor(readonly plugin: PeriodicNotesPlugin) {}
 
-  public getFormat(granularity: Granularity): string {
-    const settings = get(this.plugin.settings);
-    const activeSet = settings.calendarSets.find(
-      (set) => set.id === settings.activeCalendarSet
-    );
-    if (!activeSet) {
-      throw new Error("No active calendar set found");
-    }
-
-    return activeSet[granularity]?.format || DEFAULT_FORMAT[granularity];
-  }
-
-  public getActiveSet(): string {
+  public getActiveId(): string {
     return get(this.plugin.settings).activeCalendarSet;
   }
 
-  public getActiveConfig(granularity: Granularity): PeriodicConfig {
+  public getActiveSet(): CalendarSet {
     const settings = get(this.plugin.settings);
     const activeSet = settings.calendarSets.find(
       (set) => set.id === settings.activeCalendarSet
@@ -112,8 +99,16 @@ export default class CalendarSetManager {
     if (!activeSet) {
       throw new Error("No active calendar set found");
     }
+    return activeSet;
+  }
+  public getFormat(granularity: Granularity): string {
+    const activeSet = this.getActiveSet();
+    return getFormat(activeSet, granularity);
+  }
 
-    return activeSet[granularity] ?? DEFAULT_PERIODIC_CONFIG;
+  public getActiveConfig(granularity: Granularity): PeriodicConfig {
+    const activeSet = this.getActiveSet();
+    return getConfig(activeSet, granularity);
   }
 
   public getCalendarSets(): CalendarSet[] {
@@ -121,24 +116,12 @@ export default class CalendarSetManager {
   }
 
   public getInactiveGranularities(): Granularity[] {
-    const settings = get(this.plugin.settings);
-    const activeSet = settings.calendarSets.find(
-      (set) => set.id === settings.activeCalendarSet
-    );
-    if (!activeSet) {
-      throw new Error("No active calendar set found");
-    }
+    const activeSet = this.getActiveSet();
     return granularities.filter((granularity) => !activeSet[granularity]?.enabled);
   }
 
   public getActiveGranularities(): Granularity[] {
-    const settings = get(this.plugin.settings);
-    const activeSet = settings.calendarSets.find(
-      (set) => set.id === settings.activeCalendarSet
-    );
-    if (!activeSet) {
-      throw new Error("No active calendar set found");
-    }
+    const activeSet = this.getActiveSet();
     return granularities.filter((granularity) => activeSet[granularity]?.enabled);
   }
 

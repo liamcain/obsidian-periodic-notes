@@ -8,8 +8,8 @@ export function removeEscapedCharacters(format: string): string {
 }
 
 function pathWithoutExtension(file: TFile): string {
-  const extLen = file.path.length;
-  return file.path.slice(-extLen);
+  const extLen = file.extension.length + 1;
+  return file.path.slice(0, -extLen);
 }
 
 export function getBasename(format: string): string {
@@ -92,6 +92,7 @@ export function getDateInput(
     const strippedFormat = removeEscapedCharacters(format);
     const nestingLvl = (strippedFormat.match(/\//g)?.length ?? 0) + 1;
     const pathParts = fileName.split("/");
+    console.log("path", pathParts.slice(-nestingLvl).join("/"));
     return pathParts.slice(-nestingLvl).join("/");
   }
   return file.basename;
