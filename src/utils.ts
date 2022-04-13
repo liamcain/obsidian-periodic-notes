@@ -11,37 +11,156 @@ export function isMetaPressed(e: MouseEvent | KeyboardEvent): boolean {
   return Platform.isMacOS ? e.metaKey : e.ctrlKey;
 }
 
+function getDaysOfWeek(): string[] {
+  const { moment } = window;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let weekStart = (moment.localeData() as any)._week.dow;
+  const daysOfWeek = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
+
+  while (weekStart) {
+    daysOfWeek.push(daysOfWeek.shift()!);
+    weekStart--;
+  }
+  return daysOfWeek;
+}
+
+export function getDayOfWeekNumericalValue(dayOfWeekName: string): number {
+  return getDaysOfWeek().indexOf(dayOfWeekName.toLowerCase());
+}
+
 export function applyTemplateTransformations(
   filename: string,
+  granularity: Granularity,
   date: Moment,
   format: string,
   rawTemplateContents: string
 ): string {
-  return rawTemplateContents
+  let templateContents = rawTemplateContents;
+
+  templateContents = rawTemplateContents
     .replace(/{{\s*date\s*}}/gi, filename)
     .replace(/{{\s*time\s*}}/gi, window.moment().format("HH:mm"))
-    .replace(/{{\s*title\s*}}/gi, filename)
-    .replace(
-      /{{\s*(date|time)\s*(([+-]\d+)([yqmwdhs]))?\s*(:.+?)?}}/gi,
+    .replace(/{{\s*title\s*}}/gi, filename);
+
+  if (granularity === "day") {
+    templateContents = templateContents
+      .replace(/{{\s*yesterday\s*}}/gi, date.clone().subtract(1, "day").format(format))
+      .replace(/{{\s*tomorrow\s*}}/gi, date.clone().add(1, "d").format(format))
+      .replace(
+        /{{\s*(date|time)\s*(([+-]\d+)([yqmwdhs]))?\s*(:.+?)?}}/gi,
+        (_, _timeOrDate, calc, timeDelta, unit, momentFormat) => {
+          const now = window.moment();
+          const currentDate = date.clone().set({
+            hour: now.get("hour"),
+            minute: now.get("minute"),
+            second: now.get("second"),
+          });
+          if (calc) {
+            currentDate.add(parseInt(timeDelta, 10), unit);
+          }
+
+          if (momentFormat) {
+            return currentDate.format(momentFormat.substring(1).trim());
+          }
+          return currentDate.format(format);
+        }
+      );
+  }
+
+  if (granularity === "week") {
+    templateContents = templateContents.replace(
+      /{{\s*(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\s*:(.*?)}}/gi,
+      (_, dayOfWeek, momentFormat) => {
+        const day = getDayOfWeekNumericalValue(dayOfWeek);
+        return date.weekday(day).format(momentFormat.trim());
+      }
+    );
+  }
+
+  if (granularity === "month") {
+    templateContents = templateContents.replace(
+      /{{\s*(month)\s*(([+-]\d+)([yqmwdhs]))?\s*(:.+?)?}}/gi,
       (_, _timeOrDate, calc, timeDelta, unit, momentFormat) => {
         const now = window.moment();
-        const currentDate = date.clone().set({
-          hour: now.get("hour"),
-          minute: now.get("minute"),
-          second: now.get("second"),
-        });
+        const monthStart = date
+          .clone()
+          .startOf("month")
+          .set({
+            hour: now.get("hour"),
+            minute: now.get("minute"),
+            second: now.get("second"),
+          });
         if (calc) {
-          currentDate.add(parseInt(timeDelta, 10), unit);
+          monthStart.add(parseInt(timeDelta, 10), unit);
         }
 
         if (momentFormat) {
-          return currentDate.format(momentFormat.substring(1).trim());
+          return monthStart.format(momentFormat.substring(1).trim());
         }
-        return currentDate.format(format);
+        return monthStart.format(format);
       }
-    )
-    .replace(/{{\s*yesterday\s*}}/gi, date.clone().subtract(1, "day").format(format))
-    .replace(/{{\s*tomorrow\s*}}/gi, date.clone().add(1, "d").format(format));
+    );
+  }
+
+  if (granularity === "quarter") {
+    templateContents = templateContents.replace(
+      /{{\s*(quarter)\s*(([+-]\d+)([yqmwdhs]))?\s*(:.+?)?}}/gi,
+      (_, _timeOrDate, calc, timeDelta, unit, momentFormat) => {
+        const now = window.moment();
+        const monthStart = date
+          .clone()
+          .startOf("quarter")
+          .set({
+            hour: now.get("hour"),
+            minute: now.get("minute"),
+            second: now.get("second"),
+          });
+        if (calc) {
+          monthStart.add(parseInt(timeDelta, 10), unit);
+        }
+
+        if (momentFormat) {
+          return monthStart.format(momentFormat.substring(1).trim());
+        }
+        return monthStart.format(format);
+      }
+    );
+  }
+
+  if (granularity === "year") {
+    templateContents = templateContents.replace(
+      /{{\s*(year)\s*(([+-]\d+)([yqmwdhs]))?\s*(:.+?)?}}/gi,
+      (_, _timeOrDate, calc, timeDelta, unit, momentFormat) => {
+        const now = window.moment();
+        const monthStart = date
+          .clone()
+          .startOf("year")
+          .set({
+            hour: now.get("hour"),
+            minute: now.get("minute"),
+            second: now.get("second"),
+          });
+        if (calc) {
+          monthStart.add(parseInt(timeDelta, 10), unit);
+        }
+
+        if (momentFormat) {
+          return monthStart.format(momentFormat.substring(1).trim());
+        }
+        return monthStart.format(format);
+      }
+    );
+  }
+
+  return templateContents;
 }
 
 export function getFormat(calendarSet: CalendarSet, granularity: Granularity): string {
@@ -72,6 +191,7 @@ export async function applyPeriodicTemplateToFile(
   );
   const renderedContents = applyTemplateTransformations(
     file.basename,
+    metadata.granularity,
     metadata.date,
     format,
     templateContents
@@ -157,7 +277,6 @@ async function ensureFolderExists(app: App, path: string): Promise<void> {
 }
 
 export function getRelativeDate(granularity: Granularity, date: Moment) {
-  const today = window.moment().startOf("day");
   if (granularity == "week") {
     const thisWeek = window.moment().startOf(granularity);
     const fromNow = window.moment(date).diff(thisWeek, "week");
@@ -170,6 +289,7 @@ export function getRelativeDate(granularity: Granularity, date: Moment) {
     }
     return window.moment.duration(fromNow, granularity).humanize(true);
   } else if (granularity === "day") {
+    const today = window.moment().startOf("day");
     const fromNow = window.moment(date).from(today);
     return window.moment(date).calendar(null, {
       lastWeek: "[Last] dddd",

@@ -105,11 +105,16 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
 
   getSuggestions(query: string): DateNavigationItem[] {
     const dateInQuery = this.nlDatesPlugin.parseDate(query);
+    const quickSuggestions = this.getDateSuggestions(query);
+
+    if (quickSuggestions.length) {
+      return quickSuggestions;
+    }
+
     if (dateInQuery.moment.isValid()) {
       return this.getPeriodicNotesFromQuery(query, dateInQuery.moment);
     }
-
-    return this.getDateSuggestions(query);
+    return [];
   }
 
   getDateSuggestions(query: string): DateNavigationItem[] {
@@ -127,10 +132,6 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
     if (relativeExpr) {
       const reference = relativeExpr[1];
       return [
-        getSuggestion(`${reference} week`, "week"),
-        getSuggestion(`${reference} month`, "month"),
-        // getSuggestion(`${reference} quarter`, "quarter"),
-        getSuggestion(`${reference} year`, "year"),
         getSuggestion(`${reference} Sunday`, "day"),
         getSuggestion(`${reference} Monday`, "day"),
         getSuggestion(`${reference} Tuesday`, "day"),
@@ -138,6 +139,10 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
         getSuggestion(`${reference} Thursday`, "day"),
         getSuggestion(`${reference} Friday`, "day"),
         getSuggestion(`${reference} Saturday`, "day"),
+        getSuggestion(`${reference} week`, "week"),
+        getSuggestion(`${reference} month`, "month"),
+        // getSuggestion(`${reference} quarter`, "quarter"), TODO include once nldates supports quarters
+        getSuggestion(`${reference} year`, "year"),
       ]
         .filter((items) => activeGranularities.includes(items.granularity))
         .filter((items) => items.label.toLowerCase().startsWith(query));

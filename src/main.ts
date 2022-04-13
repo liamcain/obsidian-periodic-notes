@@ -213,6 +213,7 @@ export default class PeriodicNotesPlugin extends Plugin {
     const templateContents = await getTemplateContents(this.app, config.templatePath);
     const renderedContents = applyTemplateTransformations(
       filename,
+      granularity,
       date,
       format,
       templateContents
