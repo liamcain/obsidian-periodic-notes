@@ -26,7 +26,8 @@ function getDaysOfWeek(): string[] {
   ];
 
   while (weekStart) {
-    daysOfWeek.push(daysOfWeek.shift()!);
+    const day = daysOfWeek.shift();
+    if (day) daysOfWeek.push(day);
     weekStart--;
   }
   return daysOfWeek;
