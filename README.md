@@ -10,38 +10,31 @@ This plugin allows you to:
 
 ## Features
 
-### Calendar sets
+### 📆 Calendar sets
 
 A **calendar set** describes a collection of periodic notes. Now you no longer need to have a single Daily Note, instead you can have one for each pillar of your life. Have a clean break between Personal and Work. Track a project. Track client work. Organize your school work. Calendar sets offer _flexibility_ for you to live more strict.
 
-### Date switcher
+### ⚡️ Date switcher
 
 Two of the biggest pain points in workflows involving Periodic notes and Zettelkasten-ish notes are **note recall** and **navigation**. The date switcher attempts to solve both of these issues. Use natural language to quickly find periodic notes and other date-related notes. Looking for a meeting note from last week? Just search: `last week ⇥ meeting`. It's my proudest feature of this release and I really hope you love it.
 
-### Timeline complication
+### ⌚️ Timeline complication
 
 The date switcher will have you zipping around from note to note so fast you might start getting a bit lost. But don't fret! There is now a timeline "complication" on the top-right of your periodic notes that shows you in natural language exactly where you are.
 
 ## Configuring
 
-### Date Index
+### Classifying Dates
 
 Periodic Notes searches within the specified folders and indexes all types of time-related files.
 
-- Notes matching **exactly** the date format specified in the settings. So if the format is `YYYY-MM-DD`, it will find and index `2022-04-10.md`
+- Notes with filenames matching **exactly** the date format specified in the settings. So if the format is `YYYY-MM-DD`, it will find and index `2022-04-10.md`
 - Notes with dates in the filename. This includes Zettelkasten-prefixed notes (e.g. `202204101611 Meeting Notes.md`) but also files like `Budget cuts made in 2021.md`.
-
-It will also check the frontmatter of all files looking for the following keys with their corresponding values:
-
-| Frontmatter Key | Format       |
-| --------------- | ------------ |
-| day             | `YYYY-MM-DD` |
-| week            | `GGGG-[W]WW` |
-| month           | `YYYY-MM`    |
-| quater          | `YYYY-[Q]Q`  |
-| year            | `YYYY`       |
+- Notes [identified as periodic notes according to frontmatter](#parsing-frontmatter)
 
 Using frontmatter to identify the notes gives you maximum flexibility to name your notes however you want, meaning you're no longer restricted to the fixed formats that Moment.js can parse.
+
+When opening a note for a particular day, the algorithm always looks for exact matches and it prefers frontmatter matches over filename matches.
 
 #### Parsing filenames
 
@@ -71,7 +64,15 @@ Periodic Notes also indexes any filename that contains a date-like pattern. This
 
 #### Parsing frontmatter
 
-The plugin also looks at frontmatter to identify periodic notes. Currently it only uses frontmatter to identify exact matches:
+You can also use frontmatter to classify notes as periodic notes. It will check the frontmatter of all files looking for the following keys with their corresponding values:
+
+| Frontmatter Key | Format       |
+| --------------- | ------------ |
+| day             | `YYYY-MM-DD` |
+| week            | `GGGG-[W]WW` |
+| month           | `YYYY-MM`    |
+| quater          | `YYYY-[Q]Q`  |
+| year            | `YYYY`       |
 
 For example:
 
@@ -80,6 +81,12 @@ For example:
 day: 2022-01-12`
 ---
 ```
+
+Notes with these frontmatter keys will be classified as an **exact match**. This means that commands that open periodic notes will open the note with corresponding frontmatter.
+
+#### Reconsoling multiple **exact** matches
+
+For commands that expect a single **exact match**, such as "Open today's daily note," the plugin will favor "frontmatter"-matched notes over notes that match by filename.
 
 ## FAQ
 
