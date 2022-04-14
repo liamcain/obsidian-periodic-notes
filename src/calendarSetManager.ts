@@ -101,6 +101,7 @@ export default class CalendarSetManager {
     }
     return activeSet;
   }
+
   public getFormat(granularity: Granularity): string {
     const activeSet = this.getActiveSet();
     return getFormat(activeSet, granularity);

@@ -168,6 +168,26 @@ export function getFormat(calendarSet: CalendarSet, granularity: Granularity): s
   return calendarSet[granularity]?.format || DEFAULT_FORMAT[granularity];
 }
 
+/**
+ * When matching file formats, users can specify `YYYY/YYYY-MM-DD`. We should look for
+ * paths that match either `YYYY/YYYY-MM-DD` exactly, or just `YYYY-MM-DD` in case
+ * users move the file later.
+ */
+export function getPossibleFormats(
+  calendarSet: CalendarSet,
+  granularity: Granularity
+): string[] {
+  const format = calendarSet[granularity]?.format;
+  if (!format) return [DEFAULT_FORMAT[granularity]];
+
+  const partialFormatExp = /[^/]*$/.exec(format);
+  if (partialFormatExp) {
+    const partialFormat = partialFormatExp[0];
+    return [format, partialFormat];
+  }
+  return [format];
+}
+
 export function getFolder(calendarSet: CalendarSet, granularity: Granularity): string {
   return calendarSet[granularity]?.folder || "/";
 }

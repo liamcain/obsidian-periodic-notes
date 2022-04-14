@@ -16,7 +16,7 @@ import type PeriodicNotesPlugin from "./main";
 import { getLooselyMatchedDate } from "./parser";
 import { getDateInput } from "./settings/validation";
 import { granularities, type Granularity, type PeriodicConfig } from "./types";
-import { applyPeriodicTemplateToFile, getFormat } from "./utils";
+import { applyPeriodicTemplateToFile, getPossibleFormats } from "./utils";
 
 export type MatchType = "filename" | "frontmatter" | "date-prefixed";
 
@@ -196,9 +196,9 @@ export class PeriodicNotesCache extends Component {
         const folder = calendarSet[granularity]?.folder || "";
         if (!file.path.startsWith(folder)) continue granularities;
 
-        const format = getFormat(calendarSet, granularity);
-        const dateInputStr = getDateInput(file, format, granularity);
-        const date = window.moment(dateInputStr, format, true);
+        const formats = getPossibleFormats(calendarSet, granularity);
+        const dateInputStr = getDateInput(file, formats[0], granularity);
+        const date = window.moment(dateInputStr, formats, true);
         if (date.isValid()) {
           const metadata = {
             calendarSet: calendarSet.id,
