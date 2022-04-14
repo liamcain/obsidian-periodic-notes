@@ -5,7 +5,7 @@ Create and manage all of your time-based notes within Obsidian.
 This plugin allows you to:
 
 - Create notes for any periodic of time (daily, weekly, monthly, etc)
-- Jump to any time-based notes using natural language (requires NL Dates plugin)
+- Jump to any time-based notes using natural language (requires [NL Dates plugin](https://github.com/argenos/nldates-obsidian))
 - Easily orient yourself in a sea of `202204101611 Zettelkasten Prefixed notes`
 
 ## Features
@@ -88,13 +88,38 @@ Notes with these frontmatter keys will be classified as an **exact match**. This
 
 For commands that expect a single **exact match**, such as "Open today's daily note," the plugin will favor "frontmatter"-matched notes over notes that match by filename.
 
+## Related Plugins
+
+- [Natural Language Dates plugin](https://github.com/argenos/nldates-obsidian) by [Argentina Ortega Sáinz](https://github.com/argenos)
+- [Calendar plugin](https://github.com/liamcain/obsidian-calendar-plugin)
+
 ## FAQ
 
-### How do I use a variable in the folder path?
+### How do I have week numbers match the week numbers in Google Calendar, Outlook, Fantastical?
 
-If you want new daily notes to show up in the folder `Journal/2021/` for example, you can include the folder in the "Format" field. For example:
+Those programs conform to the ISO-8601 specification for week numbering. To follow this standard, make sure you're using the `GGGG` and `WW` tokens in your specified format.
 
-<img width="500" alt="image" src="https://user-images.githubusercontent.com/693981/111852801-c1cd8e00-88ee-11eb-9542-b7d840239037.png">
+<img width="864" alt="image" src="https://user-images.githubusercontent.com/693981/163471298-5c63da1b-7cba-4c94-b0e9-c54818703889.png">
+
+### I want new notes to be created within a subfolder of my periodic note folder. How do I do that?
+
+If you want new daily notes to show up in the folder `Journal/2022/` for example, you can include the sub-folder in the "Format" field. For example:
+
+<img width="868" alt="image" src="https://user-images.githubusercontent.com/693981/163474542-f20c469d-95a1-4e7f-afbb-6f858a9aff32.png">
+
+**Important:** Notice that the plugin will look at all files within the **Folder** that you provide. So even if you want your journal segmented into subfolders, the **Folder** should refer to the base folder only.
+
+```
+journal
+  ├── 2021
+  │   ├── 2021-12-30.md
+  │   └── 2021-12-31.md
+  └── 2022
+      ├── 2022-04-01.md
+      └── 2022-04-02.md
+```
+
+For this configuration, the **Folder** should be `journal/` and the **Format** should be `YYYY/YYYY-MM-DD`.
 
 ## Say Thanks 🙏
 
