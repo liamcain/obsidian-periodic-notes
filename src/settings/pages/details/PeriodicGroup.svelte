@@ -88,8 +88,8 @@
       out:slide|local={{ duration: 300 }}
     >
       <NoteFormatSetting {config} {granularity} />
-      <NoteTemplateSetting {app} {config} {granularity} />
       <NoteFolderSetting {app} {config} {granularity} />
+      <NoteTemplateSetting {app} {config} {granularity} />
       <OpenAtStartupSetting {config} {settings} {granularity} />
     </div>
   {/if}
