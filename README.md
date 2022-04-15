@@ -12,15 +12,47 @@ This plugin allows you to:
 
 ### 📆 Calendar sets
 
-A **calendar set** describes a collection of periodic notes. Now you no longer need to have a single Daily Note, instead you can have one for each pillar of your life. Have a clean break between Personal and Work. Track a project. Track client work. Organize your school work. Calendar sets offer _flexibility_ for you to live more strict.
+A **calendar set** describes a collection of periodic notes. Now you no longer need to have a single daily note; instead, you can have one for each pillar of your life. Have a clean break between personal and work. Track a project. Track client work. Organize your school work. Calendar sets offer _flexibility_ for you to live more strict.
 
 ### ⚡️ Date switcher
 
-Two of the biggest pain points in workflows involving Periodic notes and Zettelkasten-ish notes are **note recall** and **navigation**. The date switcher attempts to solve both of these issues. Use natural language to quickly find periodic notes and other date-related notes. Looking for a meeting note from last week? Just search: `last week ⇥ meeting`. It's my proudest feature of this release and I really hope you love it.
+Two of the biggest pain points in workflows involving Periodic notes and Zettelkasten-ish notes are **note recall** and **navigation**. The date switcher attempts to solve both of these issues. Use natural language to quickly find periodic notes and other date-related notes.
+
+Looking for a meeting note from last week? Just search: `last week ⇥ meeting`.
+
+#### Usage
+
+Access the date switcher using the command "Periodic Notes: Show date switcher...". Upon opening it, the date switcher will show a collection of quick date entries.
+
+<img width="754" alt="image" src="https://user-images.githubusercontent.com/693981/163502230-b26950b2-be74-4e77-a823-cc4d599b8e33.png">
+
+On each entry, it shows either or not the active calendar set has a corresponding note, the path for that note, as well as the number of related notes for that time period. Selecting an entry will open the existing note or create a new one if one does not exist. You can select a note by clicking or with <kbd>Enter</kbd>. Holding down <kbd>ctrl</kbd> while selecting an entry will open that note in a new pane.
+
+##### Related Notes
+
+Pressing <kbd>Tab</kbd> will open the Related Notes view for the highlighted entry. This will show all non-exact matches corresponding to that time period. On the "today" entry, it would show all notes where today's date appears in the filename. For the "this month" entry, it will show all the notes prefixed with `YYYY-MM`.
+
+##### Extended Search
+
+From the related notes view, you can press `*` to expand the search. Expanding a search means that the list will include all the entries _within_ that period. So the "this month" entry will include all the weekly and daily notes of that month.
+
+This becomes especially powerful when looking for a particular Zettlekasten note and you remember that it was from last week, but maybe not the particular day.
 
 ### ⌚️ Timeline complication
 
 The date switcher will have you zipping around from note to note so fast you might start getting a bit lost. But don't fret! There is now a timeline "complication" on the top-right of your periodic notes that shows you in natural language exactly where you are.
+
+<img width="104" alt="image" src="https://user-images.githubusercontent.com/693981/163503952-a8619a42-a91a-43ea-af49-eb77744c5048.png">
+
+The complication will show the relative date for the open note. If the open note is an **inexact** note, for example, a Zettelkasten note, it will show an ⃔ icon.
+
+<img width="100" alt="image" src="https://user-images.githubusercontent.com/693981/163503975-7a8f9798-5644-4d3d-8eeb-49c2e07d0884.png">
+
+#### Weekly Calendar
+
+Clicking on the timeline complication will toggle the weekly inline calendar.
+
+![timeline](https://user-images.githubusercontent.com/693981/163504193-064dbb30-0890-4708-86c8-49b50e86da35.gif)
 
 ## Configuring
 
