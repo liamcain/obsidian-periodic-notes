@@ -40,9 +40,9 @@ From here, you can choose which **note types** you want to enable. To get starte
 
 Each note type has the same configuration options:
 
-- **Format:** The
+- **Format:** The date format used as the filename for new periodic notes. Not only is this value used for generating filenames, but the plugin also uses this format when indexing your vault looking for periodic notes.
 - **Base Folder:** The folder that will hold all the periodic notes for this calendar set. For personal daily notes, you might choose to select a `Journal/` folder, for example.
-- **Template location:**: The path to your note template. See
+- **Template location:**: The path to your note template. Check out the [template tags](#template-tags) section for more information.
 
 ### Using the date switcher
 
