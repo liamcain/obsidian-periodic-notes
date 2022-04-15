@@ -42,11 +42,12 @@ This becomes especially powerful when looking for a particular Zettlekasten note
 
 The date switcher will have you zipping around from note to note so fast you might start getting a bit lost. But don't fret! There is now a timeline "complication" on the top-right of your periodic notes that shows you in natural language exactly where you are.
 
-<img width="104" alt="image" src="https://user-images.githubusercontent.com/693981/163503952-a8619a42-a91a-43ea-af49-eb77744c5048.png">
+The complication will show the relative date for the open note.
 
-The complication will show the relative date for the open note. If the open note is an **inexact** note, for example, a Zettelkasten note, it will show an ⃔ icon.
-
-<img width="100" alt="image" src="https://user-images.githubusercontent.com/693981/163503975-7a8f9798-5644-4d3d-8eeb-49c2e07d0884.png">
+| Note                            | Appearance                                                                                                                              |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `2022-04-14.md`                 | <img width="104" alt="image" src="https://user-images.githubusercontent.com/693981/163503952-a8619a42-a91a-43ea-af49-eb77744c5048.png"> |
+| `202204141213 Meeting Notes.md` | <img width="100" alt="image" src="https://user-images.githubusercontent.com/693981/163503975-7a8f9798-5644-4d3d-8eeb-49c2e07d0884.png"> |
 
 #### Weekly Calendar
 
