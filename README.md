@@ -14,15 +14,21 @@ This plugin allows you to:
 
 A **calendar set** describes a collection of periodic notes. Now you no longer need to have a single daily note; instead, you can have one for each pillar of your life. Have a clean break between personal and work. Track a project. Track client work. Organize your school work. Calendar sets offer _flexibility_ for you to live more strict.
 
+[Getting set up →](#setting-up-your-first-calendar-set)
+
 ### ⚡️ Date switcher
 
 Two of the biggest pain points in workflows involving Periodic notes and Zettelkasten-ish notes are **note recall** and **navigation**. The date switcher attempts to solve both of these issues. Use natural language to quickly find periodic notes and other date-related notes.
 
 Looking for a meeting note from last week? Just search: `last week ⇥ meeting`.
 
+[Usage →](#using-the-date-switcher)
+
 ### ⌚️ Timeline complication
 
 The date switcher will have you zipping around from note to note so fast you might start getting a bit lost. But don't fret! There is now a timeline "complication" on the top-right of your periodic notes that shows you in natural language exactly where you are.
+
+[Usage →](#using-the-timeline-complication)
 
 ## Usage
 
