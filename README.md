@@ -20,7 +20,25 @@ Two of the biggest pain points in workflows involving Periodic notes and Zettelk
 
 Looking for a meeting note from last week? Just search: `last week ⇥ meeting`.
 
-#### Usage
+### ⌚️ Timeline complication
+
+The date switcher will have you zipping around from note to note so fast you might start getting a bit lost. But don't fret! There is now a timeline "complication" on the top-right of your periodic notes that shows you in natural language exactly where you are.
+
+## Usage
+
+### Setting up your first calendar set
+
+In the Periodic Notes settings, you will start with a "Default" calendar set. Click on it to open the Calendar set details view.
+
+From here, you can choose which **note types** you want to enable. To get started, you might want to enable: **Daily**, **Weekly**, **Monthly**, and **Yearly**.
+
+Each note type has the same configuration options:
+
+- **Format:** The
+- **Base Folder:** The folder that will hold all the periodic notes for this calendar set. For personal daily notes, you might choose to select a `Journal/` folder, for example.
+- **Template location:**: The path to your note template. See
+
+### Using the date switcher
 
 Access the date switcher using the command "Periodic Notes: Show date switcher...". Upon opening it, the date switcher will show a collection of quick date entries.
 
@@ -38,9 +56,7 @@ From the related notes view, you can press `*` to expand the search. Expanding a
 
 This becomes especially powerful when looking for a particular Zettlekasten note and you remember that it was from last week, but maybe not the particular day.
 
-### ⌚️ Timeline complication
-
-The date switcher will have you zipping around from note to note so fast you might start getting a bit lost. But don't fret! There is now a timeline "complication" on the top-right of your periodic notes that shows you in natural language exactly where you are.
+### Using the timeline complication
 
 The complication will show the relative date for the open note.
 
@@ -120,6 +136,18 @@ Notes with these frontmatter keys will be classified as an **exact match**. This
 #### Reconsoling multiple **exact** matches
 
 For commands that expect a single **exact match**, such as "Open today's daily note," the plugin will favor "frontmatter"-matched notes over notes that match by filename.
+
+### Template Tags
+
+| Tag                                                                                    | Supported Note Types | Description                                                                                                  | Accepts date calculations |
+| -------------------------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------- |
+| `title`                                                                                | _All_                | It will insert the title of the note                                                                         | ❌                        |
+| `date`, `time`                                                                         | _All_                | It will insert current date/time. Optionally accepts a format. e.g. `{{date:YYYY-MM-DD}}`                    | ✅                        |
+| `yesterday`, `tomorrow`                                                                | Daily                | Inserts the corresponding date. Optionally accepts a format. e.g. `{{tomorrow:YYYY-MM-DD}}`                  | ✅                        |
+| `sunday`, `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday`, `sunday` | Weekly               | Refers to the particular day in the week `{{sunday:gggg-MM-DD}}` Note, you **must** specify the date format! | ✅                        |
+| `month`                                                                                | Monthly              | Refers to the first day of the month. Optionally accepts a format. e.g. `{{month:YYYY-MM}}`                  | ✅                        |
+| `quarter`                                                                              | Quarterly            | Refers to the first day of the quarter. Optionally accepts a format. e.g. `{{quarter:YYYY-[Q]Q}}`            | ✅                        |
+| `year`                                                                                 | Yearly               | Refers to the first day of the year. Optionally accepts a format. e.g. `{{year:YYYY}}`                       | ✅                        |
 
 ## Related Plugins
 
