@@ -42,7 +42,15 @@ Each note type has the same configuration options:
 
 - **Format:** The date format used as the filename for new periodic notes. Not only is this value used for generating filenames, but the plugin also uses this format when indexing your vault looking for periodic notes.
 - **Base Folder:** The folder that will hold all the periodic notes for this calendar set. For personal daily notes, you might choose to select a `Journal/` folder, for example.
-- **Template location:**: The path to your note template. Check out the [template tags](#template-tags) section for more information.
+- **Template location:** The path to your note template. Check out the [template tags](#template-tags) section for more information.
+
+### Understanding calendar sets
+
+<img width="613" alt="image" src="https://user-images.githubusercontent.com/693981/163569851-0280a2eb-fe9b-49db-a48a-93b4cfbd93ec.png">
+
+Each calendar set has an entirely separate configuration. The most common use case is creating two sets: "Personal" and "Work." This way, you can keep your daily log of work in its own separate folder without polluting it with personal information.
+
+When you have multiple calendar sets, one set is set as the **Active calendar set**. All commands that refer to creating or viewing a particular periodic note will only look at notes within the currently active calendar set. You can switch the active set in settings or by using the command "Switch active calendar set...".
 
 ### Using the date switcher
 
@@ -169,12 +177,30 @@ You can add or subtract any number of days (`d`), weeks (`w`), months (`m`), or 
 
 This feature is meant for simple use cases, like linking consequtive daily notes. If you need anything more complicated in your template, I highly recommend using the [Templater](https://github.com/SilentVoid13/Templater) plugin in conjunction with Periodic Notes.
 
+## Commands
+
+<img width="723" alt="image" src="https://user-images.githubusercontent.com/693981/163568986-a30bfb3e-3a64-49fe-bdf1-d46ace8c2649.png">
+
+| Command name                  | Description                                                                                            |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Open date switcher            | Opens the [Date Switcher](#️-date-switcher). _Requires Natural Language Dates plugin_ to be installed. |
+| Switch active calendar set... | Select from the list of your calendar sets which one should be _active_.                               |
+| Open today's daily note       | Open or create the daily note for the currently active calendar set                                    |
+| Open this week's note         | Open or create the weekly note for the currently active calendar set                                   |
+| Open this month's note        | Open or create the monthly note for the currently active calendar set                                  |
+| Open this quarter's note      | Open or create the quarterly note for the currently active calendar set                                |
+| Open this year's note         | Open or create the yearly note for the currently active calendar set                                   |
+
 ## Related Plugins
 
 - [Natural Language Dates plugin](https://github.com/argenos/nldates-obsidian) by [Argentina Ortega Sáinz](https://github.com/argenos)
 - [Calendar plugin](https://github.com/liamcain/obsidian-calendar-plugin)
 
 ## FAQ
+
+### What's the difference between this and the daily notes plugin?
+
+The daily notes plugin is built into Obsidian _core_. That means you can use it without disabling [Safe Mode](https://help.obsidian.md/Advanced+topics/Community+plugins). It's also very simple: it can open or create today's daily note. Periodic Notes, on the other hand, strives to add more interoperability with other plugins. Even if you're only interested in daily notes, Periodic Notes has a lot to offer. It can create future or historic daily notes, offers superior navigation, and allows for multiple daily notes per day.
 
 ### How do I have week numbers match the week numbers in Google Calendar, Outlook, Fantastical?
 
