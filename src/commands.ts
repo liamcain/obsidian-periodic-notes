@@ -33,7 +33,7 @@ export const displayConfigs: Record<Granularity, IDisplayConfig> = {
   year: {
     periodicity: "yearly",
     relativeUnit: "this year",
-    labelOpenPresent: "Open this years's note",
+    labelOpenPresent: "Open this year's note",
   },
 };
 
