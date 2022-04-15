@@ -155,6 +155,20 @@ For commands that expect a single **exact match**, such as "Open today's daily n
 | `quarter`                                                                              | Quarterly            | Refers to the first day of the quarter. Optionally accepts a format. e.g. `{{quarter:YYYY-[Q]Q}}`            | ✅                        |
 | `year`                                                                                 | Yearly               | Refers to the first day of the year. Optionally accepts a format. e.g. `{{year:YYYY}}`                       | ✅                        |
 
+#### Date calculations
+
+Periodic Notes provides very basic date computations inside templates. This is useful if you want to link to a different date from within your periodic template.
+
+The syntax for date calculations is best understood through example. Here's how you could have the template insert **in 5 days**:
+
+```
+{{date+5d:YYYY-MM-DD}}
+```
+
+You can add or subtract any number of days (`d`), weeks (`w`), months (`m`), or years (`y`).
+
+This feature is meant for simple use cases, like linking consequtive daily notes. If you need anything more complicated in your template, I highly recommend using the [Templater](https://github.com/SilentVoid13/Templater) plugin in conjunction with Periodic Notes.
+
 ## Related Plugins
 
 - [Natural Language Dates plugin](https://github.com/argenos/nldates-obsidian) by [Argentina Ortega Sáinz](https://github.com/argenos)
@@ -167,6 +181,12 @@ For commands that expect a single **exact match**, such as "Open today's daily n
 Those programs conform to the **ISO-8601** specification for week numbering. To follow this standard, make sure you're using the `GGGG` and `WW` tokens in your specified format.
 
 <img width="864" alt="image" src="https://user-images.githubusercontent.com/693981/163471298-5c63da1b-7cba-4c94-b0e9-c54818703889.png">
+
+### How do I make this work with Templater?
+
+To use Templater in your Periodic Notes templates, make sure to enable the following setting within Templater:
+
+<img width="631" alt="image" src="https://user-images.githubusercontent.com/693981/163508864-4f472a1b-9413-4eb6-93dd-530b31553ce1.png">
 
 ### I want new notes to be created within a subfolder of my periodic note folder. How do I do that?
 
