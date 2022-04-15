@@ -97,7 +97,7 @@ For commands that expect a single **exact match**, such as "Open today's daily n
 
 ### How do I have week numbers match the week numbers in Google Calendar, Outlook, Fantastical?
 
-Those programs conform to the ISO-8601 specification for week numbering. To follow this standard, make sure you're using the `GGGG` and `WW` tokens in your specified format.
+Those programs conform to the **ISO-8601** specification for week numbering. To follow this standard, make sure you're using the `GGGG` and `WW` tokens in your specified format.
 
 <img width="864" alt="image" src="https://user-images.githubusercontent.com/693981/163471298-5c63da1b-7cba-4c94-b0e9-c54818703889.png">
 
@@ -120,6 +120,12 @@ journal
 ```
 
 For this configuration, the **Folder** should be `journal/` and the **Format** should be `YYYY/YYYY-MM-DD`.
+
+---
+
+## 🎞 Credits
+
+A big things to everyone that helped test new features and reported bugs. And a special thank you to Argentina Ortega Sáinz for the [Natural Language Dates plugin](https://github.com/argenos/nldates-obsidian) which powers the date switcher.
 
 ## Say Thanks 🙏
 
