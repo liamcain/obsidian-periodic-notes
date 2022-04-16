@@ -55,6 +55,7 @@ export default class PeriodicNotesPlugin extends Plugin {
   private timelineManager: TimelineManager;
 
   unload(): void {
+    super.unload();
     this.timelineManager?.cleanup();
   }
 
