@@ -2,13 +2,17 @@
 
 Create and manage all of your time-based notes within Obsidian.
 
-<div style="background: linear-gradient(var(--color-attention-subtle), var(--color-attention-subtle)); color: var(--color-fg-default)"><b>Note:</b>This README has been preemptively updated in anticipation for v1.0. Not all features described here are available in the current stable release 0.0.17.</div>
+---
+
+**Note:** This README has been preemptively updated in anticipation for v1.0. Not all features described here are available in the current stable release 0.0.17.
+
+---
 
 This plugin allows you to:
 
 - Create notes for any periodic of time (daily, weekly, monthly, etc)
-- Jump to any time-based notes with natural language using the Date Switcher (requires [NL Dates plugin](https://github.com/argenos/nldates-obsidian)) <span style="display: inline-block; min-width: 20px; padding: 0 6px; font-size: 12px; font-weight: 500; line-height: 18px; color: var(--color-fg-default); text-align: center; background-color: var(--color-neutral-muted); border: 1px solid var(--color-counter-border); border-radius: 2em;">beta</span>
-- Easily orient yourself in a sea of `202204101611 Zettelkasten Prefixed notes` using the Timeline complication <span style="display: inline-block; min-width: 20px; padding: 0 6px; font-size: 12px; font-weight: 500; line-height: 18px; color: var(--color-fg-default); text-align: center; background-color: var(--color-neutral-muted); border: 1px solid var(--color-counter-border); border-radius: 2em;">beta</span>
+- Jump to any time-based notes with natural language using the Date Switcher (requires [NL Dates plugin](https://github.com/argenos/nldates-obsidian))
+- Easily orient yourself in a sea of `202204101611 Zettelkasten Prefixed notes` using the Timeline complication
 
 ## Features
 
