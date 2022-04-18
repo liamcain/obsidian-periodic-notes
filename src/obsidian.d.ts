@@ -1,4 +1,5 @@
 import "obsidian";
+import type { ILocaleOverride, IWeekStartOption } from "./settings";
 
 declare module "obsidian" {
   interface IWeeklyNoteOptions {
@@ -55,6 +56,10 @@ declare module "obsidian" {
     readableLineLength: boolean;
     tabSize: number;
     showFrontmatter: boolean;
+
+    // XXX: Added from Periodic Notes
+    localeOverride: ILocaleOverride;
+    weekStart: IWeekStartOption;
   }
 
   interface FoldPosition {
@@ -80,6 +85,7 @@ declare module "obsidian" {
   interface Vault {
     config: Record<string, unknown>;
     getConfig<T extends keyof VaultSettings>(setting: T): VaultSettings[T];
+    setConfig<T extends keyof VaultSettings>(setting: T, value: any): void;
   }
 
   export interface PluginInstance {

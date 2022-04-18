@@ -25,6 +25,10 @@ import {
   DEFAULT_PERIODIC_CONFIG,
 } from "./settings";
 import {
+  configureGlobalMomentLocale,
+  initializeLocaleConfigOnce,
+} from "./settings/localization";
+import {
   createNewCalendarSet,
   findStartupNoteConfig,
   hasLegacyDailyNoteSettings,
@@ -62,7 +66,9 @@ export default class PeriodicNotesPlugin extends Plugin {
   async onload(): Promise<void> {
     this.settings = writable<ISettings>();
     await this.loadSettings();
-    this.settings.subscribe(this.onUpdateSettings.bind(this));
+    this.register(this.settings.subscribe(this.onUpdateSettings.bind(this)));
+
+    initializeLocaleConfigOnce(this.app);
 
     this.ribbonEl = null;
     this.calendarSetManager = new CalendarSetManager(this);
@@ -195,7 +201,6 @@ export default class PeriodicNotesPlugin extends Plugin {
   }
 
   private async onUpdateSettings(newSettings: ISettings): Promise<void> {
-    // this.settings = newSettings;
     await this.saveData(newSettings);
     this.configureCommands();
     this.configureRibbonIcons();

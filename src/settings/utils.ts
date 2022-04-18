@@ -148,3 +148,33 @@ export function getLegacyDailyNoteSettings(app: App): DailyNotesSettings {
 export function disableDailyNotesPlugin(app: App): void {
   app.internalPlugins.getPluginById("daily-notes").disable(true);
 }
+
+export function getLocaleOptions() {
+  const sysLocale = navigator.language?.toLowerCase();
+  return [
+    { label: `Same as system (${sysLocale})`, value: "system-default" },
+    ...window.moment.locales().map((locale) => ({
+      label: locale,
+      value: locale,
+    })),
+  ];
+}
+
+export function getWeekStartOptions() {
+  const weekdays = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
+  const localizedWeekdays = window.moment.weekdays();
+  const localeWeekStartNum = window._bundledLocaleWeekSpec.dow;
+  const localeWeekStart = localizedWeekdays[localeWeekStartNum];
+  return [
+    { label: `Locale default (${localeWeekStart})`, value: "locale" },
+    ...localizedWeekdays.map((day, i) => ({ value: weekdays[i], label: day })),
+  ];
+}

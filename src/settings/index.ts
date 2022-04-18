@@ -6,6 +6,17 @@ import type { SvelteComponent } from "svelte";
 import type WeeklyNotesPlugin from "../main";
 import SettingsRouter from "./pages/Router.svelte";
 
+export type ILocaleOverride = "system-default" | string;
+export type IWeekStartOption =
+  | "sunday"
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "locale";
+
 export interface ISettings {
   showGettingStartedBanner: boolean;
   hasMigratedDailyNoteSettings: boolean;
@@ -19,13 +30,20 @@ export interface ISettings {
 }
 
 export const DEFAULT_SETTINGS: ISettings = {
-  installedVersion: "1.0.0-beta1",
-  activeCalendarSet: DEFAULT_CALENDARSET_ID,
+  // Onboarding
+  installedVersion: "1.0.0-beta3",
   showGettingStartedBanner: true,
   hasMigratedDailyNoteSettings: false,
   hasMigratedWeeklyNoteSettings: false,
+
+  // Configuration / Preferences
+  activeCalendarSet: DEFAULT_CALENDARSET_ID,
   calendarSets: [],
   enableTimelineComplication: true,
+
+  // Localization
+  localeOverride: "system-default",
+  weekStart: "locale" as IWeekStartOption,
 };
 
 export const DEFAULT_PERIODIC_CONFIG: PeriodicConfig = Object.freeze({

@@ -6,17 +6,26 @@
   import CalendarSetManager from "src/calendarSetManager";
   import { router } from "src/settings/stores";
   import type { ISettings } from "src/settings/index";
-  // import { getLegacyDailyNoteSettings } from "src/utils";
+  import Dropdown from "src/settings/components/Dropdown.svelte";
   import Footer from "src/settings/components/Footer.svelte";
   import SettingItem from "src/settings/components/SettingItem.svelte";
   import Toggle from "src/settings/components/Toggle.svelte";
-  import { createNewCalendarSet } from "src/settings/utils";
+  import {
+    createNewCalendarSet,
+    getLocaleOptions,
+    getWeekStartOptions,
+  } from "src/settings/utils";
+  import {
+    configureGlobalMomentLocale,
+    type ILocalizationSettings,
+  } from "src/settings/localization";
 
   import GettingStartedBanner from "./GettingStartedBanner.svelte";
   import CalendarSetMenuItem from "./CalendarSets/MenuItem.svelte";
 
   export let app: App;
   export let manager: CalendarSetManager;
+  export let localization: Writable<ILocalizationSettings>;
   export let settings: Writable<ISettings>;
 
   let addEl: HTMLElement;
@@ -75,6 +84,47 @@
     isEnabled={$settings.enableTimelineComplication}
     onChange={(val) => {
       $settings.enableTimelineComplication = val;
+    }}
+  />
+</SettingItem>
+
+<h3>Localization</h3>
+<div class="setting-item-description">
+  These settings are applied to your entire vault, meaning the values you
+  specify here may impact other plugins as well.
+</div>
+<SettingItem
+  name="Start week on"
+  description="Choose what day of the week to start. Select 'locale default' to use the default specified by moment.js"
+  type="dropdown"
+  isHeading={false}
+>
+  <Dropdown
+    slot="control"
+    options={getWeekStartOptions()}
+    value={$localization.weekStart}
+    onChange={(e) => {
+      const val = e.target.value;
+      $localization.weekStart = val;
+      app.vault.setConfig("weekStart", val);
+    }}
+  />
+</SettingItem>
+
+<SettingItem
+  name="Locale"
+  description="Override the locale used by the calendar and other plugins"
+  type="dropdown"
+  isHeading={false}
+>
+  <Dropdown
+    slot="control"
+    options={getLocaleOptions()}
+    value={$localization.localeOverride}
+    onChange={(e) => {
+      const val = e.target.value;
+      $localization.localeOverride = val;
+      app.vault.setConfig("weekStart", val);
     }}
   />
 </SettingItem>
