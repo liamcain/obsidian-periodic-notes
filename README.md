@@ -140,7 +140,7 @@ You can also use frontmatter to classify notes as periodic notes. It will check 
 | day             | `YYYY-MM-DD` |
 | week            | `GGGG-[W]WW` |
 | month           | `YYYY-MM`    |
-| quater          | `YYYY-[Q]Q`  |
+| quarter          | `YYYY-[Q]Q`  |
 | year            | `YYYY`       |
 
 For example:
