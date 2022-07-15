@@ -122,7 +122,7 @@ export function getCommands(
           if (!activeFile) return false;
           return plugin.isPeriodic(activeFile.path, granularity);
         }
-        openAdjacentNote(app, plugin, "backwards");
+        jumpToAdjacentNote(app, plugin, "backwards");
       },
     },
     {
