@@ -329,5 +329,5 @@ export function getRelativeDate(granularity: Granularity, date: Moment) {
 
 export function isIsoFormat(format: string): boolean {
   const cleanFormat = removeEscapedCharacters(format);
-  return /w{1,2}/.test(cleanFormat);
+  return /W{1,2}/.test(cleanFormat);
 }
