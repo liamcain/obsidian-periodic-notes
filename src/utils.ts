@@ -11,6 +11,13 @@ export function isMetaPressed(e: MouseEvent | KeyboardEvent): boolean {
   return Platform.isMacOS ? e.metaKey : e.ctrlKey;
 }
 
+let regexpCalc = /(([+-]\d+)([yqmwdhs]))/gi
+let getCalcs = (s) => Array.from(s.matchAll(regexpCalc), match => ({
+  calc: match[1],
+  delta: match[2],
+  unit: match[3]
+}))
+
 function getDaysOfWeek(): string[] {
   const { moment } = window;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,8 +63,8 @@ export function applyTemplateTransformations(
       .replace(/{{\s*yesterday\s*}}/gi, date.clone().subtract(1, "day").format(format))
       .replace(/{{\s*tomorrow\s*}}/gi, date.clone().add(1, "d").format(format))
       .replace(
-        /{{\s*(date|time)\s*(([+-]\d+)([yqmwdhs]))?\s*(:.+?)?}}/gi,
-        (_, _timeOrDate, calc, timeDelta, unit, momentFormat) => {
+        /{{\s*(date|time)\s*(([+-]\d+)([yqmwdhs]))*\s*(:.+?)?}}/gi,
+        (match, _timeOrDate, calc, _timeDelta, _unit, momentFormat) => {
           const now = window.moment();
           const currentDate = date.clone().set({
             hour: now.get("hour"),
@@ -65,7 +72,9 @@ export function applyTemplateTransformations(
             second: now.get("second"),
           });
           if (calc) {
-            currentDate.add(parseInt(timeDelta, 10), unit);
+            getCalcs(match).forEach(item => {
+              currentDate.add(parseInt(item.delta, 10), item.unit)
+            });
           }
 
           if (momentFormat) {
@@ -88,8 +97,8 @@ export function applyTemplateTransformations(
 
   if (granularity === "month") {
     templateContents = templateContents.replace(
-      /{{\s*(month)\s*(([+-]\d+)([yqmwdhs]))?\s*(:.+?)?}}/gi,
-      (_, _timeOrDate, calc, timeDelta, unit, momentFormat) => {
+      /{{\s*(month)\s*(([+-]\d+)([yqmwdhs]))*\s*(:.+?)?}}/gi,
+      (match, _timeOrDate, calc, _timeDelta, _unit, momentFormat) => {
         const now = window.moment();
         const monthStart = date
           .clone()
@@ -100,7 +109,9 @@ export function applyTemplateTransformations(
             second: now.get("second"),
           });
         if (calc) {
-          monthStart.add(parseInt(timeDelta, 10), unit);
+          getCalcs(match).forEach(item => {
+            monthStart.add(parseInt(item.delta, 10), item.unit)
+          });
         }
 
         if (momentFormat) {
@@ -113,8 +124,8 @@ export function applyTemplateTransformations(
 
   if (granularity === "quarter") {
     templateContents = templateContents.replace(
-      /{{\s*(quarter)\s*(([+-]\d+)([yqmwdhs]))?\s*(:.+?)?}}/gi,
-      (_, _timeOrDate, calc, timeDelta, unit, momentFormat) => {
+      /{{\s*(quarter)\s*(([+-]\d+)([yqmwdhs]))*\s*(:.+?)?}}/gi,
+      (match, _timeOrDate, calc, _timeDelta, _unit, momentFormat) => {
         const now = window.moment();
         const monthStart = date
           .clone()
@@ -125,7 +136,9 @@ export function applyTemplateTransformations(
             second: now.get("second"),
           });
         if (calc) {
-          monthStart.add(parseInt(timeDelta, 10), unit);
+          getCalcs(match).forEach(item => {
+            monthStart.add(parseInt(item.delta, 10), item.unit)
+          });
         }
 
         if (momentFormat) {
@@ -138,8 +151,8 @@ export function applyTemplateTransformations(
 
   if (granularity === "year") {
     templateContents = templateContents.replace(
-      /{{\s*(year)\s*(([+-]\d+)([yqmwdhs]))?\s*(:.+?)?}}/gi,
-      (_, _timeOrDate, calc, timeDelta, unit, momentFormat) => {
+      /{{\s*(year)\s*(([+-]\d+)([yqmwdhs]))*\s*(:.+?)?}}/gi,
+      (match, _timeOrDate, calc, _timeDelta, _unit, momentFormat) => {
         const now = window.moment();
         const monthStart = date
           .clone()
@@ -150,7 +163,9 @@ export function applyTemplateTransformations(
             second: now.get("second"),
           });
         if (calc) {
-          monthStart.add(parseInt(timeDelta, 10), unit);
+          getCalcs(match).forEach(item => {
+            monthStart.add(parseInt(item.delta, 10), item.unit)
+          });
         }
 
         if (momentFormat) {

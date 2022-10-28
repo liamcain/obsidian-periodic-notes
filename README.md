@@ -179,7 +179,12 @@ The syntax for date calculations is best understood through example. Here's how 
 {{date+5d:YYYY-MM-DD}}
 ```
 
-You can add or subtract any number of days (`d`), weeks (`w`), months (`m`), or years (`y`).
+You can add or subtract any number of days (`d`), weeks (`w`), months (`M`), quarters (`Q`), or years (`y`).
+
+You can also use multiple computations together such as:
+```
+{{date+1M+1w:YYYY-MM-DD}}
+```
 
 This feature is meant for simple use cases, like linking consequtive daily notes. If you need anything more complicated in your template, I highly recommend using the [Templater](https://github.com/SilentVoid13/Templater) plugin in conjunction with Periodic Notes.
 
