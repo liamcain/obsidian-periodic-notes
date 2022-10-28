@@ -179,7 +179,7 @@ The syntax for date calculations is best understood through example. Here's how 
 {{date+5d:YYYY-MM-DD}}
 ```
 
-You can add or subtract any number of days (`d`), weeks (`w`), months (`m`), or years (`y`).
+You can add or subtract any number of days (`d`), weeks (`w`), months (`M`), quarters (`Q`), or years (`y`).
 
 You can also use multiple computations together such as:
 ```
