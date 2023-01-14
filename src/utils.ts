@@ -208,7 +208,8 @@ export async function applyPeriodicTemplateToFile(
   const format = getFormat(calendarSet, metadata.granularity);
   const templateContents = await getTemplateContents(
     app,
-    calendarSet[metadata.granularity]?.templatePath
+    calendarSet[metadata.granularity]?.templatePath,
+    metadata.granularity
   );
   const renderedContents = applyTemplateTransformations(
     file.basename,
@@ -222,7 +223,8 @@ export async function applyPeriodicTemplateToFile(
 
 export async function getTemplateContents(
   app: App,
-  templatePath: string | undefined
+  templatePath: string | undefined,
+  granularity: Granularity
 ): Promise<string> {
   const { metadataCache, vault } = app;
   const normalizedTemplatePath = normalizePath(templatePath ?? "");
@@ -234,11 +236,12 @@ export async function getTemplateContents(
     const templateFile = metadataCache.getFirstLinkpathDest(normalizedTemplatePath, "");
     return templateFile ? vault.cachedRead(templateFile) : "";
   } catch (err) {
+    const periodicity = granularity === "day" ? "daily" : `${granularity}ly`;
     console.error(
-      `Failed to read the daily note template '${normalizedTemplatePath}'`,
+      `Failed to read the ${periodicity} note template '${normalizedTemplatePath}'`,
       err
     );
-    new Notice("Failed to read the daily note template");
+    new Notice(`Failed to read the ${periodicity} note template`);
     return "";
   }
 }
