@@ -1,4 +1,4 @@
-import { type Command, App, TFile, Notice } from "obsidian";
+import { type Command, App, TFile, Notice, Keymap } from "obsidian";
 import type PeriodicNotesPlugin from "src/main";
 
 import type { Granularity } from "./types";
@@ -56,7 +56,7 @@ async function jumpToAdjacentNote(
   if (adjacentNoteMeta) {
     const file = app.vault.getAbstractFileByPath(adjacentNoteMeta.filePath);
     if (file && file instanceof TFile) {
-      const leaf = app.workspace.getUnpinnedLeaf();
+      const leaf = app.workspace.getLeaf(Keymap.isModEvent(app.lastEvent));
       await leaf.openFile(file, { active: true });
     }
   } else {
@@ -84,8 +84,10 @@ async function openAdjacentNote(
     .clone()
     .add(offset, activeFileMeta.granularity);
 
-  plugin.openPeriodicNote(activeFileMeta.granularity, adjacentDate);
-}
+  plugin.openPeriodicNote(activeFileMeta.granularity, adjacentDate, {
+    leaftype: Keymap.isModEvent(this.app.lastEvent)
+  })
+};
 
 export function getCommands(
   app: App,

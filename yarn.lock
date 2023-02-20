@@ -3242,7 +3242,7 @@ __metadata:
     eslint-plugin-import: ^2.26.0
     lodash: 4.17.21
     moment: 2.29.2
-    obsidian: 0.14.4
+    obsidian: 0.16.3
     sass: ^1.50.0
     standard-version: ^9.3.2
     svelte: 3.47.0
@@ -3254,15 +3254,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"obsidian@npm:0.14.4":
-  version: 0.14.4
-  resolution: "obsidian@npm:0.14.4"
+"obsidian@npm:0.16.3":
+  version: 0.16.3
+  resolution: "obsidian@npm:0.16.3"
   dependencies:
-    "@codemirror/state": ^0.19.6
-    "@codemirror/view": ^0.19.31
     "@types/codemirror": 0.0.108
-    moment: 2.29.1
-  checksum: b0ee32972aacd2b26a4fd134abc01b437c3d193a3f6c4efeb9a4d262f2230cbf83d9633525d76240017460fba44983156afc8784489a379e3ca7863427a70d3f
+    moment: 2.29.4
+  peerDependencies:
+    "@codemirror/state": ^6.0.0
+    "@codemirror/view": ^6.0.0
+  checksum: 48e82e011bc1904587cb681c4a98e27ab130f0d8130888141ebb9394ddf6b943453320be93882f97500061dba7695bf44305e069dee60cdb55bddcaf97dee996
   languageName: node
   linkType: hard
 
