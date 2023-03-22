@@ -215,7 +215,7 @@ export default class PeriodicNotesPlugin extends Plugin {
   ): Promise<TFile> {
     const config = this.calendarSetManager.getActiveConfig(granularity);
     const format = this.calendarSetManager.getFormat(granularity);
-    const filename = date.format(format);
+    const filename = date.clone().format(format);
     const templateContents = await getTemplateContents(this.app, config.templatePath);
     const renderedContents = applyTemplateTransformations(
       filename,
