@@ -64,6 +64,12 @@ export default class PeriodicNotesPlugin extends Plugin {
   }
 
   async onload(): Promise<void> {
+    addIcon("calendar-day", calendarDayIcon);
+    addIcon("calendar-week", calendarWeekIcon);
+    addIcon("calendar-month", calendarMonthIcon);
+    addIcon("calendar-quarter", calendarQuarterIcon);
+    addIcon("calendar-year", calendarYearIcon);
+
     this.settings = writable<ISettings>();
     await this.loadSettings();
     this.register(this.settings.subscribe(this.onUpdateSettings.bind(this)));
@@ -80,12 +86,6 @@ export default class PeriodicNotesPlugin extends Plugin {
     
     this.configureRibbonIcons();
     this.configureCommands();
-
-    addIcon("calendar-day", calendarDayIcon);
-    addIcon("calendar-week", calendarWeekIcon);
-    addIcon("calendar-month", calendarMonthIcon);
-    addIcon("calendar-quarter", calendarQuarterIcon);
-    addIcon("calendar-year", calendarYearIcon);
 
     this.addCommand({
       id: "show-date-switcher",
