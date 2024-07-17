@@ -77,6 +77,9 @@ export default class PeriodicNotesPlugin extends Plugin {
 
     this.openPeriodicNote = this.openPeriodicNote.bind(this);
     this.addSettingTab(new PeriodicNotesSettingsTab(this.app, this));
+    
+    this.configureRibbonIcons();
+    this.configureCommands();
 
     addIcon("calendar-day", calendarDayIcon);
     addIcon("calendar-week", calendarWeekIcon);
@@ -109,9 +112,6 @@ export default class PeriodicNotesPlugin extends Plugin {
     });
 
     this.app.workspace.onLayoutReady(() => {
-      this.configureRibbonIcons();
-      this.configureCommands();
-
       const startupNoteConfig = findStartupNoteConfig(this.settings);
       if (startupNoteConfig) {
         this.openPeriodicNote(startupNoteConfig.granularity, window.moment(), {
