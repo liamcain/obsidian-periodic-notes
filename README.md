@@ -103,3 +103,14 @@ If you want new daily notes to show up in the folder `Journal/2021/` for example
 ### Why the weekly note title is wrong with the week number?
 
 Depending on your locale and operating system you are using, you may have been adopting either ISO week (first week of the year is started on the first Thursday) or Week of Year (first week of the year is started on the first day). Obsidian Periodic Notes uses Week of Year by default (ww), but you can change to ISO week by using (WW) instead. For more details, please refer to [MomentJS documentation](https://momentjs.com/docs/#/displaying/format/).
+
+---
+
+## Sponsors 🙏
+
+A big thank you to everyone that has sponsored this project.
+
+- [Carlo Zottman](https://github.com/czottmann), creator of [Actions for Obsidian](https://actions.work/actions-for-obsidian)
+- [Brian Grohe](https://github.com/paxnovem)
+- [Ben Hong](https://github.com/bencodezen)
+
