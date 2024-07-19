@@ -64,6 +64,12 @@ export default class PeriodicNotesPlugin extends Plugin {
   }
 
   async onload(): Promise<void> {
+    addIcon("calendar-day", calendarDayIcon);
+    addIcon("calendar-week", calendarWeekIcon);
+    addIcon("calendar-month", calendarMonthIcon);
+    addIcon("calendar-quarter", calendarQuarterIcon);
+    addIcon("calendar-year", calendarYearIcon);
+
     this.settings = writable<ISettings>();
     await this.loadSettings();
     this.register(this.settings.subscribe(this.onUpdateSettings.bind(this)));
@@ -77,12 +83,9 @@ export default class PeriodicNotesPlugin extends Plugin {
 
     this.openPeriodicNote = this.openPeriodicNote.bind(this);
     this.addSettingTab(new PeriodicNotesSettingsTab(this.app, this));
-
-    addIcon("calendar-day", calendarDayIcon);
-    addIcon("calendar-week", calendarWeekIcon);
-    addIcon("calendar-month", calendarMonthIcon);
-    addIcon("calendar-quarter", calendarQuarterIcon);
-    addIcon("calendar-year", calendarYearIcon);
+    
+    this.configureRibbonIcons();
+    this.configureCommands();
 
     this.addCommand({
       id: "show-date-switcher",
@@ -109,9 +112,6 @@ export default class PeriodicNotesPlugin extends Plugin {
     });
 
     this.app.workspace.onLayoutReady(() => {
-      this.configureRibbonIcons();
-      this.configureCommands();
-
       const startupNoteConfig = findStartupNoteConfig(this.settings);
       if (startupNoteConfig) {
         this.openPeriodicNote(startupNoteConfig.granularity, window.moment(), {
