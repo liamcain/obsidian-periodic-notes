@@ -169,6 +169,10 @@ export class PeriodicNotesCache extends Component {
   private resolveRename(file: TAbstractFile, oldPath: string): void {
     for (const [, cache] of this.cachedFiles) {
       if (file instanceof TFile) {
+        const fileMetadata = cache.get(oldPath);
+        if (fileMetadata) {
+          cache.delete(fileMetadata.canonicalDateStr);
+        }
         cache.delete(oldPath);
         this.resolve(file, "rename");
       }
@@ -323,6 +327,7 @@ export class PeriodicNotesCache extends Component {
     }
 
     cache.set(filePath, metadata);
+    cache.set(metadata.canonicalDateStr, metadata);
   }
 
   public isPeriodic(targetPath: string, granularity?: Granularity): boolean {
@@ -340,34 +345,44 @@ export class PeriodicNotesCache extends Component {
   }
 
   public find(
-    filePath: string | undefined,
+    fileIdentifier: string | undefined,
     calendarSet?: string
   ): PeriodicNoteCachedMetadata | null {
-    if (!filePath) return null;
+    if (!fileIdentifier) return null;
 
     // If a calendar set is passed, only check there
     if (calendarSet) {
       const cache = this.cachedFiles.get(calendarSet);
-      return cache?.get(filePath) ?? null;
+      return cache?.get(fileIdentifier) ?? null;
     }
 
     // Otherwise, check all calendar sets, starting with the active one
     const activeCache = this.cachedFiles.get(
       this.plugin.calendarSetManager.getActiveId()
     );
-    const metadata = activeCache?.get(filePath);
+    const metadata = activeCache?.get(fileIdentifier);
     if (metadata) {
       return metadata;
     }
 
     // ... all other caches
     for (const [, calendarSetCache] of this.cachedFiles) {
-      const metadata = calendarSetCache.get(filePath);
+      const metadata = calendarSetCache.get(fileIdentifier);
       if (metadata) {
         return metadata;
       }
     }
     return null;
+  }
+
+  public findByDate(
+    date: Moment | undefined,
+    granularity: Granularity,
+    calendarSet?: string
+  ): PeriodicNoteCachedMetadata | null {
+    if (!date) return null;
+    const canconicalString = getCanonicalDateString(granularity, date)
+    return this.find(canconicalString, calendarSet);
   }
 
   public findAdjacent(
