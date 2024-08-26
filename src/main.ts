@@ -2,6 +2,7 @@ import type { Moment } from "moment";
 import { addIcon, Plugin, TFile } from "obsidian";
 import { writable, type Writable } from "svelte/store";
 
+import PeriodicNotesAPI from "./api";
 import { PeriodicNotesCache, type PeriodicNoteCachedMetadata } from "./cache";
 import CalendarSetManager, {
   DEFAULT_CALENDARSET_ID,
@@ -58,6 +59,8 @@ export default class PeriodicNotesPlugin extends Plugin {
   public calendarSetManager: CalendarSetManager;
   private timelineManager: TimelineManager;
 
+  api: PeriodicNotesAPI
+
   unload(): void {
     super.unload();
     this.timelineManager?.cleanup();
@@ -76,6 +79,7 @@ export default class PeriodicNotesPlugin extends Plugin {
 
     initializeLocaleConfigOnce(this.app);
 
+    this.api = PeriodicNotesAPI.get(this)
     this.ribbonEl = null;
     this.calendarSetManager = new CalendarSetManager(this);
     this.cache = new PeriodicNotesCache(this.app, this);
@@ -228,6 +232,22 @@ export default class PeriodicNotesPlugin extends Plugin {
     return this.app.vault.create(destPath, renderedContents);
   }
 
+  public async createOrReturnPeriodicNote(
+    granularity: Granularity,
+    date: Moment,
+    calendarSet?: string
+  ): Promise<TFile> {
+    let file = this.cache.getPeriodicNote(
+      calendarSet ?? this.calendarSetManager.getActiveId(),
+      granularity,
+      date
+    );
+    if (!file) {
+      file = await this.createPeriodicNote(granularity, date);
+    }
+    return file
+  }
+
   public getPeriodicNote(granularity: Granularity, date: Moment): TFile | null {
     return this.cache.getPeriodicNote(
       this.calendarSetManager.getActiveId(),
@@ -273,14 +293,7 @@ export default class PeriodicNotesPlugin extends Plugin {
   ): Promise<void> {
     const { inNewSplit = false, calendarSet } = opts ?? {};
     const { workspace } = this.app;
-    let file = this.cache.getPeriodicNote(
-      calendarSet ?? this.calendarSetManager.getActiveId(),
-      granularity,
-      date
-    );
-    if (!file) {
-      file = await this.createPeriodicNote(granularity, date);
-    }
+    const file = await this.createOrReturnPeriodicNote(granularity, date, calendarSet);
 
     const leaf = inNewSplit ? workspace.splitActiveLeaf() : workspace.getUnpinnedLeaf();
     await leaf.openFile(file, { active: true });

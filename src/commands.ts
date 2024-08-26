@@ -7,6 +7,7 @@ interface IDisplayConfig {
   periodicity: string;
   relativeUnit: string;
   labelOpenPresent: string;
+  labelCreatePresent: string;
 }
 
 export const displayConfigs: Record<Granularity, IDisplayConfig> = {
@@ -14,26 +15,31 @@ export const displayConfigs: Record<Granularity, IDisplayConfig> = {
     periodicity: "daily",
     relativeUnit: "today",
     labelOpenPresent: "Open today's daily note",
+    labelCreatePresent: "Create today's daily note",
   },
   week: {
     periodicity: "weekly",
     relativeUnit: "this week",
     labelOpenPresent: "Open this week's note",
+    labelCreatePresent: "Create this week's note",
   },
   month: {
     periodicity: "monthly",
     relativeUnit: "this month",
     labelOpenPresent: "Open this month's note",
+    labelCreatePresent: "Create this month's note",
   },
   quarter: {
     periodicity: "quarterly",
     relativeUnit: "this quarter",
     labelOpenPresent: "Open this quarter's note",
+    labelCreatePresent: "Create this quarter's note",
   },
   year: {
     periodicity: "yearly",
     relativeUnit: "this year",
     labelOpenPresent: "Open this year's note",
+    labelCreatePresent: "Create this year's note",
   },
 };
 
@@ -100,7 +106,13 @@ export function getCommands(
       name: config.labelOpenPresent,
       callback: () => plugin.openPeriodicNote(granularity, window.moment()),
     },
-
+    {
+      id: `create-${config.periodicity}-note`,
+      name: config.labelCreatePresent,
+      callback: async () => {
+        await plugin.createOrReturnPeriodicNote(granularity, window.moment())
+      },
+    },
     {
       id: `next-${config.periodicity}-note`,
       name: `Jump forwards to closest ${config.periodicity} note`,
