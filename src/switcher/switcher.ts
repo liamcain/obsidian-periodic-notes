@@ -1,5 +1,5 @@
 import type { Moment } from "moment";
-import { type NLDatesPlugin, setIcon, App, SuggestModal } from "obsidian";
+import { type NLDatesPlugin, setIcon, App, SuggestModal, Keymap } from "obsidian";
 import type { MatchType } from "src/cache";
 import type PeriodicNotesPlugin from "src/main";
 import {
@@ -231,7 +231,7 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
 
   async onChooseSuggestion(item: DateNavigationItem, evt: MouseEvent | KeyboardEvent) {
     this.plugin.openPeriodicNote(item.granularity, item.date, {
-      inNewSplit: isMetaPressed(evt),
+      leaftype: Keymap.isModEvent(evt),
     });
   }
 }
