@@ -52,7 +52,7 @@ interface IOpenOpts {
 
 export default class PeriodicNotesPlugin extends Plugin {
   public settings: Writable<ISettings>;
-  private ribbonEl: HTMLElement | null;
+  private ribbonEls: HTMLElement[] = [];
 
   private cache: PeriodicNotesCache;
   public calendarSetManager: CalendarSetManager;
@@ -76,7 +76,6 @@ export default class PeriodicNotesPlugin extends Plugin {
 
     initializeLocaleConfigOnce(this.app);
 
-    this.ribbonEl = null;
     this.calendarSetManager = new CalendarSetManager(this);
     this.cache = new PeriodicNotesCache(this.app, this);
     this.timelineManager = new TimelineManager(this, this.cache);
@@ -122,29 +121,33 @@ export default class PeriodicNotesPlugin extends Plugin {
   }
 
   private configureRibbonIcons() {
-    this.ribbonEl?.detach();
+    // Remove existing ribbon icons
+    this.ribbonEls.forEach((el) => el.detach());
+    this.ribbonEls = [];
 
     const configuredGranularities = this.calendarSetManager.getActiveGranularities();
     if (configuredGranularities.length) {
-      const granularity = configuredGranularities[0];
-      const config = displayConfigs[granularity];
-      this.ribbonEl = this.addRibbonIcon(
-        `calendar-${granularity}`,
-        config.labelOpenPresent,
-        (e: MouseEvent) => {
-          if (e.type !== "auxclick") {
-            this.openPeriodicNote(granularity, window.moment(), {
-              inNewSplit: isMetaPressed(e),
-            });
+      configuredGranularities.forEach((granularity) => {
+        const config = displayConfigs[granularity];
+        const ribbonEl = this.addRibbonIcon(
+          `calendar-${granularity}`,
+          config.labelOpenPresent,
+          (e: MouseEvent) => {
+            if (e.type !== "auxclick") {
+              this.openPeriodicNote(granularity, window.moment(), {
+                inNewSplit: isMetaPressed(e),
+              });
+            }
           }
-        }
-      );
-      this.ribbonEl.addEventListener("contextmenu", (e: MouseEvent) => {
-        e.preventDefault();
-        showFileMenu(this.app, this, {
-          x: e.pageX,
-          y: e.pageY,
+        );
+        ribbonEl.addEventListener("contextmenu", (e: MouseEvent) => {
+          e.preventDefault();
+          showFileMenu(this.app, this, {
+            x: e.pageX,
+            y: e.pageY,
+          });
         });
+        this.ribbonEls.push(ribbonEl);
       });
     }
   }
