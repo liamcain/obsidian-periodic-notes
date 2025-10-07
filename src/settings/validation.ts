@@ -56,26 +56,25 @@ export function validateFormatComplexity(
   format: string,
   granularity: Granularity
 ): "valid" | "fragile-basename" | "loose-parsing" {
-  const testFormattedDate = window.moment().format(format);
+  const testDate = window.moment().startOf(granularity);
+  const testFormattedDate = testDate.format(format);
   const parsedDate = window.moment(testFormattedDate, format, true);
   if (!parsedDate.isValid()) {
     return "loose-parsing";
   }
 
-  const strippedFormat = removeEscapedCharacters(format);
-  if (strippedFormat.includes("/")) {
-    if (
-      granularity === "day" &&
-      !["m", "d", "y"].every(
-        (requiredChar) =>
-          getBasename(format)
-            .replace(/\[[^\]]*\]/g, "") // remove everything within brackets
-            .toLowerCase()
-            .indexOf(requiredChar) !== -1
-      )
-    ) {
-      return "fragile-basename";
+  // check that the proposed format produces a unique string at least through
+  // the next 1000 periods ¯\_(ツ)_/¯
+  var date = testDate.clone();
+  var formattedDates = { [testFormattedDate]: testDate.clone() };
+  for (let i = 0; i < 1000; i++) {
+    date = date.add(1, granularity);
+    const datef = date.format(format);
+    if (datef in formattedDates) {
+      console.log("found two periods that produce the same output from the given format string. date 1: %s, date 2: %s, format string: '%s', formatted date: '%s'", date.toISOString(), formattedDates[datef].toISOString(), format, datef);
+      return "fragile-basename"
     }
+    formattedDates[datef] = date.clone();
   }
 
   return "valid";
