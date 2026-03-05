@@ -37,7 +37,7 @@ import {
 import { CalendarSetSuggestModal } from "./switcher/calendarSetSwitcher";
 import { NLDNavigator } from "./switcher/switcher";
 import TimelineManager from "./timeline/manager";
-import type { Granularity } from "./types";
+import { granularities, type Granularity } from "./types";
 import {
   applyTemplateTransformations,
   getNoteCreationPath,
@@ -87,6 +87,8 @@ export default class PeriodicNotesPlugin extends Plugin {
     this.configureRibbonIcons();
     this.configureCommands();
 
+    this.registerCliHandlers();
+
     this.addCommand({
       id: "show-date-switcher",
       name: "Show date switcher...",
@@ -119,6 +121,43 @@ export default class PeriodicNotesPlugin extends Plugin {
         });
       }
     });
+  }
+
+  private registerCliHandlers(): void {
+    for (const granularity of granularities) {
+      const config = displayConfigs[granularity];
+      const command = `periodic-notes:${config.periodicity}`;
+      const description = config.labelOpenPresent.replace("Open", "Create/open");
+      const label = `${config.periodicity.charAt(0).toUpperCase()}${config.periodicity.slice(1)} notes`;
+
+      this.registerCliHandler(
+        command,
+        description,
+        { open: { description: "Open the note in Obsidian", type: "boolean" } },
+        async (data) => {
+          const activeGranularities = this.calendarSetManager.getActiveGranularities();
+          if (!activeGranularities.includes(granularity)) {
+            return `Warning: ${label} are not enabled. Enable in Settings → Periodic Notes.`;
+          }
+
+          try {
+            const date = window.moment();
+            const file =
+              this.getPeriodicNote(granularity, date) ??
+              (await this.createPeriodicNote(granularity, date));
+
+            if (data?.open === "true") {
+              const leaf = this.app.workspace.getUnpinnedLeaf();
+              await leaf.openFile(file, { active: true });
+            }
+
+            return file.path;
+          } catch (e) {
+            return `Error: ${e instanceof Error ? e.message : String(e)}`;
+          }
+        }
+      );
+    }
   }
 
   private configureRibbonIcons() {
