@@ -18,6 +18,17 @@ import { getDateInput } from "./settings/validation";
 import { granularities, type Granularity, type PeriodicConfig } from "./types";
 import { applyPeriodicTemplateToFile, getPossibleFormats } from "./utils";
 
+/**
+ * Weeks are labeled by ISO week (Monday-start), but `isSame(date, "week")`
+ * compares by the locale's week start. In a Sunday-first locale an ISO week
+ * straddles two locale weeks, so a lookup can miss on the last day of the
+ * week and fall through to creating an existing note. Compare weeks by ISO
+ * week instead; other granularities are unaffected.
+ */
+function isSamePeriod(date: Moment, targetDate: Moment, granularity: Granularity): boolean {
+  return date.isSame(targetDate, granularity === "week" ? "isoWeek" : granularity);
+}
+
 export type MatchType = "filename" | "frontmatter" | "date-prefixed";
 
 export interface PeriodicNoteMatchMatchData {
@@ -268,7 +279,7 @@ export class PeriodicNotesCache extends Component {
         if (
           cacheData.granularity === granularity &&
           cacheData.matchData.exact === true &&
-          cacheData.date.isSame(targetDate, granularity)
+          isSamePeriod(cacheData.date, targetDate, granularity)
         ) {
           return this.app.vault.getAbstractFileByPath(filePath) as TFile;
         }
@@ -301,7 +312,7 @@ export class PeriodicNotesCache extends Component {
           (granularity === cacheData.granularity ||
             (includeFinerGranularities &&
               compareGranularity(cacheData.granularity, granularity) <= 0)) &&
-          cacheData.date.isSame(targetDate, granularity)
+          isSamePeriod(cacheData.date, targetDate, granularity)
         ) {
           matches.push(cacheData);
         }
